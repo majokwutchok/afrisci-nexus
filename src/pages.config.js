@@ -49,6 +49,7 @@
  */
 import About from './pages/About';
 import AdminDashboard from './pages/AdminDashboard';
+import Archive from './pages/Archive';
 import AuthorResources from './pages/AuthorResources';
 import Contact from './pages/Contact';
 import Dashboard from './pages/Dashboard';
@@ -68,13 +69,13 @@ import ReviewerAwards from './pages/ReviewerAwards';
 import ReviewerDashboard from './pages/ReviewerDashboard';
 import Search from './pages/Search';
 import Submit from './pages/Submit';
-import Archive from './pages/Archive';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "About": About,
     "AdminDashboard": AdminDashboard,
+    "Archive": Archive,
     "AuthorResources": AuthorResources,
     "Contact": Contact,
     "Dashboard": Dashboard,
@@ -94,7 +95,6 @@ export const PAGES = {
     "ReviewerDashboard": ReviewerDashboard,
     "Search": Search,
     "Submit": Submit,
-    "Archive": Archive,
 }
 
 export const pagesConfig = {

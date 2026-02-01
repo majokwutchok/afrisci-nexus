@@ -1,24 +1,18 @@
-
 import React, { useState, useEffect } from "react";
 import { Journal } from "@/entities/Journal";
 import { Manuscript } from "@/entities/Manuscript";
-// This import is likely unused now, but kept as it was in original and not explicitly removed by outline
-import { Card, CardContent } from "@/components/ui/card"; // These imports are likely unused now, but kept as they were in original and not explicitly removed by outline
-// These imports are likely unused now, but kept as they were in original and not explicitly removed by outline
-// These imports are likely unused now, but kept as they were in original and not explicitly removed by outline
-// Button might still be used for the success message or other UI elements, so keeping.
-// Likely unused, but kept.
-// Likely unused, but kept.
-// Likely unused, but kept.
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-// Likely unused, but kept.
 import {
   AlertCircle,
-  CheckCircle
-} from "lucide-react"; // Some of these icons (Plus, X, FileText, User, Mail, Building) are likely unused now, but kept as they were in original. Upload, AlertCircle, CheckCircle are still used.
+  CheckCircle,
+  Sparkles
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import UniversalSubmissionForm from "../components/submission/UniversalSubmissionForm";
+import AIManuscriptAssessment from "../components/submission/AIManuscriptAssessment";
 
 export default function Submit() {
   const navigate = useNavigate();
@@ -26,6 +20,8 @@ export default function Submit() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [showAssessment, setShowAssessment] = useState(false);
+  const [draftManuscript, setDraftManuscript] = useState(null);
 
   useEffect(() => {
     loadJournals();
@@ -93,6 +89,19 @@ export default function Submit() {
     );
   }
 
+  if (showAssessment && draftManuscript) {
+    return (
+      <div className="p-6 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 min-h-screen">
+        <div className="max-w-5xl mx-auto">
+          <AIManuscriptAssessment 
+            manuscript={draftManuscript}
+            onClose={() => setShowAssessment(false)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 min-h-screen">
       <div className="max-w-4xl mx-auto">
@@ -108,11 +117,41 @@ export default function Submit() {
           </Alert>
         )}
 
+        <Card className="mb-6 border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-600 to-purple-700">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">AI Manuscript Assessment</h3>
+                  <p className="text-sm text-slate-600">Get instant feedback on grammar, plagiarism, and discoverability before submission</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => {
+                  setDraftManuscript({
+                    title: "Sample Manuscript Title",
+                    abstract: "This is a sample abstract for demonstration purposes.",
+                    keywords: ["sample", "demo"]
+                  });
+                  setShowAssessment(true);
+                }}
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Try Assessment
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         <UniversalSubmissionForm
           onSubmit={handleSubmit}
           journals={journals}
-          isLoading={isLoading} // Pass isLoading to allow the form to disable its submit button
-          setError={setError} // Pass setError to allow the form to report errors
+          isLoading={isLoading}
+          setError={setError}
         />
       </div>
     </div>
