@@ -358,13 +358,15 @@ export default function Layout({ children, currentPageName }) {
 
                     {mainMenuItems.map((menu) => (
                       <NavigationMenuItem key={menu.title}>
-                        <NavigationMenuTrigger className={`flex items-center gap-2 text-white hover:text-teal-300 font-medium px-4 py-2 rounded-lg hover:bg-white/10 transition-colors ${
-                          menu.highlight ? 'bg-white/5 border border-white/20' : ''
-                        }`}>
-                          <menu.icon className="w-4 h-4" />
-                          {menu.title}
-                          {menu.highlight && <Badge className="bg-teal-500 text-white text-xs ml-2">Popular</Badge>}
-                        </NavigationMenuTrigger>
+                        <Link to={menu.items[0]?.url || '#'} className="w-full">
+                          <NavigationMenuTrigger className={`flex items-center gap-2 text-white hover:text-teal-300 font-medium px-4 py-2 rounded-lg hover:bg-white/10 transition-colors ${
+                            menu.highlight ? 'bg-white/5 border border-white/20' : ''
+                          }`}>
+                            <menu.icon className="w-4 h-4" />
+                            {menu.title}
+                            {menu.highlight && <Badge className="bg-teal-500 text-white text-xs ml-2">Popular</Badge>}
+                          </NavigationMenuTrigger>
+                        </Link>
                         <NavigationMenuContent>
                           <div className="w-96 p-6 bg-white dropdown-shadow border-t-4 border-teal-500">
                             <div className="grid gap-4">
