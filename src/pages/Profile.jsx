@@ -24,6 +24,7 @@ import {
   Star // For reviewer badges
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import EditorInterestForm from "@/components/profile/EditorInterestForm";
 
 const countries = [
   "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon", 
@@ -528,6 +529,14 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Editor Interest Section */}
+        {user && (
+          <EditorInterestForm 
+            userProfile={user}
+            onSuccess={loadUserProfile}
+          />
+        )}
 
         {/* Save Button */}
         <div className="flex justify-center pt-6">
