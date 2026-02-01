@@ -247,6 +247,9 @@ export default function AuthorDashboard() {
           </Card>
         </div>
 
+        {/* Recommended Journals Widget */}
+        <AuthorJournalRecommendations userProfile={user} />
+
         {/* Quick Actions */}
         <div>
           <h2 className="text-xl font-bold text-slate-900 mb-4">Quick Actions</h2>
