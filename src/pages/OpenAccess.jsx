@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CheckCircle, Download, Share2, Globe, DollarSign, Users, Shield, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -74,7 +73,7 @@ export default function OpenAccessPage() {
               color="from-purple-500 to-indigo-600"
             />
             <BenefitCard
-              icon={Share2} {/* Fix applied here: changed from "Share2} to {Share2} */}
+              icon={Share2}
               title="Enhanced Collaboration"
               description="Free access promotes interdisciplinary collaboration and knowledge exchange."
               color="from-amber-500 to-orange-600"
