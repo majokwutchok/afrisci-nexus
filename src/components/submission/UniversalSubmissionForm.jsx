@@ -515,6 +515,7 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
             </div>
           </CardContent>
         </Card>
+        </>
       )}
 
       {/* Step 3: File Upload */}
