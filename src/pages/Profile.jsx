@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { User } from "@/entities/User";
-import { Manuscript } from "@/entities/Manuscript"; // Import Manuscript entity
+import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom"; // Import Link
 import { createPageUrl } from "@/utils"; // Import createPageUrl
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,7 +87,7 @@ export default function Profile() {
   const loadUserProfile = async () => {
     setIsLoading(true);
     try {
-      const userData = await User.me();
+      const userData = await base44.auth.me();
       setUser({
         orcid: "",
         affiliation: "",
@@ -108,7 +106,7 @@ export default function Profile() {
 
       // Fetch published manuscripts
       if (userData?.email) {
-        const userManuscripts = await Manuscript.filter({
+        const userManuscripts = await base44.entities.Manuscript.filter({
           created_by: userData.email,
           status: 'published'
         });
@@ -163,7 +161,7 @@ export default function Profile() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await User.updateMyUserData({
+      await base44.auth.updateMe({
         orcid: user.orcid,
         affiliation: user.affiliation,
         country: user.country,

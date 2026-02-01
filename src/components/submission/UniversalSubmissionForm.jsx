@@ -38,6 +38,7 @@ const categoryLabels = {
 
 export default function UniversalSubmissionForm({ onSubmit, initialData, journals, isLoading, setError }) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [currentUser, setCurrentUser] = useState(null);
   const [manuscript, setManuscript] = useState({
     title: "",
     abstract: "",
@@ -56,6 +57,33 @@ export default function UniversalSubmissionForm({ onSubmit, initialData, journal
     funding_sources: "",
     ...initialData
   });
+
+  React.useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      const user = await base44.auth.me();
+      setCurrentUser(user);
+      
+      // Pre-fill first author with user's profile data if no initial data
+      if (!initialData && user) {
+        setManuscript(prev => ({
+          ...prev,
+          authors: [{
+            name: user.full_name || "",
+            email: user.email || "",
+            affiliation: user.affiliation || "",
+            orcid: user.orcid || "",
+            is_corresponding: true
+          }]
+        }));
+      }
+    } catch (error) {
+      console.error("Error loading user profile:", error);
+    }
+  };
 
   const [suggestedJournals, setSuggestedJournals] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
