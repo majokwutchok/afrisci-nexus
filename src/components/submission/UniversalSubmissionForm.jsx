@@ -681,8 +681,106 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
         </Card>
       )}
 
-      {/* Step 5: Declarations */}
+      {/* Step 5: Declarations & Reviewer Suggestions */}
       {currentStep === 5 && (
+        <>
+        {/* AI Reviewer Suggestions */}
+        {manuscript.abstract && manuscript.keywords.length >= 3 && (
+          <Card className="border-0 bg-gradient-to-br from-purple-50 to-blue-50 shadow-lg border-2 border-purple-200">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-purple-600" />
+                  AI Reviewer Suggestions
+                  <Badge className="bg-purple-600 text-white">AI-Powered</Badge>
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  onClick={suggestReviewers}
+                  disabled={isLoadingReviewers}
+                  className="flex items-center gap-2 bg-purple-600 text-white hover:bg-purple-700 border-0"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  {isLoadingReviewers ? "Analyzing..." : "Find Reviewers"}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoadingReviewers ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                    <p className="text-slate-600">Analyzing manuscript and matching with expert reviewers...</p>
+                  </div>
+                </div>
+              ) : aiSuggestedReviewers.length > 0 ? (
+                <div className="space-y-3">
+                  <Alert className="bg-purple-50 border-purple-200">
+                    <Sparkles className="h-4 w-4 text-purple-600" />
+                    <AlertDescription className="text-purple-900">
+                      AI has identified {aiSuggestedReviewers.length} potential reviewers based on expertise matching. These suggestions will be sent to the editor.
+                    </AlertDescription>
+                  </Alert>
+                  <div className="grid gap-3">
+                    {aiSuggestedReviewers.map((reviewer, index) => (
+                      <div
+                        key={reviewer.user_id}
+                        className="p-4 rounded-lg border-2 border-purple-200 bg-white hover:shadow-lg transition-shadow"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                #{index + 1}
+                              </div>
+                              <div>
+                                <h5 className="font-semibold text-slate-900">{reviewer.name}</h5>
+                                <p className="text-sm text-slate-600">{reviewer.email}</p>
+                              </div>
+                            </div>
+                            <div className="bg-slate-50 p-3 rounded-lg mt-2">
+                              <p className="text-xs text-slate-500 font-medium mb-1">Match Reasoning:</p>
+                              <p className="text-sm text-slate-700">{reviewer.reason}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge 
+                              className={`text-base px-3 py-1 ${
+                                reviewer.expertise_match >= 90 ? 'bg-emerald-500' :
+                                reviewer.expertise_match >= 80 ? 'bg-blue-500' :
+                                reviewer.expertise_match >= 70 ? 'bg-amber-500' :
+                                'bg-slate-500'
+                              } text-white`}
+                            >
+                              {reviewer.expertise_match}%
+                            </Badge>
+                            <span className="text-xs text-slate-500">
+                              {reviewer.expertise_match >= 90 ? 'Excellent Match' :
+                               reviewer.expertise_match >= 80 ? 'Strong Match' :
+                               reviewer.expertise_match >= 70 ? 'Good Match' :
+                               'Fair Match'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Brain className="w-12 h-12 mx-auto text-purple-300 mb-3" />
+                  <p className="text-slate-600 mb-4">
+                    Click "Find Reviewers" to get AI-powered expert reviewer suggestions based on your manuscript.
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    Our AI analyzes your abstract and keywords to match with the most qualified reviewers.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -749,6 +847,7 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
             </div>
           </CardContent>
         </Card>
+        </>
       )}
 
       {/* Step 6: Review & Submit */}
@@ -795,6 +894,21 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
                   Main manuscript + {manuscript.supplementary_files.length} supplementary file(s)
                 </p>
               </div>
+              {aiSuggestedReviewers.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm text-slate-600">AI Suggested Reviewers</h4>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {aiSuggestedReviewers.slice(0, 3).map((reviewer) => (
+                      <Badge key={reviewer.user_id} className="bg-purple-100 text-purple-800 border border-purple-200">
+                        {reviewer.name} ({reviewer.expertise_match}% match)
+                      </Badge>
+                    ))}
+                    {aiSuggestedReviewers.length > 3 && (
+                      <Badge variant="outline">+{aiSuggestedReviewers.length - 3} more</Badge>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <Button 
@@ -831,67 +945,7 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
         ) : null}
       </div>
 
-      {/* AI Journal Matching (Hidden) */}
-      {/* AI Reviewer Suggestions (Hidden for now) */}
-      {manuscript.journal_id && (
-        <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-blue-600" />
-                AI Reviewer Suggestions
-              </CardTitle>
-              <Button
-                variant="outline"
-                onClick={suggestReviewers}
-                disabled={!manuscript.keywords.length || isLoadingReviewers}
-                className="flex items-center gap-2"
-              >
-                <Brain className="w-4 h-4" />
-                {isLoadingReviewers ? "Finding Reviewers..." : "Suggest Reviewers"}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {aiSuggestedReviewers.length > 0 && (
-              <div className="space-y-3">
-                <Alert>
-                  <Sparkles className="h-4 w-4" />
-                  <AlertDescription>
-                    AI has identified these potential reviewers based on expertise matching:
-                  </AlertDescription>
-                </Alert>
-                {aiSuggestedReviewers.map((reviewer, index) => (
-                  <div
-                    key={reviewer.user_id}
-                    className="p-4 rounded-lg border border-slate-200 bg-slate-50"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h5 className="font-medium">{reviewer.name}</h5>
-                        <p className="text-sm text-slate-600">{reviewer.email}</p>
-                        <p className="text-xs text-slate-500 mt-1">{reviewer.reason}</p>
-                      </div>
-                      <Badge 
-                        variant={reviewer.expertise_match >= 80 ? "default" : "secondary"}
-                        className="ml-3"
-                      >
-                        {reviewer.expertise_match}% match
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            <div className="mt-4">
-              <p className="text-sm text-slate-600 mb-2">
-                These suggestions will be sent to the assigned editor for consideration.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
     </div>
   );
 }
