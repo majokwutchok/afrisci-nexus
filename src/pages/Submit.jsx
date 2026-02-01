@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import UniversalSubmissionForm from "../components/submission/UniversalSubmissionForm";
 import AIManuscriptAssessment from "../components/submission/AIManuscriptAssessment";
+import AIJournalRecommender from "../components/submission/AIJournalRecommender";
 
 export default function Submit() {
   const navigate = useNavigate();
@@ -22,10 +23,24 @@ export default function Submit() {
   const [success, setSuccess] = useState(false);
   const [showAssessment, setShowAssessment] = useState(false);
   const [draftManuscript, setDraftManuscript] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [currentManuscript, setCurrentManuscript] = useState(null);
 
   useEffect(() => {
     loadJournals();
+    loadUserProfile();
   }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      const user = await base44.auth.me();
+      if (user) {
+        setUserProfile(user);
+      }
+    } catch (error) {
+      console.error("Error loading user profile:", error);
+    }
+  };
 
   const loadJournals = async () => {
     try {
@@ -147,11 +162,34 @@ export default function Submit() {
           </CardContent>
         </Card>
 
+        {/* AI Journal Recommender */}
+        {userProfile && journals.length > 0 && (
+          <div className="mb-8">
+            <AIJournalRecommender
+              authorProfile={userProfile}
+              manuscript={currentManuscript || {
+                title: '',
+                abstract: '',
+                keywords: [],
+                field: ''
+              }}
+              journals={journals}
+              onRecommendationsReady={(recs) => {
+                // Store recommendations for later use
+              }}
+              onSelectJournal={(journal) => {
+                // Can be used to pre-select journal in form
+              }}
+            />
+          </div>
+        )}
+
         <UniversalSubmissionForm
           onSubmit={handleSubmit}
           journals={journals}
           isLoading={isLoading}
           setError={setError}
+          onManuscriptChange={setCurrentManuscript}
         />
       </div>
     </div>

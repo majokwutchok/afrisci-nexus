@@ -21,8 +21,10 @@ import {
   TrendingUp,
   Calendar,
   Edit,
-  Sparkles
+  Sparkles,
+  Lightbulb
 } from 'lucide-react';
+import AuthorJournalRecommendations from './AuthorJournalRecommendations';
 
 const statusConfig = {
   draft: { color: 'bg-slate-100 text-slate-800 border-slate-300', icon: Edit, label: 'Draft' },
