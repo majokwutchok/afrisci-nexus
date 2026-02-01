@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import AIManuscriptAssistant from "./AIManuscriptAssistant";
 import { 
   Sparkles, 
   CheckCircle, 
@@ -158,6 +159,11 @@ export default function UniversalSubmissionForm({ onSubmit, initialData, journal
 
   const removeKeyword = (keyword) => {
     handleInputChange('keywords', manuscript.keywords.filter(k => k !== keyword));
+  };
+
+  const handleAIKeywordsSuggested = (keywords) => {
+    const newKeywords = keywords.filter(k => !manuscript.keywords.includes(k));
+    handleInputChange('keywords', [...manuscript.keywords, ...newKeywords]);
   };
 
   const analyzeAndSuggestJournal = async () => {
@@ -399,14 +405,26 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
 
       {/* Step 2: Manuscript Details */}
       {currentStep === 2 && (
-        <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-emerald-600" />
-              Manuscript Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <>
+          {/* AI Assistant */}
+          {manuscript.title && manuscript.abstract && (
+            <AIManuscriptAssistant
+              manuscriptTitle={manuscript.title}
+              manuscriptAbstract={manuscript.abstract}
+              journalTitle={journals.find(j => j.id === manuscript.journal_id)?.title}
+              authors={manuscript.authors}
+              onKeywordsSuggested={handleAIKeywordsSuggested}
+            />
+          )}
+
+          <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-emerald-600" />
+                Manuscript Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
             <div>
               <Label htmlFor="title">Title *</Label>
               <Input
