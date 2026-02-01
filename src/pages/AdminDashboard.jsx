@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Journal } from "@/entities/Journal";
@@ -20,7 +19,8 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import RevenueAnalytics from "../components/admin/RevenueAnalytics";
-import PaymentManagement from "../components/admin/PaymentManagement"; // Import the new component
+import PaymentManagement from "../components/admin/PaymentManagement";
+import EditorApplications from "../components/admin/EditorApplications";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -107,8 +107,9 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="overview">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="editors">Editor Applications</TabsTrigger>
             <TabsTrigger value="revenue">Revenue & Analytics</TabsTrigger>
             <TabsTrigger value="journals">Journal Management</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
@@ -133,6 +134,10 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="editors" className="mt-6">
+            <EditorApplications />
           </TabsContent>
 
           <TabsContent value="revenue" className="mt-6">
