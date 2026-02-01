@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User } from "@/entities/User";
-import { Journal } from "@/entities/Journal";
-import { Manuscript } from "@/entities/Manuscript";
+import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -17,8 +15,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle } from "lucide-react";
+import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen } from "lucide-react";
 import AutomatedReminderSystem from "../components/admin/AutomatedReminderSystem";
+import JournalManagementPanel from "../components/editor/JournalManagementPanel";
 
 // Mock utility functions (in a real app, these would be in a utils folder or separate services)
 const addDays = (date, days) => {
@@ -152,7 +151,7 @@ export default function EditorDashboard() {
     setIsLoading(true);
     setError(null);
     try {
-      const user = await User.me();
+      const user = await base44.auth.me();
       setCurrentUser(user);
 
       // Check if user has editor roles or is admin
@@ -160,9 +159,9 @@ export default function EditorDashboard() {
       
       if (hasEditorAccess) {
         const [allJournals, allManuscripts, allUsersData] = await Promise.all([
-          Journal.list(),
-          Manuscript.list(),
-          User.list()
+          base44.entities.Journal.list(),
+          base44.entities.Manuscript.list(),
+          base44.entities.User.list()
         ]);
 
         // If admin, show all journals; if editor, show only assigned journals
@@ -211,7 +210,7 @@ export default function EditorDashboard() {
     }];
 
     try {
-      await Manuscript.update(manuscript.id, {
+      await base44.entities.Manuscript.update(manuscript.id, {
         review_history: updatedHistory,
         timeline,
         status: 'under_review'
@@ -253,7 +252,7 @@ Editorial Team`
     }];
 
     try {
-      await Manuscript.update(manuscript.id, { 
+      await base44.entities.Manuscript.update(manuscript.id, { 
         status: decision,
         timeline
       });
@@ -272,7 +271,7 @@ Editorial Team`
   
   const handleSavePolicy = async (journalId, updatedData) => {
     try {
-      await Journal.update(journalId, updatedData);
+      await base44.entities.Journal.update(journalId, updatedData);
       setIsPolicyModalOpen(false);
       setEditingJournal(null);
       loadData();
@@ -313,12 +312,15 @@ Editorial Team`
         </div>
 
         <Tabs defaultValue="new_submissions">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="new_submissions">New Submissions</TabsTrigger>
             <TabsTrigger value="under_review">Under Review</TabsTrigger>
             <TabsTrigger value="revisions">Revisions</TabsTrigger>
-            <TabsTrigger value="reminders">Automated Reminders</TabsTrigger>
-            <TabsTrigger value="journal_management">Journal Management</TabsTrigger>
+            <TabsTrigger value="journal_management" className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Journals
+            </TabsTrigger>
+            <TabsTrigger value="reminders">Reminders</TabsTrigger>
           </TabsList>
 
           <TabsContent value="new_submissions" className="mt-6">
@@ -374,41 +376,12 @@ Editorial Team`
           </TabsContent>
 
           <TabsContent value="journal_management" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Manage Your Journals</CardTitle>
-                <p className="text-sm text-slate-500">Edit journal policies and settings.</p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {editorJournals.map(journal => (
-                    <div key={journal.id} className="flex items-center justify-between p-4 border rounded-lg bg-white hover:bg-slate-50 transition-colors">
-                      <div>
-                        <h3 className="font-semibold text-slate-900">{journal.title}</h3>
-                        <p className="text-sm text-slate-600">{journal.category ? journal.category.replace('_', ' ') : 'N/A'}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-xs">
-                            {manuscripts.filter(m => m.journal_id === journal.id).length} manuscripts
-                          </Badge>
-                          {journal.submission_fee > 0 && (
-                            <Badge variant="outline" className="text-xs">
-                              ${journal.submission_fee} fee
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" onClick={() => handleOpenPolicyEditor(journal)}>
-                        <Settings className="w-4 h-4 mr-2" />
-                        Edit Policy
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                {editorJournals.length === 0 && (
-                  <p className="text-center text-slate-500 py-8">No journals assigned to manage.</p>
-                )}
-              </CardContent>
-            </Card>
+            <JournalManagementPanel 
+              journals={editorJournals}
+              manuscripts={manuscripts}
+              onRefresh={loadData}
+              currentUser={currentUser}
+            />
           </TabsContent>
         </Tabs>
 
