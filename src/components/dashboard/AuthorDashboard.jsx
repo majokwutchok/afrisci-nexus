@@ -20,7 +20,8 @@ import {
   MessageSquare,
   TrendingUp,
   Calendar,
-  Edit
+  Edit,
+  Sparkles
 } from 'lucide-react';
 
 const statusConfig = {
@@ -248,6 +249,19 @@ export default function AuthorDashboard() {
         <div>
           <h2 className="text-xl font-bold text-slate-900 mb-4">Quick Actions</h2>
           <div className="grid md:grid-cols-3 gap-4">
+            <QuickActionCard
+              icon={Sparkles}
+              title="AI Manuscript Assessment"
+              description="Get instant pre-submission feedback"
+              color="purple"
+              action={
+                <Link to={createPageUrl('Submit')}>
+                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                    Try AI Assessment
+                  </Button>
+                </Link>
+              }
+            />
             <QuickActionCard
               icon={Upload}
               title="Submit New Manuscript"
