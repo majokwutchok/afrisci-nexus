@@ -909,6 +909,30 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
                   </div>
                 </div>
               )}
+              {reviewerPreferences.preferred.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm text-slate-600">Preferred Reviewers</h4>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {reviewerPreferences.preferred.map((reviewer) => (
+                      <Badge key={reviewer.email} className="bg-green-100 text-green-800 border border-green-200">
+                        {reviewer.email}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {reviewerPreferences.nonPreferred.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm text-slate-600">Non-Preferred Reviewers</h4>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {reviewerPreferences.nonPreferred.map((reviewer) => (
+                      <Badge key={reviewer.email} className="bg-red-100 text-red-800 border border-red-200">
+                        {reviewer.email}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <Button 
