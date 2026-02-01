@@ -8,10 +8,10 @@ import { Search, ArrowRight, ShieldCheck, Globe, BookOpen } from 'lucide-react';
 export default function HeroSection() {
   return (
     <div className="relative bg-blue-900 text-white overflow-hidden">
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center opacity-20"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1532187863486-abf9db50b6aa?q=80&w=2070&auto=format&fit=crop')" }}
-      ></div>
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1532187863486-abf9db50b6aa?q=80&w=2070&auto=format&fit=crop')" }}>
+      </div>
       <div className="absolute inset-0 bg-gradient-to-t from-blue-900 via-blue-900/80 to-transparent"></div>
       
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-32 md:py-48 text-center">
@@ -28,8 +28,8 @@ export default function HeroSection() {
             <Input
               type="search"
               placeholder="Search for articles, authors, or journals..."
-              className="w-full pl-12 pr-4 py-3 h-14 rounded-full bg-white/10 border-white/20 text-white placeholder:text-sky-200 backdrop-blur-sm focus:bg-white/20 focus:ring-2 focus:ring-teal-400"
-            />
+              className="w-full pl-12 pr-4 py-3 h-14 rounded-full bg-white/10 border-white/20 text-white placeholder:text-sky-200 backdrop-blur-sm focus:bg-white/20 focus:ring-2 focus:ring-teal-400" />
+
           </form>
         </div>
         
@@ -40,18 +40,18 @@ export default function HeroSection() {
             </Button>
           </Link>
           <Link to={createPageUrl("Journals")}>
-            <Button size="lg" variant="outline" className="text-white border-white/50 hover:bg-white hover:text-blue-800 w-full sm:w-auto font-semibold backdrop-blur-sm">
+            <Button size="lg" variant="outline" className="bg-emerald-600 text-slate-100 px-8 text-sm font-semibold rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border shadow-sm h-10 border-white/50 hover:bg-white hover:text-blue-800 w-full sm:w-auto backdrop-blur-sm">
               Explore Journals
             </Button>
           </Link>
         </div>
 
         <div className="mt-12 flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-sm text-sky-200">
-            <span className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-teal-400"/> Peer-Reviewed</span>
-            <span className="flex items-center gap-2"><Globe className="w-4 h-4 text-teal-400"/> Open Access</span>
-            <span className="flex items-center gap-2"><BookOpen className="w-4 h-4 text-teal-400"/> Multi-Disciplinary</span>
+            <span className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-teal-400" /> Peer-Reviewed</span>
+            <span className="flex items-center gap-2"><Globe className="w-4 h-4 text-teal-400" /> Open Access</span>
+            <span className="flex items-center gap-2"><BookOpen className="w-4 h-4 text-teal-400" /> Multi-Disciplinary</span>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
