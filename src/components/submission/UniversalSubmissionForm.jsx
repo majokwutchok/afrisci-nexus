@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import AIManuscriptAssistant from "./AIManuscriptAssistant";
+import ManuscriptPreparationTools from "./ManuscriptPreparationTools";
 import { 
   Sparkles, 
   CheckCircle, 
@@ -92,24 +93,31 @@ export default function UniversalSubmissionForm({ onSubmit, initialData, journal
   const [isLoadingReviewers, setIsLoadingReviewers] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [keywordInput, setKeywordInput] = useState("");
+  const [preparationChecklist, setPreparationChecklist] = useState({});
+  const [reviewerPreferences, setReviewerPreferences] = useState({
+    preferred: [],
+    nonPreferred: []
+  });
 
   const steps = [
     { number: 1, title: "Journal Selection", icon: FileText },
     { number: 2, title: "Manuscript Details", icon: FileText },
-    { number: 3, title: "File Upload", icon: Upload },
-    { number: 4, title: "Authors", icon: Users },
-    { number: 5, title: "Declarations", icon: CheckCircle },
-    { number: 6, title: "Review", icon: CheckCircle }
+    { number: 3, title: "Preparation Tools", icon: CheckCircle },
+    { number: 4, title: "File Upload", icon: Upload },
+    { number: 5, title: "Authors", icon: Users },
+    { number: 6, title: "Declarations", icon: CheckCircle },
+    { number: 7, title: "Review", icon: CheckCircle }
   ];
 
   const canProceed = () => {
     switch(currentStep) {
       case 1: return manuscript.journal_id;
       case 2: return manuscript.title && manuscript.abstract && manuscript.keywords.length >= 3;
-      case 3: return manuscript.manuscript_file_url;
-      case 4: return manuscript.authors.length > 0 && manuscript.authors[0].name && manuscript.authors[0].email;
-      case 5: return true;
+      case 3: return true; // Preparation tools are optional
+      case 4: return manuscript.manuscript_file_url;
+      case 5: return manuscript.authors.length > 0 && manuscript.authors[0].name && manuscript.authors[0].email;
       case 6: return true;
+      case 7: return true;
       default: return false;
     }
   };
@@ -518,8 +526,21 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
         </>
       )}
 
-      {/* Step 3: File Upload */}
+      {/* Step 3: Preparation Tools */}
       {currentStep === 3 && (
+        <div className="space-y-6">
+          <ManuscriptPreparationTools
+            manuscriptText={`${manuscript.title}\n\n${manuscript.abstract}\n\nKeywords: ${manuscript.keywords.join(', ')}`}
+            checklist={preparationChecklist}
+            onChecklistUpdate={setPreparationChecklist}
+            reviewerPreferences={reviewerPreferences}
+            onReviewerPreferencesUpdate={setReviewerPreferences}
+          />
+        </div>
+      )}
+
+      {/* Step 4: File Upload */}
+      {currentStep === 4 && (
         <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -594,8 +615,8 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
         </Card>
       )}
 
-      {/* Step 4: Authors */}
-      {currentStep === 4 && (
+      {/* Step 5: Authors */}
+      {currentStep === 5 && (
         <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -681,8 +702,8 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
         </Card>
       )}
 
-      {/* Step 5: Declarations & Reviewer Suggestions */}
-      {currentStep === 5 && (
+      {/* Step 6: Declarations & Reviewer Suggestions */}
+      {currentStep === 6 && (
         <>
         {/* AI Reviewer Suggestions */}
         {manuscript.abstract && manuscript.keywords.length >= 3 && (
@@ -850,8 +871,8 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
         </>
       )}
 
-      {/* Step 6: Review & Submit */}
-      {currentStep === 6 && (
+      {/* Step 7: Review & Submit */}
+      {currentStep === 7 && (
         <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -957,7 +978,7 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
           Previous
         </Button>
         
-        {currentStep < 6 ? (
+        {currentStep < 7 ? (
           <Button
             onClick={() => setCurrentStep(prev => prev + 1)}
             disabled={!canProceed()}
