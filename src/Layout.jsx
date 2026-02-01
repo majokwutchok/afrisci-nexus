@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -22,7 +21,8 @@ import {
   Home,
   Star,
   Target,
-  Phone
+  Phone,
+  Archive as ArchiveIcon
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -109,6 +109,12 @@ const mainMenuItems = [
         description: "Discover high-impact research",
         icon: Star,
         badge: "Popular"
+      },
+      { 
+        title: "Research Archive", 
+        url: createPageUrl("Archive"), 
+        description: "Browse our complete publication history",
+        icon: ArchiveIcon
       }
     ]
   },

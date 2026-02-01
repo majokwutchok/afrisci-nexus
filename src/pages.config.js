@@ -68,6 +68,7 @@ import ReviewerAwards from './pages/ReviewerAwards';
 import ReviewerDashboard from './pages/ReviewerDashboard';
 import Search from './pages/Search';
 import Submit from './pages/Submit';
+import Archive from './pages/Archive';
 import __Layout from './Layout.jsx';
 
 
@@ -93,6 +94,7 @@ export const PAGES = {
     "ReviewerDashboard": ReviewerDashboard,
     "Search": Search,
     "Submit": Submit,
+    "Archive": Archive,
 }
 
 export const pagesConfig = {
