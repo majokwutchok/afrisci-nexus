@@ -47,52 +47,52 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Dashboard from './pages/Dashboard';
-import Journals from './pages/Journals';
-import Submit from './pages/Submit';
-import MyManuscripts from './pages/MyManuscripts';
-import Profile from './pages/Profile';
-import AdminDashboard from './pages/AdminDashboard';
-import EditorDashboard from './pages/EditorDashboard';
-import ReviewerDashboard from './pages/ReviewerDashboard';
-import ManuscriptDetail from './pages/ManuscriptDetail';
-import Publications from './pages/Publications';
-import Home from './pages/Home';
 import About from './pages/About';
-import Editorial from './pages/Editorial';
-import OpenAccess from './pages/OpenAccess';
-import Contact from './pages/Contact';
-import Guidelines from './pages/Guidelines';
+import AdminDashboard from './pages/AdminDashboard';
 import AuthorResources from './pages/AuthorResources';
-import Search from './pages/Search';
+import Contact from './pages/Contact';
+import Dashboard from './pages/Dashboard';
+import EditorDashboard from './pages/EditorDashboard';
+import Editorial from './pages/Editorial';
+import Guidelines from './pages/Guidelines';
+import Home from './pages/Home';
+import JournalDetail from './pages/JournalDetail';
+import Journals from './pages/Journals';
+import ManuscriptDetail from './pages/ManuscriptDetail';
+import MyManuscripts from './pages/MyManuscripts';
+import OpenAccess from './pages/OpenAccess';
+import Profile from './pages/Profile';
+import Publications from './pages/Publications';
 import ReviewGuidelines from './pages/ReviewGuidelines';
 import ReviewerAwards from './pages/ReviewerAwards';
-import JournalDetail from './pages/JournalDetail';
+import ReviewerDashboard from './pages/ReviewerDashboard';
+import Search from './pages/Search';
+import Submit from './pages/Submit';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Dashboard": Dashboard,
-    "Journals": Journals,
-    "Submit": Submit,
-    "MyManuscripts": MyManuscripts,
-    "Profile": Profile,
-    "AdminDashboard": AdminDashboard,
-    "EditorDashboard": EditorDashboard,
-    "ReviewerDashboard": ReviewerDashboard,
-    "ManuscriptDetail": ManuscriptDetail,
-    "Publications": Publications,
-    "Home": Home,
     "About": About,
-    "Editorial": Editorial,
-    "OpenAccess": OpenAccess,
-    "Contact": Contact,
-    "Guidelines": Guidelines,
+    "AdminDashboard": AdminDashboard,
     "AuthorResources": AuthorResources,
-    "Search": Search,
+    "Contact": Contact,
+    "Dashboard": Dashboard,
+    "EditorDashboard": EditorDashboard,
+    "Editorial": Editorial,
+    "Guidelines": Guidelines,
+    "Home": Home,
+    "JournalDetail": JournalDetail,
+    "Journals": Journals,
+    "ManuscriptDetail": ManuscriptDetail,
+    "MyManuscripts": MyManuscripts,
+    "OpenAccess": OpenAccess,
+    "Profile": Profile,
+    "Publications": Publications,
     "ReviewGuidelines": ReviewGuidelines,
     "ReviewerAwards": ReviewerAwards,
-    "JournalDetail": JournalDetail,
+    "ReviewerDashboard": ReviewerDashboard,
+    "Search": Search,
+    "Submit": Submit,
 }
 
 export const pagesConfig = {

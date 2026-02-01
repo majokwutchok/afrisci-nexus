@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen } from "lucide-react";
 import AutomatedReminderSystem from "../components/admin/AutomatedReminderSystem";
 import JournalManagementPanel from "../components/editor/JournalManagementPanel";
+import AIReviewAnalyzer from "../components/editor/AIReviewAnalyzer";
 
 // Mock utility functions (in a real app, these would be in a utils folder or separate services)
 const addDays = (date, days) => {
@@ -396,6 +397,13 @@ Editorial Team`
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
+                  {/* AI Review Analysis */}
+                  {selectedManuscript.review_history && selectedManuscript.review_history.some(r => r.status === 'completed') && (
+                    <AIReviewAnalyzer 
+                      manuscript={selectedManuscript}
+                      onDecisionSuggested={(decision) => handleMakeDecision(selectedManuscript, decision)}
+                    />
+                  )}
                   <div>
                     <Label htmlFor="reviewer-email">Assign Reviewer</Label>
                     <div className="flex gap-2">
