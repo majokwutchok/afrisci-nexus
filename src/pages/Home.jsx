@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { Journal } from '@/entities/Journal';
 import { Manuscript } from '@/entities/Manuscript';
 import { ReadershipStats } from '@/entities/ReadershipStats';
 import { User } from '@/entities/User';
 import { Skeleton } from '@/components/ui/skeleton';
-import Footer from '../components/layout/Footer'; // Import the new Footer component
+import Footer from '../components/layout/Footer';
+import HomeHeader from '../components/home/HomeHeader';
 
 // Lazy load components for better initial page load performance
 const HeroSection = React.lazy(() => import('../components/home/HeroSection'));
@@ -73,6 +73,8 @@ export default function HomePage() {
 
   return (
     <div className="bg-slate-50 text-slate-900">
+      <HomeHeader />
+      
       <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><p>Loading...</p></div>}>
         <HeroSection />
       </Suspense>
