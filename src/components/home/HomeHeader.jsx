@@ -18,15 +18,24 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 export default function HomeHeader() {
   const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     base44.auth.me()
       .then(setUser)
       .catch(() => setUser(null));
   }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = createPageUrl("Search") + `?q=${encodeURIComponent(searchQuery)}`;
+    }
+  };
 
   const userRoles = ['user'];
   if (user) {
@@ -100,14 +109,16 @@ export default function HomeHeader() {
 
               {/* Desktop Quick Actions */}
               <div className="hidden lg:flex items-center gap-4">
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
+                <form onSubmit={handleSearch} className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
                   <Search className="w-4 h-4 text-sky-200" />
                   <input 
-                    type="text" 
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search journals, articles..." 
                     className="bg-transparent text-white placeholder-sky-300 border-none outline-none text-sm w-64"
                   />
-                </div>
+                </form>
                 
                 <Link to={createPageUrl("Submit")}>
                   <Button className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
@@ -137,56 +148,88 @@ export default function HomeHeader() {
 
                 {/* About Menu */}
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-teal-300 font-medium px-4 py-2 rounded-lg hover:bg-white/10 transition-colors">
+                  <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-white font-medium px-4 py-2 rounded-lg bg-blue-800/50 hover:bg-blue-700/70 transition-colors border border-blue-600/30">
                     About
-                    <ChevronDown className="w-4 h-4" />
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-80 p-4 bg-white">
-                      <Link to={createPageUrl("About")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">About Us</Link>
-                      <Link to={createPageUrl("Editorial")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">Editorial Board</Link>
+                    <div className="w-80 p-3 bg-white shadow-xl rounded-lg border-t-4 border-blue-500">
+                      <Link to={createPageUrl("About")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
+                        About Us
+                      </Link>
+                      <Link to={createPageUrl("Editorial")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
+                        Editorial Board
+                      </Link>
+                      <Link to={createPageUrl("OpenAccess")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
+                        Open Access Policy
+                      </Link>
+                      <Link to={createPageUrl("Contact")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
+                        Contact Us
+                      </Link>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
                 {/* Browse Menu */}
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-teal-300 font-medium px-4 py-2 rounded-lg hover:bg-white/10 transition-colors bg-white/5 border border-white/20">
+                  <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-white font-medium px-4 py-2 rounded-lg bg-teal-600/60 hover:bg-teal-600/80 transition-colors border border-teal-500/40">
                     Browse
-                    <Badge className="bg-teal-500 text-white text-xs ml-2">Popular</Badge>
+                    <Badge className="bg-teal-400 text-teal-900 text-xs ml-1">Popular</Badge>
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-80 p-4 bg-white">
-                      <Link to={createPageUrl("Journals")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">All Journals</Link>
-                      <Link to={createPageUrl("Publications")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">Latest Publications</Link>
+                    <div className="w-80 p-3 bg-white shadow-xl rounded-lg border-t-4 border-teal-500">
+                      <Link to={createPageUrl("Journals")} className="block p-4 rounded-lg hover:bg-teal-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-teal-200">
+                        All Journals
+                      </Link>
+                      <Link to={createPageUrl("Publications")} className="block p-4 rounded-lg hover:bg-teal-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-teal-200">
+                        Latest Publications
+                      </Link>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
                 {/* For Authors Menu */}
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-teal-300 font-medium px-4 py-2 rounded-lg hover:bg-white/10 transition-colors bg-white/5 border border-white/20">
+                  <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-white font-medium px-4 py-2 rounded-lg bg-emerald-600/60 hover:bg-emerald-600/80 transition-colors border border-emerald-500/40">
                     For Authors
-                    <Badge className="bg-teal-500 text-white text-xs ml-2">Popular</Badge>
+                    <Badge className="bg-emerald-400 text-emerald-900 text-xs ml-1">Popular</Badge>
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-80 p-4 bg-white">
-                      <Link to={createPageUrl("Submit")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">Submit Manuscript</Link>
-                      <Link to={createPageUrl("MyManuscripts")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">Track Submission</Link>
+                    <div className="w-80 p-3 bg-white shadow-xl rounded-lg border-t-4 border-emerald-500">
+                      <Link to={createPageUrl("Submit")} className="block p-4 rounded-lg hover:bg-emerald-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-emerald-200">
+                        Submit Manuscript
+                      </Link>
+                      <Link to={createPageUrl("MyManuscripts")} className="block p-4 rounded-lg hover:bg-emerald-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-emerald-200">
+                        Track Submission
+                      </Link>
+                      <Link to={createPageUrl("Guidelines")} className="block p-4 rounded-lg hover:bg-emerald-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-emerald-200">
+                        Submission Guidelines
+                      </Link>
+                      <Link to={createPageUrl("AuthorResources")} className="block p-4 rounded-lg hover:bg-emerald-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-emerald-200">
+                        Author Resources
+                      </Link>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
                 {/* For Reviewers Menu */}
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-teal-300 font-medium px-4 py-2 rounded-lg hover:bg-white/10 transition-colors">
+                  <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-white font-medium px-4 py-2 rounded-lg bg-blue-700/50 hover:bg-blue-700/70 transition-colors border border-blue-600/30">
                     For Reviewers
-                    <ChevronDown className="w-4 h-4" />
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-80 p-4 bg-white">
-                      <Link to={createPageUrl("ReviewerDashboard")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">Reviewer Dashboard</Link>
-                      <Link to={createPageUrl("Profile")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">Become a Reviewer</Link>
+                    <div className="w-80 p-3 bg-white shadow-xl rounded-lg border-t-4 border-blue-500">
+                      <Link to={createPageUrl("ReviewerDashboard")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
+                        Reviewer Dashboard
+                      </Link>
+                      <Link to={createPageUrl("Profile")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
+                        Become a Reviewer
+                      </Link>
+                      <Link to={createPageUrl("ReviewGuidelines")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
+                        Review Guidelines
+                      </Link>
+                      <Link to={createPageUrl("ReviewerAwards")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
+                        Reviewer Awards
+                      </Link>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
@@ -194,20 +237,26 @@ export default function HomeHeader() {
                 {/* Editorial Menu - For Staff Only */}
                 {user && (userRoles.includes('admin') || userRoles.includes('editor') || user.reviewer_status === 'active') && (
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger className="flex items-center gap-2 text-amber-300 hover:text-amber-200 font-medium px-4 py-2 rounded-lg bg-amber-500/20 border border-amber-400/30">
+                    <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-white font-medium px-4 py-2 rounded-lg bg-amber-600/70 hover:bg-amber-600/90 transition-colors border border-amber-500/50">
                       Editorial
-                      <Badge className="bg-amber-400 text-amber-900 text-xs ml-2">Staff</Badge>
+                      <Badge className="bg-amber-300 text-amber-900 text-xs ml-1 font-semibold">Staff</Badge>
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="w-80 p-4 bg-white">
+                      <div className="w-80 p-3 bg-white shadow-xl rounded-lg border-t-4 border-amber-500">
                         {user.reviewer_status === 'active' && (
-                          <Link to={createPageUrl("ReviewerDashboard")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">Reviewer Dashboard</Link>
+                          <Link to={createPageUrl("ReviewerDashboard")} className="block p-4 rounded-lg hover:bg-amber-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-amber-200">
+                            Reviewer Dashboard
+                          </Link>
                         )}
                         {(userRoles.includes('editor') || userRoles.includes('admin')) && (
-                          <Link to={createPageUrl("EditorDashboard")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">Editor Dashboard</Link>
+                          <Link to={createPageUrl("EditorDashboard")} className="block p-4 rounded-lg hover:bg-amber-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-amber-200">
+                            Editor Dashboard
+                          </Link>
                         )}
                         {userRoles.includes('admin') && (
-                          <Link to={createPageUrl("AdminDashboard")} className="block p-3 rounded-lg hover:bg-slate-50 text-slate-900">Admin Dashboard</Link>
+                          <Link to={createPageUrl("AdminDashboard")} className="block p-4 rounded-lg hover:bg-amber-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-amber-200">
+                            Admin Dashboard
+                          </Link>
                         )}
                       </div>
                     </NavigationMenuContent>
