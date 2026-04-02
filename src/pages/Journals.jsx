@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import SEO from '../components/SEO';
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -147,7 +148,20 @@ export default function Journals() {
   }, {});
 
   return (
-    <div className="p-6 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 min-h-screen">
+    <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+      <SEO
+        title="Browse African Academic Journals — 50+ Peer-Reviewed Publications"
+        description="Explore 50+ peer-reviewed African academic journals covering STEM, medicine, law, agriculture, social sciences, humanities and more. All open-access, all serving African research."
+        keywords="African academic journals, peer reviewed journals Africa, open access journals Africa, STEM journals Africa, medical journals Africa, social science journals Africa"
+        canonicalPath="/Journals"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "African Academic Journals — AfriSci Nexus",
+          "description": "Browse 50+ open-access peer-reviewed African academic journals",
+          "url": "https://afrisco-nexus.base44.app/Journals"
+        }}
+      />
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">

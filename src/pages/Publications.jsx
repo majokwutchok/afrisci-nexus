@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SEO from '../components/SEO';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -149,6 +150,20 @@ export default function PublicationsPage() {
 
   return (
     <div className="p-6 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 min-h-screen">
+      <SEO
+        title="Published Research — Peer-Reviewed African Scientific Articles"
+        description="Browse thousands of peer-reviewed research articles published in AfriSci Nexus journals. Discover cutting-edge science, medicine, agriculture, and social research from African scholars."
+        keywords="African research articles, peer reviewed papers Africa, open access journals Africa, scientific publications Africa, African researchers"
+        canonicalPath="/Publications"
+        ogType="website"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Published Research — AfriSci Nexus",
+          "description": "Browse peer-reviewed African scientific articles",
+          "url": "https://afrisco-nexus.base44.app/Publications"
+        }}
+      />
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">

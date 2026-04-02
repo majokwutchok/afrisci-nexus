@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
+import SEO from '../components/SEO';
 import { Journal } from '@/entities/Journal';
 import { Manuscript } from '@/entities/Manuscript';
 import { ReadershipStats } from '@/entities/ReadershipStats';
@@ -71,8 +72,27 @@ export default function HomePage() {
     </div>
   );
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "AfriSci Nexus — African Open Access Peer-Reviewed Journals",
+    "description": "Africa's leading open-access academic publishing platform. Submit manuscripts, discover peer-reviewed research across 54 African countries.",
+    "url": "https://afrisco-nexus.base44.app/",
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://afrisco-nexus.base44.app/"}]
+    }
+  };
+
   return (
     <div className="bg-slate-50 text-slate-900">
+      <SEO
+        title="African Open Access Peer-Reviewed Journals & Research"
+        description="AfriSci Nexus — Africa's leading open-access academic publishing platform. 50+ peer-reviewed journals, 10,000+ articles across STEM, medicine, agriculture, social sciences. Serving 54 African countries."
+        keywords="African journals, open access research Africa, peer reviewed journals, academic publishing Africa, AfriSci Nexus, African science, submit manuscript, research papers Africa"
+        canonicalPath="/"
+        structuredData={structuredData}
+      />
       <HomeHeader />
       
       <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><p>Loading...</p></div>}>
