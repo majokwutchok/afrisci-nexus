@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Manuscript } from "@/entities/Manuscript";
 import { Journal } from "@/entities/Journal";
@@ -18,12 +17,14 @@ import {
   Eye,
   Calendar,
   User as UserIcon,
-  ExternalLink
+  ExternalLink,
+  Sparkles
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { Link } from "react-router-dom"; // Import Link
-import { createPageUrl } from "@/utils"; // Import createPageUrl
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import ManuscriptReformatter from "../components/submission/ManuscriptReformatter";
 
 const statusColors = {
   draft: "bg-gray-100 text-gray-800 border-gray-200",
@@ -49,7 +50,9 @@ const statusIcons = {
   published: <CheckCircle className="w-4 h-4" />
 };
 
-const ManuscriptCard = ({ manuscript, journal }) => (
+const ManuscriptCard = ({ manuscript, journal }) => {
+  const [reformatterOpen, setReformatterOpen] = React.useState(false);
+  return (
   <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
     <CardHeader className="pb-4">
       <div className="flex items-start justify-between gap-4">
@@ -133,8 +136,8 @@ const ManuscriptCard = ({ manuscript, journal }) => (
         )}
       </div>
 
-      <div className="flex gap-2 pt-3">
-        <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>
+      <div className="flex flex-wrap gap-2 pt-3">
+        <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>          
           <Button size="sm" variant="outline" className="flex items-center gap-1 text-xs">
             <Eye className="w-3 h-3" />
             View Progress
@@ -151,10 +154,28 @@ const ManuscriptCard = ({ manuscript, journal }) => (
             Download
           </Button>
         )}
+        {journal && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700"
+            onClick={() => setReformatterOpen(true)}
+          >
+            <Sparkles className="w-3 h-3" />
+            Reformat
+          </Button>
+        )}
       </div>
+      <ManuscriptReformatter
+        manuscript={manuscript}
+        journal={journal}
+        open={reformatterOpen}
+        onClose={() => setReformatterOpen(false)}
+      />
     </CardContent>
   </Card>
 );
+};
 
 export default function MyManuscripts() {
   const [manuscripts, setManuscripts] = useState([]);
