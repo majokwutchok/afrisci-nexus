@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import ProgressTracker from "../components/submission/ProgressTracker";
+import DOIPanel from "../components/publication/DOIPanel";
 
 const statusColors = {
   draft: "bg-gray-100 text-gray-800 border-gray-200",
@@ -95,6 +96,10 @@ export default function ManuscriptDetail() {
     setIsLoading(false);
   };
   
+  const handleDOIAssigned = (doi) => {
+    setManuscript(prev => prev ? { ...prev, doi } : prev);
+  };
+
   const handleDownload = async () => {
     if (!manuscript?.manuscript_file_url) return;
     window.open(manuscript.manuscript_file_url, '_blank');
@@ -204,7 +209,19 @@ export default function ManuscriptDetail() {
                     </div>
                   )}
                 </div>
-                {manuscript.doi && <p className="text-sm text-blue-600 font-mono pt-2">DOI: {manuscript.doi}</p>}
+                {manuscript.doi && (
+                  <div className="flex items-center gap-2 pt-2">
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">DOI:</span>
+                    <a
+                      href={`https://doi.org/${manuscript.doi}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-mono text-teal-700 hover:text-teal-900 hover:underline"
+                    >
+                      {manuscript.doi}
+                    </a>
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="space-y-6">
                 {manuscript.authors && manuscript.authors.length > 0 && (
@@ -279,11 +296,16 @@ export default function ManuscriptDetail() {
             )}
           </div>
 
-          {/* Progress Sidebar */}
-          <div className="lg:col-span-1">
-            <ProgressTracker 
-              manuscript={manuscript} 
+          {/* Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            <ProgressTracker
+              manuscript={manuscript}
               showReviewDetails={true}
+            />
+            <DOIPanel
+              manuscript={manuscript}
+              journal={journal}
+              onDOIAssigned={handleDOIAssigned}
             />
           </div>
         </div>
