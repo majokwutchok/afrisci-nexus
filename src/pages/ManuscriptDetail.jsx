@@ -23,6 +23,7 @@ import {
 import { format } from "date-fns";
 import ProgressTracker from "../components/submission/ProgressTracker";
 import DOIPanel from "../components/publication/DOIPanel";
+import CitationTracker from "../components/publication/CitationTracker";
 
 const statusColors = {
   draft: "bg-gray-100 text-gray-800 border-gray-200",
@@ -96,6 +97,10 @@ export default function ManuscriptDetail() {
     setIsLoading(false);
   };
   
+  const handleCitationAdded = (newCount) => {
+    setManuscript(prev => prev ? { ...prev, citation_count: newCount } : prev);
+  };
+
   const handleDOIAssigned = (doi) => {
     setManuscript(prev => prev ? { ...prev, doi } : prev);
   };
@@ -306,6 +311,11 @@ export default function ManuscriptDetail() {
               manuscript={manuscript}
               journal={journal}
               onDOIAssigned={handleDOIAssigned}
+            />
+            <CitationTracker
+              manuscript={manuscript}
+              journal={journal}
+              onCitationAdded={handleCitationAdded}
             />
           </div>
         </div>
