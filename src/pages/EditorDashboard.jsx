@@ -19,6 +19,7 @@ import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen } from 
 import AutomatedReminderSystem from "../components/admin/AutomatedReminderSystem";
 import JournalManagementPanel from "../components/editor/JournalManagementPanel";
 import AIReviewAnalyzer from "../components/editor/AIReviewAnalyzer";
+import ReviewScoreSummary from "../components/editor/ReviewScoreSummary";
 
 // Mock utility functions (in a real app, these would be in a utils folder or separate services)
 const addDays = (date, days) => {
@@ -397,6 +398,12 @@ Editorial Team`
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
+                  {/* Aggregate Score Summary */}
+                  <ReviewScoreSummary
+                    manuscript={selectedManuscript}
+                    onDecisionSuggested={(decision) => handleMakeDecision(selectedManuscript, decision)}
+                  />
+
                   {/* AI Review Analysis */}
                   {selectedManuscript.review_history && selectedManuscript.review_history.some(r => r.status === 'completed') && (
                     <AIReviewAnalyzer 

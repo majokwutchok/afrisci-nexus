@@ -16,11 +16,11 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 const RATING_CRITERIA = [
-  { key: "originality", label: "Originality & Novelty", description: "How original and novel is the research?" },
-  { key: "methodology", label: "Methodology & Rigor", description: "Are the methods sound and well-described?" },
-  { key: "clarity", label: "Clarity & Presentation", description: "Is the paper well-written and clearly structured?" },
-  { key: "significance", label: "Significance & Impact", description: "How significant is the contribution to the field?" },
-  { key: "references", label: "Literature & References", description: "Are references adequate and up to date?" },
+  { key: "originality",  label: "Originality & Novelty",     description: "How original and novel is the research?",           weight: 0.25 },
+  { key: "methodology",  label: "Methodology & Rigor",       description: "Are the methods sound and well-described?",         weight: 0.30 },
+  { key: "clarity",      label: "Clarity & Presentation",    description: "Is the paper well-written and clearly structured?", weight: 0.15 },
+  { key: "significance", label: "Significance & Impact",     description: "How significant is the contribution to the field?", weight: 0.20 },
+  { key: "references",   label: "Literature & References",   description: "Are references adequate and up to date?",           weight: 0.10 },
 ];
 
 function RatingRow({ criterion, value, onChange }) {
@@ -28,7 +28,10 @@ function RatingRow({ criterion, value, onChange }) {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-slate-800">{criterion.label}</p>
+          <p className="text-sm font-semibold text-slate-800">
+            {criterion.label}
+            <span className="ml-2 text-xs font-normal text-slate-400">weight {Math.round(criterion.weight * 100)}%</span>
+          </p>
           <p className="text-xs text-slate-500">{criterion.description}</p>
         </div>
         <span className="text-lg font-bold text-teal-600 w-10 text-right">{value ?? "—"}</span>
@@ -80,6 +83,17 @@ export default function ReviewForm({ manuscript, review, onSubmit, onCancel }) {
     return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
   };
 
+  const weightedAvg = () => {
+    let total = 0, weight = 0;
+    RATING_CRITERIA.forEach(c => {
+      if (ratings[c.key] != null) {
+        total += ratings[c.key] * c.weight;
+        weight += c.weight;
+      }
+    });
+    return weight > 0 ? (total / weight).toFixed(2) : null;
+  };
+
   const allRated = RATING_CRITERIA.every((c) => ratings[c.key] !== null);
   const canSubmit = allRated && recommendation && comments.trim().length >= 50;
 
@@ -93,11 +107,17 @@ export default function ReviewForm({ manuscript, review, onSubmit, onCancel }) {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    let total = 0, weight = 0;
+    RATING_CRITERIA.forEach(c => {
+      if (ratings[c.key] != null) { total += ratings[c.key] * c.weight; weight += c.weight; }
+    });
+    const wScore = weight > 0 ? parseFloat((total / weight).toFixed(2)) : null;
     await onSubmit({
       comments,
       confidential_comments: confidentialComments,
       recommendation,
       ratings,
+      weighted_score: wScore,
       annotated_file: annotatedFile,
     });
     setSubmitting(false);
@@ -171,15 +191,24 @@ export default function ReviewForm({ manuscript, review, onSubmit, onCancel }) {
             <RatingRow key={c.key} criterion={c} value={ratings[c.key]} onChange={(v) => setRating(c.key, v)} />
           ))}
           {avgRating() && (
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-              <span className="text-sm font-semibold text-slate-700">Overall Average Score</span>
-              <div className="flex items-center gap-2">
-                <div className={`text-2xl font-bold ${
-                  avgRating() >= 4 ? "text-green-600" : avgRating() >= 3 ? "text-amber-600" : "text-red-600"
-                }`}>
-                  {avgRating()}
+            <div className="pt-3 border-t border-slate-100 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-700">Simple Average</span>
+                <div className="flex items-center gap-1">
+                  <span className={`text-xl font-bold ${
+                    avgRating() >= 4 ? "text-green-600" : avgRating() >= 3 ? "text-amber-600" : "text-red-600"
+                  }`}>{avgRating()}</span>
+                  <span className="text-slate-400 text-sm">/ 5</span>
                 </div>
-                <span className="text-slate-400 text-sm">/ 5</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-700">Weighted Score</span>
+                <div className="flex items-center gap-1">
+                  <span className={`text-2xl font-bold ${
+                    weightedAvg() >= 4 ? "text-green-600" : weightedAvg() >= 3 ? "text-amber-600" : "text-red-600"
+                  }`}>{weightedAvg()}</span>
+                  <span className="text-slate-400 text-sm">/ 5</span>
+                </div>
               </div>
             </div>
           )}
