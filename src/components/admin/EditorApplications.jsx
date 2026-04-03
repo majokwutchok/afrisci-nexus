@@ -35,10 +35,7 @@ export default function EditorApplications() {
     setProcessingId(userId);
     try {
       const user = users.find(u => u.id === userId);
-      await base44.auth.updateMe({
-        ...user,
-        editor_status: 'approved'
-      });
+      await base44.asServiceRole.entities.User.update(userId, { editor_status: 'approved' });
 
       // Send approval email
       await base44.integrations.Core.SendEmail({
@@ -59,10 +56,7 @@ export default function EditorApplications() {
     setProcessingId(userId);
     try {
       const user = users.find(u => u.id === userId);
-      await base44.auth.updateMe({
-        ...user,
-        editor_status: 'rejected'
-      });
+      await base44.asServiceRole.entities.User.update(userId, { editor_status: 'rejected' });
 
       // Send rejection email
       await base44.integrations.Core.SendEmail({

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { User } from '@/entities/User';
+import { base44 } from '@/api/base44Client';
 import { Journal } from '@/entities/Journal';
+import EditorApplicationForm from '../components/editor/EditorApplicationForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Mail, Globe, Award, BookOpen, Users as UsersIcon } from 'lucide-react';
+import { Mail, Globe, Award, BookOpen, Users as UsersIcon, Edit3, CheckCircle } from 'lucide-react';
 
 const EditorCard = ({ editor, journals }) => {
   const editorJournals = journals.filter(j => editor.editor_roles?.includes(j.id));
@@ -79,6 +80,8 @@ export default function EditorialBoardPage() {
   const [editors, setEditors] = useState([]);
   const [journals, setJournals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     loadEditorialBoard();
@@ -88,7 +91,7 @@ export default function EditorialBoardPage() {
     setIsLoading(true);
     try {
       const [allUsers, allJournals] = await Promise.all([
-        User.list(),
+        base44.entities.User.list(),
         Journal.list()
       ]);
       
@@ -114,7 +117,7 @@ export default function EditorialBoardPage() {
   );
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-100 min-h-screen">
+    <>
       {/* Hero Section */}
       <div className="text-center py-24 px-4 bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white">
         <UsersIcon className="w-16 h-16 mx-auto mb-6 text-sky-200" />
@@ -231,11 +234,30 @@ export default function EditorialBoardPage() {
           <p className="max-w-2xl mx-auto text-slate-600 mb-6">
             We are always looking for dedicated scholars to join our editorial board. If you're passionate about advancing African research and maintaining the highest standards of peer review, we'd love to hear from you.
           </p>
-          <a href="mailto:editorial@afriscinexus.org" className="inline-block bg-gradient-to-r from-teal-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
-            Express Your Interest
-          </a>
+          {submitted ? (
+            <div className="inline-flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 px-8 py-4 rounded-xl font-semibold">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+              Application Submitted! We'll be in touch soon.
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
+            >
+              <Edit3 className="w-5 h-5" />
+              Apply to Join Editorial Board
+            </button>
+          )}
         </div>
       </div>
     </div>
+
+    {showForm && (
+      <EditorApplicationForm
+        onClose={() => setShowForm(false)}
+        onSuccess={() => { setShowForm(false); setSubmitted(true); }}
+      />
+    )}
+  </>
   );
 }
