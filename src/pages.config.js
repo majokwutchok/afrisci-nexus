@@ -69,6 +69,7 @@ import ReviewerAwards from './pages/ReviewerAwards';
 import ReviewerDashboard from './pages/ReviewerDashboard';
 import Search from './pages/Search';
 import Submit from './pages/Submit';
+import JournalProfile from './pages/JournalProfile';
 import __Layout from './Layout.jsx';
 
 
@@ -95,6 +96,7 @@ export const PAGES = {
     "ReviewerDashboard": ReviewerDashboard,
     "Search": Search,
     "Submit": Submit,
+    "JournalProfile": JournalProfile,
 }
 
 export const pagesConfig = {
