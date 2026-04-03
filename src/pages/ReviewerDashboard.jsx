@@ -4,39 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { Check, X, Download, Upload, FileText, User as UserIcon, Award, Clock, AlertCircle, Eye, BookOpen } from "lucide-react";
+import { Check, X, Download, Eye, Award, Clock, AlertCircle, BookOpen, FileText, ArrowLeft, User as UserIcon } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import ReviewForm from "../components/reviewer/ReviewForm";
 
-const ReviewCard = ({ manuscript, review, onStatusChange, onSubmitReview }) => {
-  const [comments, setComments] = useState(review?.comments || '');
-  const [confidentialComments, setConfidentialComments] = useState(review?.confidential_comments || '');
-  const [recommendation, setRecommendation] = useState(review?.recommendation || '');
-  const [reviewFile, setReviewFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
+const ReviewCard = ({ manuscript, review, onStatusChange, onOpenForm }) => {
   const [expanded, setExpanded] = useState(false);
 
-  const daysUntilDue = review?.review_due_date 
+  const daysUntilDue = review?.review_due_date
     ? Math.ceil((new Date(review.review_due_date) - new Date()) / (1000 * 60 * 60 * 24))
     : null;
-
-  const handleFileUpload = async (file) => {
-    if (!file) return;
-    setUploading(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setReviewFile(file_url);
-    } catch (error) {
-      console.error("File upload error:", error);
-    }
-    setUploading(false);
-  };
 
   return (
     <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-0">
@@ -46,7 +29,7 @@ const ReviewCard = ({ manuscript, review, onStatusChange, onSubmitReview }) => {
             <CardTitle className="text-base font-bold line-clamp-2 mb-2">{manuscript.title}</CardTitle>
             <div className="flex flex-wrap gap-2 text-xs text-slate-500">
               <span>Invited: {new Date(review.date).toLocaleDateString()}</span>
-              {daysUntilDue && review.status === 'accepted' && (
+              {daysUntilDue !== null && review.status === 'accepted' && (
                 <Badge variant={daysUntilDue < 3 ? "destructive" : "secondary"} className="text-xs">
                   {daysUntilDue > 0 ? `${daysUntilDue} days left` : 'Overdue'}
                 </Badge>
@@ -59,7 +42,7 @@ const ReviewCard = ({ manuscript, review, onStatusChange, onSubmitReview }) => {
             review.status === 'completed' ? 'bg-green-100 text-green-800' :
             'bg-slate-100 text-slate-800'
           }>
-            {review.status === 'invited' ? 'Pending' : 
+            {review.status === 'invited' ? 'Pending' :
              review.status === 'accepted' ? 'In Progress' :
              review.status === 'completed' ? 'Completed' : 'Declined'}
           </Badge>
@@ -70,157 +53,66 @@ const ReviewCard = ({ manuscript, review, onStatusChange, onSubmitReview }) => {
           <>
             <Alert>
               <Clock className="h-4 w-4" />
-              <AlertDescription>
-                Please respond to this invitation within 3 days.
-              </AlertDescription>
+              <AlertDescription>Please respond to this invitation within 3 days.</AlertDescription>
             </Alert>
-            <div className="space-y-3">
-              <Button 
-                className="w-full" 
-                onClick={() => setExpanded(!expanded)}
-                variant="outline"
-              >
-                <Eye className="w-4 h-4 mr-2" /> 
-                {expanded ? 'Hide' : 'View'} Abstract
-              </Button>
-              {expanded && (
-                <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700">
-                  {manuscript.abstract?.substring(0, 200)}...
-                </div>
-              )}
-              <div className="flex gap-2">
-                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => onStatusChange(manuscript.id, 'accepted')}>
-                  <Check className="w-4 h-4 mr-2" /> Accept Review
-                </Button>
-                <Button className="flex-1" variant="destructive" onClick={() => onStatusChange(manuscript.id, 'declined')}>
-                  <X className="w-4 h-4 mr-2" /> Decline
-                </Button>
+            <Button variant="outline" className="w-full" onClick={() => setExpanded(!expanded)}>
+              <Eye className="w-4 h-4 mr-2" />{expanded ? 'Hide' : 'View'} Abstract
+            </Button>
+            {expanded && (
+              <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700">
+                {manuscript.abstract?.substring(0, 300)}...
               </div>
+            )}
+            <div className="flex gap-2">
+              <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => onStatusChange(manuscript.id, 'accepted')}>
+                <Check className="w-4 h-4 mr-2" /> Accept
+              </Button>
+              <Button className="flex-1" variant="destructive" onClick={() => onStatusChange(manuscript.id, 'declined')}>
+                <X className="w-4 h-4 mr-2" /> Decline
+              </Button>
             </div>
           </>
         )}
-        
+
         {review.status === 'accepted' && (
-          <div className="space-y-4">
-            <a href={manuscript.manuscript_file_url} target="_blank" rel="noreferrer">
-              <Button variant="outline" className="w-full">
-                <Download className="w-4 h-4 mr-2" /> Download Manuscript
-              </Button>
-            </a>
-
-            <Link to={createPageUrl("ReviewGuidelines")}>
-              <Button variant="ghost" className="w-full text-teal-600 hover:text-teal-700">
-                <BookOpen className="w-4 h-4 mr-2" /> Review Guidelines
-              </Button>
-            </Link>
-
-            <div>
-              <Label className="text-sm font-semibold">Comments for Author</Label>
-              <Textarea 
-                placeholder="Provide constructive feedback for the authors..."
-                value={comments}
-                onChange={(e) => setComments(e.target.value)}
-                rows={4}
-                className="mt-2"
-              />
-            </div>
-
-            <div>
-              <Label className="text-sm font-semibold">Confidential Comments for Editor</Label>
-              <Textarea 
-                placeholder="Comments only visible to the editor..."
-                value={confidentialComments}
-                onChange={(e) => setConfidentialComments(e.target.value)}
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-
-            <div>
-              <Label className="text-sm font-semibold">Upload Review Report (optional)</Label>
-              <Input
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={(e) => handleFileUpload(e.target.files[0])}
-                disabled={uploading}
-                className="mt-2"
-              />
-              {uploading && <p className="text-xs text-teal-600 mt-1">Uploading...</p>}
-              {reviewFile && (
-                <div className="flex items-center gap-2 mt-2 text-xs text-green-600">
-                  <FileText className="w-4 h-4" />
-                  <span>File uploaded successfully</span>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <Label className="text-sm font-semibold">Recommendation *</Label>
-              <Select value={recommendation} onValueChange={setRecommendation}>
-                <SelectTrigger className="mt-2">
-                  <SelectValue placeholder="Select your recommendation" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="accept">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-green-100 text-green-800">Accept</Badge>
-                      <span className="text-xs">Ready for publication</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="minor_revision">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-blue-100 text-blue-800">Minor Revision</Badge>
-                      <span className="text-xs">Small improvements needed</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="major_revision">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-orange-100 text-orange-800">Major Revision</Badge>
-                      <span className="text-xs">Significant changes required</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="reject">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-red-100 text-red-800">Reject</Badge>
-                      <span className="text-xs">Not suitable for publication</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button 
-              onClick={() => onSubmitReview(manuscript.id, comments, confidentialComments, recommendation, reviewFile)}
-              disabled={!recommendation || !comments}
+          <div className="space-y-3">
+            {manuscript.manuscript_file_url && (
+              <a href={manuscript.manuscript_file_url} target="_blank" rel="noreferrer">
+                <Button variant="outline" className="w-full">
+                  <Download className="w-4 h-4 mr-2" /> Download Manuscript
+                </Button>
+              </a>
+            )}
+            <Button
               className="w-full bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-700 hover:to-emerald-800"
+              onClick={() => onOpenForm({ manuscript, review })}
             >
-              <Check className="w-4 h-4 mr-2" />
-              Submit Review
+              <FileText className="w-4 h-4 mr-2" /> Open Review Form
             </Button>
           </div>
         )}
-        
+
         {review.status === 'completed' && (
           <div className="space-y-3">
             <Alert className="bg-green-50 border-green-200">
               <Check className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                Review submitted successfully. Thank you for your contribution!
-              </AlertDescription>
+              <AlertDescription className="text-green-800">Review submitted. Thank you!</AlertDescription>
             </Alert>
-            <div className="text-sm space-y-2">
-              <p><strong>Your Recommendation:</strong> <Badge>{review.recommendation?.replace('_', ' ')}</Badge></p>
-              <p className="text-slate-600">Submitted: {new Date(review.date).toLocaleDateString()}</p>
+            <div className="text-sm space-y-1">
+              <p><strong>Recommendation:</strong> <Badge>{review.recommendation?.replace('_', ' ')}</Badge></p>
+              {review.ratings && (
+                <p className="text-slate-500 text-xs">
+                  Avg score: {(Object.values(review.ratings).reduce((a,b)=>a+b,0)/Object.values(review.ratings).length).toFixed(1)}/5
+                </p>
+              )}
             </div>
           </div>
         )}
-        
+
         {review.status === 'declined' && (
           <Alert variant="destructive">
             <X className="h-4 w-4" />
-            <AlertDescription>
-              You declined this review invitation.
-            </AlertDescription>
+            <AlertDescription>You declined this review invitation.</AlertDescription>
           </Alert>
         )}
       </CardContent>
@@ -234,6 +126,7 @@ export default function ReviewerDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('invitations');
   const [editingProfile, setEditingProfile] = useState(false);
+  const [activeReviewForm, setActiveReviewForm] = useState(null); // { manuscript, review }
   const [profileData, setProfileData] = useState({
     research_interests: [],
     expertise_keywords: [],
@@ -312,21 +205,21 @@ export default function ReviewerDashboard() {
     loadData();
   };
 
-  const handleReviewSubmit = async (manuscriptId, comments, confidentialComments, recommendation, reviewFile) => {
+  const handleReviewSubmit = async ({ comments, confidential_comments, recommendation, ratings, annotated_file }) => {
+    const manuscriptId = activeReviewForm.manuscript.id;
     const manuscript = allManuscripts.find(ms => ms.id === manuscriptId);
-    const updatedHistory = manuscript.review_history.map(r => 
-      r.reviewer_id === currentUser.id ? { 
-        ...r, 
-        status: 'completed', 
-        comments, 
-        confidential_comments: confidentialComments,
+    const updatedHistory = manuscript.review_history.map(r =>
+      r.reviewer_id === currentUser.id ? {
+        ...r,
+        status: 'completed',
+        comments,
+        confidential_comments,
         recommendation,
-        review_file: reviewFile,
+        ratings,
+        annotated_file,
         date: new Date().toISOString().split('T')[0]
       } : r
     );
-    
-    // Add to timeline
     const newTimeline = [
       ...(manuscript.timeline || []),
       {
@@ -336,11 +229,11 @@ export default function ReviewerDashboard() {
         comment: `Review completed with recommendation: ${recommendation}`
       }
     ];
-    
-    await base44.entities.Manuscript.update(manuscriptId, { 
+    await base44.entities.Manuscript.update(manuscriptId, {
       review_history: updatedHistory,
       timeline: newTimeline
     });
+    setActiveReviewForm(null);
     loadData();
   };
 
@@ -371,6 +264,29 @@ export default function ReviewerDashboard() {
     completed: getReviewsByStatus('completed').length,
     total: myReviews.length
   };
+
+  // If a review form is open, show it full-page
+  if (activeReviewForm) {
+    return (
+      <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+        <div className="max-w-3xl mx-auto">
+          <button
+            onClick={() => setActiveReviewForm(null)}
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 text-sm font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          </button>
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">Submit Review</h2>
+          <ReviewForm
+            manuscript={activeReviewForm.manuscript}
+            review={activeReviewForm.review}
+            onSubmit={handleReviewSubmit}
+            onCancel={() => setActiveReviewForm(null)}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-100 min-h-screen">
@@ -476,11 +392,11 @@ export default function ReviewerDashboard() {
             ) : (
               <div className="grid md:grid-cols-2 gap-6">
                 {getReviewsByStatus('accepted').map(({ manuscript, review }) => (
-                  <ReviewCard 
+                  <ReviewCard
                     key={manuscript.id}
                     manuscript={manuscript}
                     review={review}
-                    onSubmitReview={handleReviewSubmit}
+                    onOpenForm={setActiveReviewForm}
                   />
                 ))}
               </div>
