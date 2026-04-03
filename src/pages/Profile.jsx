@@ -27,14 +27,37 @@ import { Skeleton } from "@/components/ui/skeleton";
 import EditorInterestForm from "@/components/profile/EditorInterestForm";
 
 const countries = [
-  "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon", 
-  "Cape Verde", "Central African Republic", "Chad", "Comoros", "Congo", "DR Congo",
-  "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Ethiopia", "Gabon", "Gambia",
-  "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast", "Kenya", "Lesotho", "Liberia",
-  "Libya", "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco",
-  "Mozambique", "Namibia", "Niger", "Nigeria", "Rwanda", "São Tomé and Príncipe",
-  "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan",
-  "Sudan", "Swaziland", "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe"
+  // Africa
+  "Algeria","Angola","Benin","Botswana","Burkina Faso","Burundi","Cabo Verde",
+  "Cameroon","Central African Republic","Chad","Comoros","Congo (Brazzaville)","Congo (DRC)",
+  "Côte d'Ivoire","Djibouti","Egypt","Equatorial Guinea","Eritrea","Eswatini","Ethiopia",
+  "Gabon","Gambia","Ghana","Guinea","Guinea-Bissau","Kenya","Lesotho","Liberia","Libya",
+  "Madagascar","Malawi","Mali","Mauritania","Mauritius","Morocco","Mozambique","Namibia",
+  "Niger","Nigeria","Rwanda","São Tomé and Príncipe","Senegal","Seychelles","Sierra Leone",
+  "Somalia","South Africa","South Sudan","Sudan","Tanzania","Togo","Tunisia","Uganda",
+  "Zambia","Zimbabwe",
+  // Asia
+  "Afghanistan","Armenia","Azerbaijan","Bahrain","Bangladesh","Bhutan","Brunei",
+  "Cambodia","China","Cyprus","Georgia","India","Indonesia","Iran","Iraq","Israel",
+  "Japan","Jordan","Kazakhstan","Kuwait","Kyrgyzstan","Laos","Lebanon","Malaysia",
+  "Maldives","Mongolia","Myanmar","Nepal","North Korea","Oman","Pakistan","Palestine",
+  "Philippines","Qatar","Saudi Arabia","Singapore","South Korea","Sri Lanka","Syria",
+  "Taiwan","Tajikistan","Thailand","Timor-Leste","Turkey","Turkmenistan","UAE",
+  "Uzbekistan","Vietnam","Yemen",
+  // Europe
+  "Albania","Andorra","Austria","Belarus","Belgium","Bosnia and Herzegovina","Bulgaria",
+  "Croatia","Czech Republic","Denmark","Estonia","Finland","France","Germany","Greece",
+  "Hungary","Iceland","Ireland","Italy","Kosovo","Latvia","Liechtenstein","Lithuania",
+  "Luxembourg","Malta","Moldova","Monaco","Montenegro","Netherlands","North Macedonia",
+  "Norway","Poland","Portugal","Romania","Russia","San Marino","Serbia","Slovakia",
+  "Slovenia","Spain","Sweden","Switzerland","Ukraine","United Kingdom",
+  // Americas
+  "Argentina","Bahamas","Barbados","Belize","Bolivia","Brazil","Canada","Chile",
+  "Colombia","Costa Rica","Cuba","Dominican Republic","Ecuador","El Salvador","Guatemala",
+  "Guyana","Haiti","Honduras","Jamaica","Mexico","Nicaragua","Panama","Paraguay","Peru",
+  "Suriname","Trinidad and Tobago","United States","Uruguay","Venezuela",
+  // Oceania
+  "Australia","Fiji","New Zealand","Papua New Guinea","Samoa","Solomon Islands","Tonga","Vanuatu",
 ];
 
 const languages = [

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import PaginationBar from '../components/ui/PaginationBar';
 import SEO from '../components/SEO';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
@@ -92,6 +93,8 @@ const PublicationCard = ({ manuscript, journal }) => (
   </Card>
 );
 
+const PAGE_SIZE = 18;
+
 export default function PublicationsPage() {
   const [manuscripts, setManuscripts] = useState([]);
   const [journals, setJournals] = useState([]);
@@ -99,6 +102,7 @@ export default function PublicationsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('recent');
   const [filterJournal, setFilterJournal] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     loadData();
@@ -108,12 +112,10 @@ export default function PublicationsPage() {
     setIsLoading(true);
     try {
       const [manuscriptData, journalData] = await Promise.all([
-        base44.entities.Manuscript.list('-publication_date'),
-        base44.entities.Journal.list()
+        base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 500),
+        base44.entities.Journal.list('-created_date', 200)
       ]);
-      
-      const publishedManuscripts = manuscriptData.filter(m => m.status === 'published');
-      setManuscripts(publishedManuscripts);
+      setManuscripts(manuscriptData);
       setJournals(journalData);
     } catch (error) {
       console.error("Error loading publications:", error);
@@ -121,32 +123,37 @@ export default function PublicationsPage() {
     setIsLoading(false);
   };
 
-  const filteredAndSortedManuscripts = manuscripts
+  const filteredAndSortedManuscripts = useMemo(() => manuscripts
     .filter(manuscript => {
-      const matchesSearch = 
-        manuscript.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        manuscript.abstract.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      const matchesSearch = !searchQuery ||
+        manuscript.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        manuscript.abstract?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         manuscript.authors?.some(a => a.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
         manuscript.keywords?.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()));
-      
       const matchesJournal = filterJournal === 'all' || manuscript.journal_id === filterJournal;
-      
       return matchesSearch && matchesJournal;
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case 'recent':
-          return new Date(b.publication_date || b.created_date) - new Date(a.publication_date || a.created_date);
-        case 'citations':
-          return (b.citation_count || 0) - (a.citation_count || 0);
-        case 'views':
-          return (b.view_count || 0) - (a.view_count || 0);
-        default:
-          return 0;
+        case 'recent': return new Date(b.publication_date || b.created_date) - new Date(a.publication_date || a.created_date);
+        case 'citations': return (b.citation_count || 0) - (a.citation_count || 0);
+        case 'views': return (b.view_count || 0) - (a.view_count || 0);
+        default: return 0;
       }
-    });
+    }), [manuscripts, searchQuery, filterJournal, sortBy]);
 
   const getJournalById = (id) => journals.find(j => j.id === id);
+
+  const totalPages = Math.ceil(filteredAndSortedManuscripts.length / PAGE_SIZE);
+  const paginatedManuscripts = filteredAndSortedManuscripts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  // Reset to page 1 when filters change
+  const handleSearch = (val) => { setSearchQuery(val); setCurrentPage(1); };
+  const handleSort = (val) => { setSortBy(val); setCurrentPage(1); };
+  const handleJournal = (val) => { setFilterJournal(val); setCurrentPage(1); };
 
   return (
     <div className="p-6 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 min-h-screen">
@@ -219,11 +226,11 @@ export default function PublicationsPage() {
                 <Input
                   placeholder="Search by title, author, keywords..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => handleSearch(e.target.value)}
                   className="pl-10 py-3 border-slate-200 focus:border-emerald-300 focus:ring-emerald-200 rounded-xl"
                 />
               </div>
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select value={sortBy} onValueChange={handleSort}>
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
@@ -233,7 +240,7 @@ export default function PublicationsPage() {
                   <SelectItem value="views">Most Viewed</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={filterJournal} onValueChange={setFilterJournal}>
+              <Select value={filterJournal} onValueChange={handleJournal}>
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue placeholder="All Journals" />
                 </SelectTrigger>
@@ -285,11 +292,11 @@ export default function PublicationsPage() {
                 </CardContent>
               </Card>
             ))
-          ) : filteredAndSortedManuscripts.length > 0 ? (
-            filteredAndSortedManuscripts.map((manuscript) => (
-              <PublicationCard 
-                key={manuscript.id} 
-                manuscript={manuscript} 
+          ) : paginatedManuscripts.length > 0 ? (
+            paginatedManuscripts.map((manuscript) => (
+              <PublicationCard
+                key={manuscript.id}
+                manuscript={manuscript}
                 journal={getJournalById(manuscript.journal_id)}
               />
             ))
@@ -305,6 +312,13 @@ export default function PublicationsPage() {
             </div>
           )}
         </div>
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={PAGE_SIZE}
+          totalItems={filteredAndSortedManuscripts.length}
+        />
       </div>
     </div>
   );

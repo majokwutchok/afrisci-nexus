@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import PaginationBar from '../components/ui/PaginationBar';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -147,10 +148,13 @@ const TimelineView = ({ publications, journals }) => {
   );
 };
 
+const PAGE_SIZE = 20;
+
 export default function Archive() {
   const [manuscripts, setManuscripts] = useState([]);
   const [journals, setJournals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     startYear: '',
@@ -169,15 +173,15 @@ export default function Archive() {
     setIsLoading(true);
     try {
       const [allManuscripts, allJournals] = await Promise.all([
-        base44.entities.Manuscript.list(),
-        base44.entities.Journal.list()
+        base44.entities.Manuscript.filter(
+          { $or: [{ status: 'published' }, { status: 'online_first' }] },
+          '-publication_date',
+          1000
+        ).catch(() => base44.entities.Manuscript.list('-publication_date', 500)),
+        base44.entities.Journal.list('-created_date', 200)
       ]);
-
-      const publishedManuscripts = allManuscripts.filter(m => 
-        m.status === 'published' || m.status === 'online_first'
-      );
-
-      setManuscripts(publishedManuscripts);
+      const published = allManuscripts.filter(m => m.status === 'published' || m.status === 'online_first');
+      setManuscripts(published);
       setJournals(allJournals);
     } catch (error) {
       console.error('Error loading archive:', error);
@@ -203,7 +207,7 @@ export default function Archive() {
     }));
   };
 
-  const filteredManuscripts = manuscripts.filter(manuscript => {
+  const filteredManuscripts = useMemo(() => manuscripts.filter(manuscript => {
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -249,10 +253,9 @@ export default function Archive() {
     }
 
     return true;
-  });
+  }), [manuscripts, searchQuery, filters, journals]);
 
-  // Sort manuscripts
-  const sortedManuscripts = [...filteredManuscripts].sort((a, b) => {
+  const sortedManuscripts = useMemo(() => [...filteredManuscripts].sort((a, b) => {
     switch (sortBy) {
       case 'date_desc':
         return new Date(b.publication_date || b.online_first_date) - new Date(a.publication_date || a.online_first_date);
@@ -267,7 +270,10 @@ export default function Archive() {
       default:
         return 0;
     }
-  });
+  }), [filteredManuscripts, sortBy]);
+
+  const totalPages = Math.ceil(sortedManuscripts.length / PAGE_SIZE);
+  const paginatedManuscripts = sortedManuscripts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const stats = {
     total: filteredManuscripts.length,
@@ -503,7 +509,7 @@ export default function Archive() {
 
             <TabsContent value="grid">
               <div className="grid md:grid-cols-2 gap-6">
-                {sortedManuscripts.map(manuscript => (
+                {paginatedManuscripts.map(manuscript => (
                   <PublicationCard
                     key={manuscript.id}
                     manuscript={manuscript}
@@ -512,6 +518,13 @@ export default function Archive() {
                   />
                 ))}
               </div>
+              <PaginationBar
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                itemsPerPage={PAGE_SIZE}
+                totalItems={sortedManuscripts.length}
+              />
             </TabsContent>
 
             <TabsContent value="timeline">

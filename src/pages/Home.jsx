@@ -1,9 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import SEO from '../components/SEO';
-import { Journal } from '@/entities/Journal';
-import { Manuscript } from '@/entities/Manuscript';
-import { ReadershipStats } from '@/entities/ReadershipStats';
-import { User } from '@/entities/User';
+import { base44 } from '@/api/base44Client';
 import { Skeleton } from '@/components/ui/skeleton';
 import Footer from '../components/layout/Footer';
 import HomeHeader from '../components/home/HomeHeader';
@@ -31,16 +28,11 @@ export default function HomePage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [
-          journalData,
-          publicationData,
-          readershipData,
-          userData,
-        ] = await Promise.all([
-          Journal.list('-created_date', 4),
-          Manuscript.filter({ status: 'published' }, '-publication_date', 20),
-          ReadershipStats.list(),
-          User.list(),
+        const [journalData, publicationData, readershipData, userData] = await Promise.all([
+          base44.entities.Journal.filter({ status: 'active' }, '-created_date', 6),
+          base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 20),
+          base44.entities.ReadershipStats.list('-view_date', 500),
+          base44.entities.User.filter({ reviewer_status: 'active' }, '-created_date', 200),
         ]);
         setData({
           journals: journalData,
@@ -58,10 +50,10 @@ export default function HomePage() {
   }, []);
   
   const platformStats = {
-    journals: 12, // Hardcoded for visual appeal
-    articles: data.publications.length > 0 ? 1300 : 0, // Hardcoded
-    reviewers: data.users.filter(u => u.reviewer_status === 'active').length > 0 ? 500 : 0, // Hardcoded
-    countries: [...new Set(data.stats.map(s => s.country))].length > 0 ? 54 : 0, // Hardcoded
+    journals: isLoading ? null : data.journals.length || 0,
+    articles: isLoading ? null : data.publications.length || 0,
+    reviewers: isLoading ? null : data.users.length || 0,
+    countries: isLoading ? null : [...new Set(data.stats.map(s => s.country).filter(Boolean))].length || 0,
   };
 
   const ComponentLoader = () => (

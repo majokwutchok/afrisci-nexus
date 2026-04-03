@@ -58,9 +58,11 @@ export default function ManuscriptDetail() {
     setIsLoading(true);
     setError(null);
     try {
-      // First load the manuscript
       const msData = await Manuscript.get(manuscriptId);
       setManuscript(msData);
+
+      // Increment view count asynchronously (fire and forget)
+      Manuscript.update(manuscriptId, { view_count: (msData.view_count || 0) + 1 }).catch(() => {});
 
       // Load other data in parallel, with error handling for each
       const [commentsData, userData] = await Promise.all([
@@ -93,6 +95,12 @@ export default function ManuscriptDetail() {
     setIsLoading(false);
   };
   
+  const handleDownload = async () => {
+    if (!manuscript?.manuscript_file_url) return;
+    window.open(manuscript.manuscript_file_url, '_blank');
+    Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+  };
+
   const handlePostComment = async () => {
     if (!newComment.trim() || !currentUser || !manuscript) return;
     
@@ -226,9 +234,9 @@ export default function ManuscriptDetail() {
                 <Separator />
                 <div className="flex items-center justify-between">
                   {manuscript.manuscript_file_url && (
-                    <a href={manuscript.manuscript_file_url} target="_blank" rel="noreferrer">
-                      <Button><Download className="w-4 h-4 mr-2"/>Download PDF</Button>
-                    </a>
+                    <Button onClick={handleDownload}>
+                      <Download className="w-4 h-4 mr-2"/>Download PDF
+                    </Button>
                   )}
                   <div className="flex items-center gap-2">
                     <Share2 className="w-5 h-5 text-slate-600"/>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import PaginationBar from "../components/ui/PaginationBar";
 import { User } from "@/entities/User";
 import { Journal } from "@/entities/Journal";
 import { Manuscript } from "@/entities/Manuscript";
@@ -34,11 +35,17 @@ const StatsCard = ({ title, value, icon: Icon, color }) => (
   </Card>
 );
 
+const PAGE_SIZE = 25;
+
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [journals, setJournals] = useState([]);
   const [manuscripts, setManuscripts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userPage, setUserPage] = useState(1);
+  const [journalPage, setJournalPage] = useState(1);
+  const [userSearch, setUserSearch] = useState('');
+  const [journalSearch, setJournalSearch] = useState('');
 
   useEffect(() => {
     loadData();
@@ -48,9 +55,9 @@ export default function AdminDashboard() {
     setIsLoading(true);
     try {
       const [userData, journalData, manuscriptData] = await Promise.all([
-        User.list(),
-        Journal.list(),
-        Manuscript.list()
+        User.list('-created_date', 500),
+        Journal.list('-created_date', 500),
+        Manuscript.list('-created_date', 500)
       ]);
       setUsers(userData);
       setJournals(journalData);
@@ -60,6 +67,24 @@ export default function AdminDashboard() {
     }
     setIsLoading(false);
   };
+
+  const filteredUsers = useMemo(() =>
+    users.filter(u =>
+      !userSearch ||
+      u.full_name?.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.email?.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.country?.toLowerCase().includes(userSearch.toLowerCase())
+    ), [users, userSearch]);
+
+  const filteredJournals = useMemo(() =>
+    journals.filter(j =>
+      !journalSearch ||
+      j.title?.toLowerCase().includes(journalSearch.toLowerCase()) ||
+      j.category?.toLowerCase().includes(journalSearch.toLowerCase())
+    ), [journals, journalSearch]);
+
+  const pagedUsers = filteredUsers.slice((userPage - 1) * PAGE_SIZE, userPage * PAGE_SIZE);
+  const pagedJournals = filteredJournals.slice((journalPage - 1) * PAGE_SIZE, journalPage * PAGE_SIZE);
   
   const manuscriptStatusData = manuscripts.reduce((acc, ms) => {
     const status = ms.status.replace('_', ' ');
@@ -147,7 +172,16 @@ export default function AdminDashboard() {
           <TabsContent value="journals" className="mt-6">
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Manage Journals</CardTitle>
+                <div className="flex items-center justify-between gap-4">
+                  <CardTitle>Manage Journals</CardTitle>
+                  <input
+                    type="text"
+                    placeholder="Search journals..."
+                    value={journalSearch}
+                    onChange={e => { setJournalSearch(e.target.value); setJournalPage(1); }}
+                    className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-teal-300"
+                  />
+                </div>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -161,7 +195,7 @@ export default function AdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {journals.map(journal => (
+                    {pagedJournals.map(journal => (
                       <TableRow key={journal.id}>
                         <TableCell className="font-medium">{journal.title}</TableCell>
                         <TableCell>{journal.category?.replace('_', ' ')}</TableCell>
@@ -173,8 +207,8 @@ export default function AdminDashboard() {
                         </TableCell>
                         <TableCell>
                           <Button variant="ghost" size="sm" onClick={() => handleJournalStatusToggle(journal)}>
-                            {journal.status === 'active' 
-                               ? <ToggleRight className="w-5 h-5 text-green-600" /> 
+                            {journal.status === 'active'
+                               ? <ToggleRight className="w-5 h-5 text-green-600" />
                                : <ToggleLeft className="w-5 h-5 text-slate-400" />}
                           </Button>
                         </TableCell>
@@ -182,14 +216,24 @@ export default function AdminDashboard() {
                     ))}
                   </TableBody>
                 </Table>
+                <PaginationBar currentPage={journalPage} totalPages={Math.ceil(filteredJournals.length / PAGE_SIZE)} onPageChange={setJournalPage} itemsPerPage={PAGE_SIZE} totalItems={filteredJournals.length} />
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="users" className="mt-6">
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Manage Users</CardTitle>
+                <div className="flex items-center justify-between gap-4">
+                  <CardTitle>Manage Users</CardTitle>
+                  <input
+                    type="text"
+                    placeholder="Search by name, email or country..."
+                    value={userSearch}
+                    onChange={e => { setUserSearch(e.target.value); setUserPage(1); }}
+                    className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-teal-300"
+                  />
+                </div>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -203,7 +247,7 @@ export default function AdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map(user => (
+                    {pagedUsers.map(user => (
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.full_name}</TableCell>
                         <TableCell>{user.email}</TableCell>
@@ -219,6 +263,7 @@ export default function AdminDashboard() {
                     ))}
                   </TableBody>
                 </Table>
+                <PaginationBar currentPage={userPage} totalPages={Math.ceil(filteredUsers.length / PAGE_SIZE)} onPageChange={setUserPage} itemsPerPage={PAGE_SIZE} totalItems={filteredUsers.length} />
               </CardContent>
             </Card>
           </TabsContent>

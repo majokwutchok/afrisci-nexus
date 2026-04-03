@@ -89,21 +89,17 @@ export default function JournalDetailPage() {
   const loadJournalData = async () => {
     setIsLoading(true);
     try {
-      const journalData = await Journal.list();
-      const currentJournal = journalData.find(j => j.id === journalId);
-      setJournal(currentJournal);
-
-      const allManuscripts = await Manuscript.list();
-      const journalManuscripts = allManuscripts.filter(
-        m => m.journal_id === journalId && m.status === 'published'
-      );
-      setManuscripts(journalManuscripts.slice(0, 10));
-
-      const allUsers = await User.list();
-      const journalEditors = allUsers.filter(
-        u => u.editor_roles && u.editor_roles.includes(journalId)
-      );
-      setEditors(journalEditors);
+      const [journalData, journalManuscripts, allUsers] = await Promise.all([
+        Journal.get(journalId).catch(async () => {
+          const all = await Journal.list();
+          return all.find(j => j.id === journalId);
+        }),
+        Manuscript.filter({ journal_id: journalId, status: 'published' }, '-publication_date', 20).catch(() => []),
+        User.list('-created_date', 200)
+      ]);
+      setJournal(journalData);
+      setManuscripts(journalManuscripts);
+      setEditors(allUsers.filter(u => u.editor_roles?.includes(journalId)));
     } catch (error) {
       console.error("Error loading journal data:", error);
     }
