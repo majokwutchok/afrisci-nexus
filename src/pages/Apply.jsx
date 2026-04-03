@@ -177,6 +177,12 @@ export default function Apply() {
 
     setSubmitted(true);
     setSubmitting(false);
+
+    // Auto-redirect to dashboard after 2 seconds
+    setTimeout(() => {
+      const roleData = ROLES.find(r => r.id === selectedRole);
+      navigate(createPageUrl(roleData.dashboardUrl));
+    }, 2000);
   };
 
   if (isLoadingUser) {
