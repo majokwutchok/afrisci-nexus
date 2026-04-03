@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import PaginationBar from "../components/ui/PaginationBar";
+import BrandAssets from "../components/admin/BrandAssets";
 import { User } from "@/entities/User";
 import { Journal } from "@/entities/Journal";
 import { Manuscript } from "@/entities/Manuscript";
@@ -132,13 +133,14 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="overview">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="editors">Editor Applications</TabsTrigger>
             <TabsTrigger value="revenue">Revenue & Analytics</TabsTrigger>
             <TabsTrigger value="journals">Journal Management</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="payments">Payment Management</TabsTrigger>
+            <TabsTrigger value="brand" className="text-amber-700 font-semibold">🎨 Brand Assets</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="mt-6">
@@ -270,6 +272,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="payments" className="mt-6">
             <PaymentManagement />
+          </TabsContent>
+
+          <TabsContent value="brand" className="mt-6">
+            <BrandAssets />
           </TabsContent>
         </Tabs>
       </div>

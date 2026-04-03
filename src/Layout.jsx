@@ -24,6 +24,7 @@ import {
   Phone,
   Archive as ArchiveIcon
 } from "lucide-react";
+import AfriSciLogo from "./components/brand/AfriSciLogo";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -285,26 +286,8 @@ export default function Layout({ children, currentPageName }) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between py-6">
                 {/* Logo Section */}
-                <Link to={createPageUrl("Home")} className="flex items-center gap-4 group">
-                  <div className="relative">
-                    <div className="w-16 h-16 bg-gradient-to-br from-teal-400 to-teal-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform duration-300">
-                      <Globe className="w-9 h-9 text-white" />
-                    </div>
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full flex items-center justify-center animate-pulse">
-                      <Award className="w-3 h-3 text-amber-900" />
-                    </div>
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-sky-300 bg-clip-text text-transparent">
-                      AfriSci Nexus
-                    </h1>
-                    <p className="text-sky-200 font-medium text-sm">
-                      African Scientific Excellence Platform
-                    </p>
-                    <p className="text-blue-300 text-xs">
-                      Est. 2024 • Open Access • Peer Reviewed
-                    </p>
-                  </div>
+                <Link to={createPageUrl("Home")} className="flex items-center">
+                  <AfriSciLogo variant="header" theme="dark" />
                 </Link>
 
                 {/* Desktop Quick Actions */}

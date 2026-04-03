@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Globe, Twitter, Linkedin, Facebook } from 'lucide-react';
+import { Twitter, Linkedin, Facebook } from 'lucide-react';
+import AfriSciLogo from '../brand/AfriSciLogo';
 
 export default function Footer() {
   const authorLinks = [
@@ -33,11 +34,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Logo and mission */}
           <div className="lg:col-span-2">
-             <Link to={createPageUrl("Home")} className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center">
-                <Globe className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="font-bold text-xl text-white">AfriSci Nexus</h3>
+            <Link to={createPageUrl("Home")} className="inline-block mb-4">
+              <AfriSciLogo variant="header" theme="dark" />
             </Link>
             <p className="text-sm text-slate-400 mb-6 max-w-sm">
               Elevating African research on the global stage through open access publishing and rigorous peer review.

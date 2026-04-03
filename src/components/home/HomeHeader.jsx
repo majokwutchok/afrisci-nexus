@@ -2,13 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { 
-  Globe, 
-  Search, 
-  Upload,
-  User as UserIcon,
-  ChevronDown
-} from "lucide-react";
+import { Search, Upload, User as UserIcon } from "lucide-react";
+import AfriSciLogo from "../brand/AfriSciLogo";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -88,23 +83,8 @@ export default function HomeHeader() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between py-6">
               {/* Logo Section */}
-              <Link to={createPageUrl("Home")} className="flex items-center gap-4 group">
-                <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-teal-400 to-teal-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform duration-300">
-                    <Globe className="w-9 h-9 text-white" />
-                  </div>
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-sky-300 bg-clip-text text-transparent">
-                    AfriSci Nexus
-                  </h1>
-                  <p className="text-sky-200 font-medium text-sm">
-                    African Scientific Excellence Platform
-                  </p>
-                  <p className="text-blue-300 text-xs">
-                    Est. 2024 • Open Access • Peer Reviewed
-                  </p>
-                </div>
+              <Link to={createPageUrl("Home")}>
+                <AfriSciLogo variant="header" theme="dark" />
               </Link>
 
               {/* Desktop Quick Actions */}
