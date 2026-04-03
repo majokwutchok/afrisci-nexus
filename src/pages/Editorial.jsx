@@ -118,6 +118,7 @@ export default function EditorialBoardPage() {
 
   return (
     <>
+    <div className="bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-100 min-h-screen">
       {/* Hero Section */}
       <div className="text-center py-24 px-4 bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white">
         <UsersIcon className="w-16 h-16 mx-auto mb-6 text-sky-200" />
