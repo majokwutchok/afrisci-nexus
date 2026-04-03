@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Journal } from "@/entities/Journal";
 import { Manuscript } from "@/entities/Manuscript";
+import { createPageUrl } from "@/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  AlertCircle,
-  CheckCircle,
-  Sparkles
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { AlertCircle, CheckCircle, Sparkles } from "lucide-react";
 import UniversalSubmissionForm from "../components/submission/UniversalSubmissionForm";
 import AIManuscriptAssessment from "../components/submission/AIManuscriptAssessment";
 import AIJournalRecommender from "../components/submission/AIJournalRecommender";
@@ -35,9 +31,7 @@ export default function Submit() {
   const loadUserProfile = async () => {
     try {
       const user = await base44.auth.me();
-      if (user) {
-        setUserProfile(user);
-      }
+      if (user) setUserProfile(user);
     } catch (error) {
       console.error("Error loading user profile:", error);
     }
@@ -121,6 +115,25 @@ export default function Submit() {
   return (
     <div className="p-6 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 min-h-screen">
       <div className="max-w-4xl mx-auto">
+        {/* Author registration gate */}
+        {userProfile && userProfile.author_application_status !== "approved" && !userProfile.author_registered && (
+          <div className="mb-6 p-5 bg-amber-50 border border-amber-300 rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <AlertCircle className="w-7 h-7 text-amber-600 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-slate-900">Author Registration Required</h3>
+              <p className="text-sm text-slate-600 mt-0.5">
+                You need to register as an author before submitting a manuscript.
+                {userProfile.author_application_status === "pending" && " Your application is currently under review — you'll be notified once approved."}
+              </p>
+            </div>
+            {userProfile.author_application_status !== "pending" && (
+              <Link to={createPageUrl("Apply?role=author")}>
+                <Button className="bg-amber-600 hover:bg-amber-700 text-white flex-shrink-0">Register as Author</Button>
+              </Link>
+            )}
+          </div>
+        )}
+
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Submit Your Manuscript</h1>
           <p className="text-lg text-slate-600">AI-powered submission with intelligent journal matching</p>

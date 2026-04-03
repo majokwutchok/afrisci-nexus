@@ -1,0 +1,139 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "orcid": {
+      "type": "string",
+      "description": "ORCID identifier"
+    },
+    "affiliation": {
+      "type": "string",
+      "description": "Institution or organization"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country of residence"
+    },
+    "research_interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Areas of research expertise"
+    },
+    "academic_title": {
+      "type": "string",
+      "description": "Academic position or title"
+    },
+    "google_scholar_url": {
+      "type": "string",
+      "description": "Google Scholar profile URL"
+    },
+    "reviewer_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "pending"
+      ],
+      "default": "inactive",
+      "description": "Peer reviewer status"
+    },
+    "editor_roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Journal IDs where user serves as editor"
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "english"
+      ],
+      "description": "Languages for reviewing/editing"
+    },
+    "career_stage": {
+      "type": "string",
+      "enum": [
+        "undergraduate",
+        "graduate",
+        "postdoc",
+        "early_career",
+        "mid_career",
+        "senior"
+      ],
+      "description": "Current career stage"
+    },
+    "total_reviews_completed": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of peer reviews completed"
+    },
+    "manuscripts_published": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of published manuscripts"
+    },
+    "editor_interest": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether user has expressed interest in being an editor"
+    },
+    "editor_bio": {
+      "type": "string",
+      "description": "Professional bio for editor profile"
+    },
+    "editor_credentials": {
+      "type": "string",
+      "description": "Academic credentials and qualifications"
+    },
+    "editor_photo_url": {
+      "type": "string",
+      "description": "URL to editor profile photo"
+    },
+    "editor_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Editor application approval status"
+    },
+    "editor_application_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when editor interest was submitted"
+    },
+    "author_registered": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether user has completed author registration"
+    },
+    "author_application_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Author registration approval status"
+    },
+    "reviewer_application_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "description": "Reviewer application status"
+    }
+  },
+  "required": []
+}

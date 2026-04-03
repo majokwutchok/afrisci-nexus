@@ -70,6 +70,7 @@ import ReviewerDashboard from './pages/ReviewerDashboard';
 import Search from './pages/Search';
 import Submit from './pages/Submit';
 import JournalProfile from './pages/JournalProfile';
+import Apply from './pages/Apply';
 import __Layout from './Layout.jsx';
 
 
@@ -97,6 +98,7 @@ export const PAGES = {
     "Search": Search,
     "Submit": Submit,
     "JournalProfile": JournalProfile,
+    "Apply": Apply,
 }
 
 export const pagesConfig = {

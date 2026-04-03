@@ -125,11 +125,18 @@ const mainMenuItems = [
     highlight: true,
     items: [
       { 
+        title: "Register as Author", 
+        url: createPageUrl("Apply?role=author"), 
+        description: "Create your author account to start submitting",
+        icon: UserIcon,
+        featured: true,
+        badge: "Free"
+      },
+      { 
         title: "Submit Manuscript", 
         url: createPageUrl("Submit"), 
         description: "AI-powered submission system",
         icon: Upload,
-        featured: true,
         badge: "AI Enhanced"
       },
       { 
@@ -158,17 +165,18 @@ const mainMenuItems = [
     highlight: false,
     items: [
       { 
+        title: "Become a Reviewer", 
+        url: createPageUrl("Apply?role=reviewer"), 
+        description: "Apply to join 500+ expert reviewers",
+        icon: UserIcon,
+        featured: true,
+        badge: "Apply Now"
+      },
+      { 
         title: "Reviewer Dashboard", 
         url: createPageUrl("ReviewerDashboard"), 
         description: "Manage your review assignments",
         icon: BarChart3
-      },
-      { 
-        title: "Become a Reviewer", 
-        url: createPageUrl("Profile"), 
-        description: "Join 500+ expert reviewers",
-        icon: UserIcon,
-        badge: "Join 500+"
       },
       { 
         title: "Review Guidelines", 
@@ -181,6 +189,33 @@ const mainMenuItems = [
         url: createPageUrl("ReviewerAwards"), 
         description: "Recognition for outstanding reviewers",
         icon: Award
+      }
+    ]
+  },
+  {
+    title: "For Editors",
+    icon: ShieldCheck,
+    highlight: false,
+    items: [
+      { 
+        title: "Apply as Editor", 
+        url: createPageUrl("Apply?role=editor"), 
+        description: "Join our editorial board",
+        icon: UserIcon,
+        featured: true,
+        badge: "Apply Now"
+      },
+      { 
+        title: "Editor Dashboard", 
+        url: createPageUrl("EditorDashboard"), 
+        description: "Manage journal submissions",
+        icon: Edit
+      },
+      { 
+        title: "Editorial Board", 
+        url: createPageUrl("Editorial"), 
+        description: "Meet our editorial team",
+        icon: Users
       }
     ]
   }

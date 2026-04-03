@@ -1,0 +1,89 @@
+{
+  "name": "RoleApplication",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "author",
+        "reviewer",
+        "editor"
+      ],
+      "description": "The role being applied for"
+    },
+    "applicant_email": {
+      "type": "string",
+      "description": "Email of the applicant"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Full name of applicant"
+    },
+    "affiliation": {
+      "type": "string",
+      "description": "Institution or organization"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country of residence"
+    },
+    "academic_title": {
+      "type": "string",
+      "description": "Academic position or title"
+    },
+    "research_interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Areas of expertise"
+    },
+    "motivation": {
+      "type": "string",
+      "description": "Why the applicant wants this role"
+    },
+    "cv_url": {
+      "type": "string",
+      "description": "URL to uploaded CV document"
+    },
+    "credentials_url": {
+      "type": "string",
+      "description": "URL to uploaded credentials/certificates"
+    },
+    "orcid": {
+      "type": "string",
+      "description": "ORCID identifier"
+    },
+    "google_scholar_url": {
+      "type": "string",
+      "description": "Google Scholar profile URL"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "under_review"
+      ],
+      "default": "pending",
+      "description": "Application review status"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Internal notes from admin review"
+    },
+    "reviewed_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the application was reviewed"
+    }
+  },
+  "required": [
+    "role",
+    "applicant_email",
+    "full_name",
+    "affiliation",
+    "country"
+  ]
+}
