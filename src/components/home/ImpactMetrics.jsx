@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Eye, Download, BookMarked, RefreshCw, Globe2 } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // ISO2 country code map for flag emoji
 const COUNTRY_FLAGS = {
@@ -115,6 +116,11 @@ export default function ImpactMetrics() {
     return () => clearInterval(interval);
   }, [fetchMetrics]);
 
+  const PIE_COLORS = [
+    '#14B8A6','#3B82F6','#F59E0B','#8B5CF6','#EF4444',
+    '#10B981','#F97316','#06B6D4','#EC4899','#6366F1'
+  ];
+
   const CONTINENT_COLORS = {
     "Africa": "bg-emerald-500", "Europe": "bg-blue-500", "Asia": "bg-amber-500",
     "North America": "bg-purple-500", "South America": "bg-pink-500", "Oceania": "bg-cyan-500",
@@ -163,28 +169,44 @@ export default function ImpactMetrics() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
-        {/* Country list */}
+        {/* Country Pie Chart */}
         <div className="lg:col-span-2 p-6">
           <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-2">
             <Globe2 className="w-4 h-4" /> Visitors by Country
           </h3>
           {loading ? (
-            <div className="space-y-3">
-              {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
-            </div>
+            <div className="flex items-center justify-center h-64"><Skeleton className="w-48 h-48 rounded-full" /></div>
           ) : data?.countryRows?.length > 0 ? (
-            <div className="space-y-0">
-              {data.countryRows.map((row, i) => (
-                <CountryRow
-                  key={row.country}
-                  rank={i + 1}
-                  country={row.country}
-                  views={row.views}
-                  downloads={row.downloads}
-                  maxViews={data.maxViews}
+            <ResponsiveContainer width="100%" height={320}>
+              <PieChart>
+                <Pie
+                  data={data.countryRows.slice(0, 10)}
+                  dataKey="views"
+                  nameKey="country"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={110}
+                  innerRadius={55}
+                  paddingAngle={2}
+                  label={({ country, percent }) => percent > 0.04 ? `${getFlag(country)} ${(percent * 100).toFixed(0)}%` : ''}
+                  labelLine={false}
+                >
+                  {data.countryRows.slice(0, 10).map((_, i) => (
+                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value, name) => [value.toLocaleString() + ' views', name]}
+                  contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }}
                 />
-              ))}
-            </div>
+                <Legend
+                  formatter={(value) => `${getFlag(value)} ${value}`}
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           ) : (
             <div className="text-center py-12 text-slate-400">
               <Globe2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
