@@ -20,6 +20,7 @@ import AutomatedReminderSystem from "../components/admin/AutomatedReminderSystem
 import JournalManagementPanel from "../components/editor/JournalManagementPanel";
 import AIReviewAnalyzer from "../components/editor/AIReviewAnalyzer";
 import ReviewScoreSummary from "../components/editor/ReviewScoreSummary";
+import AIReviewerMatcher from "../components/editor/AIReviewerMatcher";
 
 // Mock utility functions (in a real app, these would be in a utils folder or separate services)
 const addDays = (date, days) => {
@@ -412,20 +413,27 @@ Editorial Team`
                     />
                   )}
                   <div>
-                    <Label htmlFor="reviewer-email">Assign Reviewer</Label>
-                    <div className="flex gap-2">
-                       <Input
-                         id="reviewer-email"
-                         type="email"
-                         placeholder="Enter reviewer email"
-                         value={reviewerSearch}
-                         onChange={(e) => setReviewerSearch(e.target.value)}
-                       />
+                    <AIReviewerMatcher
+                      manuscript={selectedManuscript}
+                      allUsers={allUsers}
+                      onSelectReviewer={(email) => setReviewerSearch(email)}
+                    />
+                  </div>
+                  <div>
+                     <Label htmlFor="reviewer-email">Assign Reviewer</Label>
+                     <div className="flex gap-2">
+                        <Input
+                          id="reviewer-email"
+                          type="email"
+                          placeholder="Enter reviewer email or select from AI suggestions"
+                          value={reviewerSearch}
+                          onChange={(e) => setReviewerSearch(e.target.value)}
+                        />
                        <Button onClick={() => assignReviewer(selectedManuscript, reviewerSearch)}>
                          <Mail className="w-4 h-4 mr-2" /> Invite
                        </Button>
-                    </div>
-                  </div>
+                     </div>
+                   </div>
                   <div className="space-y-2">
                     <Label>Make Decision</Label>
                     <div className="flex gap-2">
