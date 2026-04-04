@@ -87,9 +87,9 @@ export default function HomeHeader() {
                 <span className="text-sky-200">🌍 Serving 54 African Countries</span>
                 <span className="text-sky-200 hidden sm:inline">📊 10,000+ Published Articles</span>
               </div>
-              <div className="flex items-center space-x-3 ml-auto pl-6">
+              <div className="flex items-center space-x-3 ml-auto">
                 {user ? (
-                  <div className="relative" ref={menuRef}>
+                  <div className="relative flex justify-end" ref={menuRef}>
                     <button
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
                       className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/20 transition-colors"
@@ -104,7 +104,7 @@ export default function HomeHeader() {
                     </button>
 
                     {userMenuOpen && (
-                      <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 overflow-hidden">
+                      <div className="fixed right-4 mt-1 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 z-[9999] overflow-hidden" style={{top: '48px'}}>
                         {/* User info */}
                         <div className="px-4 py-3 bg-gradient-to-r from-blue-900 to-blue-800">
                           <p className="text-white font-semibold text-sm">{user.full_name}</p>
