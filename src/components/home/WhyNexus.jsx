@@ -6,25 +6,25 @@ const benefits = [
     icon: Globe,
     title: "Global Visibility",
     description: "Our open-access platform ensures your research reaches a worldwide audience, maximizing impact and citations.",
-    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=400&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=400&auto=format&fit=crop"
   },
   {
     icon: ShieldCheck,
     title: "Rigorous Peer Review",
     description: "Benefit from a thorough, fair, and constructive peer-review process conducted by experts in your field.",
-    image: "https://images.unsplash.com/photo-1531384441138-2736e62e0919?q=80&w=400&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=400&auto=format&fit=crop"
   },
   {
     icon: TrendingUp,
     title: "Boost Your Profile",
     description: "Publishing with us enhances your academic profile and connects you with a vibrant community of African researchers.",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=400&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1528901166007-3784c7dd3653?q=80&w=400&auto=format&fit=crop"
   },
   {
     icon: Edit,
     title: "Author-Centric Support",
     description: "From our AI-assisted submission process to post-publication support, we are dedicated to your success.",
-    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=400&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?q=80&w=400&auto=format&fit=crop"
   },
 ];
 
