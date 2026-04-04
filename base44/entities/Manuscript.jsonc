@@ -1,0 +1,322 @@
+{
+  "name": "Manuscript",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Manuscript title"
+    },
+    "abstract": {
+      "type": "string",
+      "description": "Research abstract"
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Research keywords"
+    },
+    "journal_id": {
+      "type": "string",
+      "description": "Target journal ID"
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "affiliation": {
+            "type": "string"
+          },
+          "orcid": {
+            "type": "string"
+          },
+          "is_corresponding": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "List of authors"
+    },
+    "manuscript_file_url": {
+      "type": "string",
+      "description": "URL to manuscript file"
+    },
+    "supplementary_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs to supplementary files"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "editor_assigned",
+        "under_review",
+        "revision_requested",
+        "revised",
+        "accepted",
+        "rejected",
+        "published",
+        "online_first"
+      ],
+      "default": "draft",
+      "description": "Manuscript status"
+    },
+    "submission_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of submission"
+    },
+    "publication_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of publication"
+    },
+    "online_first_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of online-first publication"
+    },
+    "language": {
+      "type": "string",
+      "default": "english",
+      "description": "Manuscript language"
+    },
+    "reviewer_suggestions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Suggested reviewer emails"
+    },
+    "ai_suggested_reviewers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "expertise_match": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "AI-generated reviewer suggestions"
+    },
+    "review_type": {
+      "type": "string",
+      "enum": [
+        "double_blind",
+        "single_blind",
+        "open_review"
+      ],
+      "default": "double_blind",
+      "description": "Type of peer review"
+    },
+    "assigned_editor": {
+      "type": "string",
+      "description": "User ID of assigned editor"
+    },
+    "doi": {
+      "type": "string",
+      "description": "Digital Object Identifier (when published)"
+    },
+    "access_type": {
+      "type": "string",
+      "enum": [
+        "open_access",
+        "subscription",
+        "hybrid"
+      ],
+      "default": "open_access",
+      "description": "Article access model"
+    },
+    "citation_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of citations"
+    },
+    "download_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of downloads"
+    },
+    "view_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of page views"
+    },
+    "export_formats": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "pdf",
+          "html",
+          "epub",
+          "bibtex",
+          "ris"
+        ]
+      },
+      "default": [
+        "pdf",
+        "html"
+      ],
+      "description": "Available export formats"
+    },
+    "review_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewer_id": {
+            "type": "string"
+          },
+          "reviewer_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "invited",
+              "accepted",
+              "declined",
+              "completed",
+              "reminded"
+            ]
+          },
+          "comments": {
+            "type": "string"
+          },
+          "confidential_comments": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string",
+            "enum": [
+              "accept",
+              "minor_revision",
+              "major_revision",
+              "reject"
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "reminder_count": {
+            "type": "number",
+            "default": 0
+          },
+          "review_due_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "description": "Review history and feedback"
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Complete timeline of manuscript progress"
+    },
+    "plagiarism_report": {
+      "type": "object",
+      "description": "Automated plagiarism screening result",
+      "properties": {
+        "similarity_score": {
+          "type": "number",
+          "description": "Estimated similarity percentage 0-100"
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "recommendation": {
+          "type": "string",
+          "enum": [
+            "clear",
+            "flag_for_review",
+            "reject_submission"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "flagged_sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text_excerpt": {
+                "type": "string"
+              },
+              "issue_type": {
+                "type": "string"
+              },
+              "explanation": {
+                "type": "string"
+              },
+              "severity": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "screened_at": {
+          "type": "string",
+          "description": "ISO timestamp of when screen was run"
+        }
+      }
+    }
+  },
+  "required": [
+    "title",
+    "abstract",
+    "authors"
+  ]
+}

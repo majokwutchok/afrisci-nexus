@@ -22,6 +22,7 @@ import AIReviewAnalyzer from "../components/editor/AIReviewAnalyzer";
 import ReviewScoreSummary from "../components/editor/ReviewScoreSummary";
 import AIReviewerMatcher from "../components/editor/AIReviewerMatcher";
 import PublicationWorkflow from "../components/editor/PublicationWorkflow";
+import PlagiarismReport from "../components/editor/PlagiarismReport";
 
 // Mock utility functions (in a real app, these would be in a utils folder or separate services)
 const addDays = (date, days) => {
@@ -405,13 +406,15 @@ Editorial Team`
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
-                  {/* Aggregate Score Summary */}
-                  <ReviewScoreSummary
-                    manuscript={selectedManuscript}
-                    onDecisionSuggested={(decision) => handleMakeDecision(selectedManuscript, decision)}
-                  />
+                 <PlagiarismReport manuscript={selectedManuscript} onReportUpdated={loadData} />
 
-                  {/* AI Review Analysis */}
+                 {/* Aggregate Score Summary */}
+                 <ReviewScoreSummary
+                   manuscript={selectedManuscript}
+                   onDecisionSuggested={(decision) => handleMakeDecision(selectedManuscript, decision)}
+                 />
+
+                 {/* AI Review Analysis */}
                   {selectedManuscript.review_history && selectedManuscript.review_history.some(r => r.status === 'completed') && (
                     <AIReviewAnalyzer 
                       manuscript={selectedManuscript}
