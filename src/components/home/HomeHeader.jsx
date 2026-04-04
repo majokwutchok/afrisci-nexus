@@ -49,7 +49,7 @@ export default function HomeHeader() {
   };
 
   const handleSignIn = () => {
-    base44.auth.redirectToLogin();
+    base44.auth.redirectToLogin(createPageUrl('MyManuscripts'));
   };
 
   const userRoles = ['user'];
@@ -85,9 +85,9 @@ export default function HomeHeader() {
             <div className="flex items-center justify-between h-12 text-sm">
               <div className="flex items-center space-x-6">
                 <span className="text-sky-200">🌍 Serving 54 African Countries</span>
-                <span className="text-sky-200">📊 10,000+ Published Articles</span>
+                <span className="text-sky-200 hidden sm:inline">📊 10,000+ Published Articles</span>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 ml-auto pl-6">
                 {user ? (
                   <div className="relative" ref={menuRef}>
                     <button
