@@ -21,6 +21,7 @@ import JournalManagementPanel from "../components/editor/JournalManagementPanel"
 import AIReviewAnalyzer from "../components/editor/AIReviewAnalyzer";
 import ReviewScoreSummary from "../components/editor/ReviewScoreSummary";
 import AIReviewerMatcher from "../components/editor/AIReviewerMatcher";
+import PublicationWorkflow from "../components/editor/PublicationWorkflow";
 
 // Mock utility functions (in a real app, these would be in a utils folder or separate services)
 const addDays = (date, days) => {
@@ -315,10 +316,11 @@ Editorial Team`
         </div>
 
         <Tabs defaultValue="new_submissions">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="new_submissions">New Submissions</TabsTrigger>
             <TabsTrigger value="under_review">Under Review</TabsTrigger>
             <TabsTrigger value="revisions">Revisions</TabsTrigger>
+            <TabsTrigger value="publication">Publication</TabsTrigger>
             <TabsTrigger value="journal_management" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
               Journals
@@ -372,6 +374,10 @@ Editorial Team`
             {getManuscriptsByStatus('revision_requested').length === 0 && (
               <p className="text-center text-slate-500 py-8">No manuscripts awaiting revisions.</p>
             )}
+          </TabsContent>
+
+          <TabsContent value="publication" className="mt-6">
+            <PublicationWorkflow manuscripts={manuscripts} onRefresh={loadData} />
           </TabsContent>
 
           <TabsContent value="reminders" className="mt-6">
