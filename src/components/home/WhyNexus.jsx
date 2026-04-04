@@ -12,7 +12,7 @@ const benefits = [
     icon: ShieldCheck,
     title: "Rigorous Peer Review",
     description: "Benefit from a thorough, fair, and constructive peer-review process conducted by experts in your field.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1531384441138-2736e62e0919?q=80&w=400&auto=format&fit=crop"
   },
   {
     icon: TrendingUp,
