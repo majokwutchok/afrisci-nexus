@@ -8,9 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle, Sparkles } from "lucide-react";
-import UniversalSubmissionForm from "../components/submission/UniversalSubmissionForm";
+import SubmissionWizard from "../components/submission/SubmissionWizard";
 import AIManuscriptAssessment from "../components/submission/AIManuscriptAssessment";
-import AIJournalRecommender from "../components/submission/AIJournalRecommender";
 
 export default function Submit() {
   const navigate = useNavigate();
@@ -21,7 +20,6 @@ export default function Submit() {
   const [showAssessment, setShowAssessment] = useState(false);
   const [draftManuscript, setDraftManuscript] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  const [currentManuscript, setCurrentManuscript] = useState(null);
 
   useEffect(() => {
     loadJournals();
@@ -146,64 +144,10 @@ export default function Submit() {
           </Alert>
         )}
 
-        <Card className="mb-6 border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-600 to-purple-700">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-slate-900">AI Manuscript Assessment</h3>
-                  <p className="text-sm text-slate-600">Get instant feedback on grammar, plagiarism, and discoverability before submission</p>
-                </div>
-              </div>
-              <Button
-                onClick={() => {
-                  setDraftManuscript({
-                    title: "Sample Manuscript Title",
-                    abstract: "This is a sample abstract for demonstration purposes.",
-                    keywords: ["sample", "demo"]
-                  });
-                  setShowAssessment(true);
-                }}
-                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Try Assessment
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* AI Journal Recommender */}
-        {userProfile && journals.length > 0 && (
-          <div className="mb-8">
-            <AIJournalRecommender
-              authorProfile={userProfile}
-              manuscript={currentManuscript || {
-                title: '',
-                abstract: '',
-                keywords: [],
-                field: ''
-              }}
-              journals={journals}
-              onRecommendationsReady={(recs) => {
-                // Store recommendations for later use
-              }}
-              onSelectJournal={(journal) => {
-                // Can be used to pre-select journal in form
-              }}
-            />
-          </div>
-        )}
-
-        <UniversalSubmissionForm
-          onSubmit={handleSubmit}
+        <SubmissionWizard
           journals={journals}
+          onSubmit={handleSubmit}
           isLoading={isLoading}
-          setError={setError}
-          onManuscriptChange={setCurrentManuscript}
         />
       </div>
     </div>
