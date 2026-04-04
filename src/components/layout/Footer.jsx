@@ -30,19 +30,64 @@ export default function Footer() {
 
   return (
     <footer className="bg-slate-900 text-slate-300">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
-          <p className="text-sm text-slate-500 text-center md:text-left">
-            &copy; {new Date().getFullYear()} AfriSci Nexus. All Rights Reserved.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-10">
+          {/* Brand */}
+          <div>
+            <AfriSciLogo variant="footer" theme="dark" />
+            <p className="text-sm text-slate-400 mt-3 leading-relaxed">
+              Advancing African scientific research through open-access publishing.
+            </p>
+            <div className="flex space-x-3 mt-4">
+              <a href="#" className="text-slate-500 hover:text-teal-400 transition-colors"><Twitter className="w-5 h-5" /></a>
+              <a href="#" className="text-slate-500 hover:text-teal-400 transition-colors"><Linkedin className="w-5 h-5" /></a>
+              <a href="#" className="text-slate-500 hover:text-teal-400 transition-colors"><Facebook className="w-5 h-5" /></a>
+            </div>
+          </div>
+
+          {/* For Authors */}
+          <div>
+            <h4 className="text-white font-semibold mb-4">For Authors</h4>
+            <ul className="space-y-2">
+              {authorLinks.map(link => (
+                <li key={link.title}>
+                  <Link to={link.url} className="text-sm text-slate-400 hover:text-teal-400 transition-colors">{link.title}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Explore */}
+          <div>
+            <h4 className="text-white font-semibold mb-4">Explore</h4>
+            <ul className="space-y-2">
+              {exploreLinks.map(link => (
+                <li key={link.title}>
+                  <Link to={link.url} className="text-sm text-slate-400 hover:text-teal-400 transition-colors">{link.title}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* About */}
+          <div>
+            <h4 className="text-white font-semibold mb-4">About</h4>
+            <ul className="space-y-2">
+              {aboutLinks.map(link => (
+                <li key={link.title}>
+                  <Link to={link.url} className="text-sm text-slate-400 hover:text-teal-400 transition-colors">{link.title}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} AfriSci Nexus. All Rights Reserved.</p>
+          <div className="flex gap-4">
             <Link to={createPageUrl("PrivacyPolicy")} className="text-sm text-slate-400 hover:text-teal-400 transition-colors">Privacy Policy</Link>
             <Link to={createPageUrl("TermsConditions")} className="text-sm text-slate-400 hover:text-teal-400 transition-colors">Terms &amp; Conditions</Link>
-            <div className="flex space-x-4">
-              <a href="#" className="text-slate-500 hover:text-teal-400"><Twitter className="w-5 h-5" /></a>
-              <a href="#" className="text-slate-500 hover:text-teal-400"><Linkedin className="w-5 h-5" /></a>
-              <a href="#" className="text-slate-500 hover:text-teal-400"><Facebook className="w-5 h-5" /></a>
-            </div>
           </div>
         </div>
       </div>
