@@ -14,6 +14,7 @@ const LatestPublications = React.lazy(() => import('../components/home/LatestPub
 const DisciplineExplorer = React.lazy(() => import('../components/home/DisciplineExplorer'));
 const ReviewerCTA = React.lazy(() => import('../components/home/ReviewerCTA'));
 const ReadershipMap = React.lazy(() => import('../components/home/ReadershipMap'));
+const ImpactMetrics = React.lazy(() => import('../components/home/ImpactMetrics'));
 
 export default function HomePage() {
   const [data, setData] = useState({
@@ -111,6 +112,10 @@ export default function HomePage() {
             
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                <DisciplineExplorer />
+            </div>
+
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <ImpactMetrics />
             </div>
 
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
