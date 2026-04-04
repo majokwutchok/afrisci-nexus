@@ -79,14 +79,18 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-slate-500 text-center md:text-left mb-4 md:mb-0">
+        <div className="mt-12 border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-slate-500 text-center md:text-left">
             &copy; {new Date().getFullYear()} AfriSci Nexus. All Rights Reserved.
           </p>
-          <div className="flex space-x-5">
-            <a href="#" className="text-slate-500 hover:text-teal-400"><Twitter className="w-5 h-5" /></a>
-            <a href="#" className="text-slate-500 hover:text-teal-400"><Linkedin className="w-5 h-5" /></a>
-            <a href="#" className="text-slate-500 hover:text-teal-400"><Facebook className="w-5 h-5" /></a>
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <Link to={createPageUrl("PrivacyPolicy")} className="text-sm text-slate-400 hover:text-teal-400 transition-colors">Privacy Policy</Link>
+            <Link to={createPageUrl("TermsConditions")} className="text-sm text-slate-400 hover:text-teal-400 transition-colors">Terms &amp; Conditions</Link>
+            <div className="flex space-x-4">
+              <a href="#" className="text-slate-500 hover:text-teal-400"><Twitter className="w-5 h-5" /></a>
+              <a href="#" className="text-slate-500 hover:text-teal-400"><Linkedin className="w-5 h-5" /></a>
+              <a href="#" className="text-slate-500 hover:text-teal-400"><Facebook className="w-5 h-5" /></a>
+            </div>
           </div>
         </div>
       </div>
