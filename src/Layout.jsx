@@ -250,7 +250,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col">
-      <style>
+      <div className="sticky top-0 z-50">
         {`
           :root {
             --primary: #1E40AF; /* blue-800 */
@@ -283,8 +283,9 @@ export default function Layout({ children, currentPageName }) {
         `}
       </style>
 
-      {/* Visual Header Section */}
-      <header className="relative bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white overflow-hidden shadow-xl">
+      <div className="sticky top-0 z-50">
+        {/* Visual Header Section */}
+        <header className="relative bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white overflow-hidden shadow-xl">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
@@ -610,6 +611,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
       </nav>
+      </div>
 
       {/* Main Content */}
       <main className="flex-1">
