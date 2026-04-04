@@ -104,7 +104,7 @@ export default function HomeHeader() {
                     </button>
 
                     {userMenuOpen && (
-                      <div className="fixed right-4 mt-1 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 z-[9999] overflow-hidden" style={{top: '48px'}}>
+                      <div className="fixed right-4 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 z-[9999] overflow-y-auto max-h-[85vh]" style={{top: '52px'}}>
                         {/* User info */}
                         <div className="px-4 py-3 bg-gradient-to-r from-blue-900 to-blue-800">
                           <p className="text-white font-semibold text-sm">{user.full_name}</p>
