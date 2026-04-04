@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import ProgressTracker from "../components/submission/ProgressTracker";
+import ScholarMetaTags from "../components/publication/ScholarMetaTags";
 import DOIPanel from "../components/publication/DOIPanel";
 import CitationTracker from "../components/publication/CitationTracker";
 
@@ -186,6 +187,7 @@ export default function ManuscriptDetail() {
 
   return (
     <div className="p-6 bg-slate-50 min-h-screen">
+      <ScholarMetaTags manuscript={manuscript} journal={journal} />
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
