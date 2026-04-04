@@ -22,7 +22,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import RevenueAnalytics from "../components/admin/RevenueAnalytics";
 import PaymentManagement from "../components/admin/PaymentManagement";
-import EditorApplications from "../components/admin/EditorApplications";
+import AllApplications from "../components/admin/AllApplications";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -132,10 +132,10 @@ export default function AdminDashboard() {
           <StatsCard title="Published Articles" value={manuscripts.filter(m => m.status === 'published').length} icon={BarChart3} color="border-purple-500" />
         </div>
 
-        <Tabs defaultValue="overview">
-          <TabsList className="grid w-full grid-cols-7">
+        <Tabs defaultValue="applications">
+          <TabsList className="flex flex-wrap gap-1 h-auto p-1">
+            <TabsTrigger value="applications" className="text-blue-700 font-semibold">📋 Applications</TabsTrigger>
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="editors">Editor Applications</TabsTrigger>
             <TabsTrigger value="revenue">Revenue & Analytics</TabsTrigger>
             <TabsTrigger value="journals">Journal Management</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
@@ -163,8 +163,8 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="editors" className="mt-6">
-            <EditorApplications />
+          <TabsContent value="applications" className="mt-6">
+            <AllApplications />
           </TabsContent>
 
           <TabsContent value="revenue" className="mt-6">
