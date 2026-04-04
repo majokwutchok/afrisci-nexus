@@ -297,24 +297,24 @@ export default function Layout({ children, currentPageName }) {
         <div className="relative">
           {/* Top Bar */}
           <div className="border-b border-blue-700/50 bg-black/20 backdrop-blur-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between h-12 text-sm">
-                <div className="flex items-center space-x-6">
-                  <span className="text-sky-200">🌍 Serving 54 African Countries</span>
-                  <span className="text-sky-200">📊 10,000+ Published Articles</span>
+                <div className="flex items-center space-x-3 min-w-0">
+                  <span className="text-sky-200 text-xs sm:text-sm truncate">🌍 Serving 54 African Countries</span>
+                  <span className="text-sky-200 text-xs hidden md:inline">📊 10,000+ Published Articles</span>
                 </div>
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                   {user ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
                         <UserIcon className="w-3 h-3" />
                       </div>
-                      <span className="text-teal-200">{user.full_name}</span>
-                      {user.role === 'admin' && <Badge className="bg-red-500 text-white text-xs">Admin</Badge>}
-                      {user.editor_roles?.length > 0 && <Badge className="bg-sky-500 text-white text-xs">Editor</Badge>}
+                      <span className="text-teal-200 text-xs sm:text-sm font-medium truncate max-w-[80px] sm:max-w-[120px]">{user.full_name}</span>
+                      {user.role === 'admin' && <Badge className="bg-red-500 text-white text-xs hidden sm:flex">Admin</Badge>}
+                      {user.editor_roles?.length > 0 && <Badge className="bg-sky-500 text-white text-xs hidden sm:flex">Editor</Badge>}
                     </div>
                   ) : (
-                    <Button variant="ghost" size="sm" className="text-white hover:text-teal-300">
+                    <Button variant="ghost" size="sm" className="text-white hover:text-teal-300 text-xs sm:text-sm">
                       Login / Register
                     </Button>
                   )}
