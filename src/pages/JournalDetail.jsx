@@ -22,6 +22,7 @@ import {
   DollarSign,
   BarChart3
 } from 'lucide-react';
+import JournalMetrics from '../components/journal/JournalMetrics';
 
 const categoryLabels = {
   stem: "STEM",
@@ -77,6 +78,7 @@ export default function JournalDetailPage() {
   
   const [journal, setJournal] = useState(null);
   const [manuscripts, setManuscripts] = useState([]);
+  const [allManuscripts, setAllManuscripts] = useState([]);
   const [editors, setEditors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -89,16 +91,18 @@ export default function JournalDetailPage() {
   const loadJournalData = async () => {
     setIsLoading(true);
     try {
-      const [journalData, journalManuscripts, allUsers] = await Promise.all([
+      const [journalData, journalManuscripts, allJournalManuscripts, allUsers] = await Promise.all([
         Journal.get(journalId).catch(async () => {
           const all = await Journal.list();
           return all.find(j => j.id === journalId);
         }),
         Manuscript.filter({ journal_id: journalId, status: 'published' }, '-publication_date', 20).catch(() => []),
+        Manuscript.filter({ journal_id: journalId }, '-created_date', 500).catch(() => []),
         User.list('-created_date', 200)
       ]);
       setJournal(journalData);
       setManuscripts(journalManuscripts);
+      setAllManuscripts(allJournalManuscripts);
       setEditors(allUsers.filter(u => u.editor_roles?.includes(journalId)));
     } catch (error) {
       console.error("Error loading journal data:", error);
@@ -455,51 +459,11 @@ export default function JournalDetailPage() {
           </TabsContent>
 
           <TabsContent value="metrics" className="space-y-6">
-            <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-6 h-6 text-teal-600" />
-                  Journal Metrics
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="text-center p-6 bg-blue-50 rounded-lg">
-                    <Award className="w-10 h-10 text-blue-600 mx-auto mb-2" />
-                    <p className="text-3xl font-bold text-slate-900">{journal.impact_factor || 'N/A'}</p>
-                    <p className="text-sm text-slate-600 mt-1">Impact Factor</p>
-                  </div>
-                  <div className="text-center p-6 bg-emerald-50 rounded-lg">
-                    <TrendingUp className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
-                    <p className="text-3xl font-bold text-slate-900">{publishedCount}</p>
-                    <p className="text-sm text-slate-600 mt-1">Articles Published</p>
-                  </div>
-                  <div className="text-center p-6 bg-purple-50 rounded-lg">
-                    <Calendar className="w-10 h-10 text-purple-600 mx-auto mb-2" />
-                    <p className="text-3xl font-bold text-slate-900">4-6 wks</p>
-                    <p className="text-sm text-slate-600 mt-1">Avg. Review Time</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-lg text-slate-900 mb-4">Publishing Statistics</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                      <span className="text-slate-700">Acceptance Rate</span>
-                      <Badge variant="outline">~40%</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                      <span className="text-slate-700">Average Time to Publication</span>
-                      <Badge variant="outline">8-12 weeks</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                      <span className="text-slate-700">Downloads (Last Year)</span>
-                      <Badge variant="outline">{Math.floor(Math.random() * 50000 + 10000).toLocaleString()}</Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <JournalMetrics
+              journal={journal}
+              allManuscripts={allManuscripts}
+              publishedManuscripts={manuscripts}
+            />
           </TabsContent>
         </Tabs>
       </div>
