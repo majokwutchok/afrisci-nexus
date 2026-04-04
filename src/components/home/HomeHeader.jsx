@@ -253,34 +253,80 @@ export default function HomeHeader() {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Editorial Menu - For Staff Only */}
-                {user && (userRoles.includes('admin') || userRoles.includes('editor') || user.reviewer_status === 'active') && (
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-white font-medium px-4 py-2 rounded-lg bg-amber-600/70 hover:bg-amber-600/90 transition-colors border border-amber-500/50">
-                      Editorial
-                      <Badge className="bg-amber-300 text-amber-900 text-xs ml-1 font-semibold">Staff</Badge>
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <div className="w-80 p-3 bg-white shadow-xl rounded-lg border-t-4 border-amber-500">
-                        {user.reviewer_status === 'active' && (
-                          <Link to={createPageUrl("ReviewerDashboard")} className="block p-4 rounded-lg hover:bg-amber-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-amber-200">
-                            Reviewer Dashboard
+                {/* For Editors Menu - always visible */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="flex items-center gap-2 text-white hover:text-white font-medium px-4 py-2 rounded-lg bg-amber-600/70 hover:bg-amber-600/90 transition-colors border border-amber-500/50">
+                    For Editors
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="w-96 p-4 bg-white shadow-xl rounded-lg border-t-4 border-amber-500">
+                      {/* Apply CTA */}
+                      <Link
+                        to={createPageUrl("Apply") + "?role=editor"}
+                        className="flex items-center gap-3 p-4 mb-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 transition-all shadow-md group"
+                      >
+                        <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <span className="text-lg">✍️</span>
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm">Apply to Join the Editorial Board</p>
+                          <p className="text-amber-100 text-xs mt-0.5">Shape African scholarship — open to senior academics worldwide</p>
+                        </div>
+                        <Badge className="bg-white/20 text-white text-xs ml-auto flex-shrink-0">Apply Now</Badge>
+                      </Link>
+
+                      {/* Info links */}
+                      <div className="space-y-1">
+                        <Link to={createPageUrl("Editorial")} className="flex items-start gap-3 p-3 rounded-lg hover:bg-amber-50 transition-colors border border-transparent hover:border-amber-200 group">
+                          <span className="text-base mt-0.5">👥</span>
+                          <div>
+                            <p className="font-semibold text-slate-900 text-sm group-hover:text-amber-700">Editorial Board</p>
+                            <p className="text-xs text-slate-500">Meet our distinguished international editors</p>
+                          </div>
+                        </Link>
+                        {user && (userRoles.includes('editor') || userRoles.includes('admin')) && (
+                          <Link to={createPageUrl("EditorDashboard")} className="flex items-start gap-3 p-3 rounded-lg hover:bg-amber-50 transition-colors border border-transparent hover:border-amber-200 group">
+                            <span className="text-base mt-0.5">📊</span>
+                            <div>
+                              <p className="font-semibold text-slate-900 text-sm group-hover:text-amber-700">Editor Dashboard</p>
+                              <p className="text-xs text-slate-500">Manage submissions, reviewers &amp; decisions</p>
+                            </div>
                           </Link>
                         )}
-                        {(userRoles.includes('editor') || userRoles.includes('admin')) && (
-                          <Link to={createPageUrl("EditorDashboard")} className="block p-4 rounded-lg hover:bg-amber-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-amber-200">
-                            Editor Dashboard
+                        {user && userRoles.includes('admin') && (
+                          <Link to={createPageUrl("AdminDashboard")} className="flex items-start gap-3 p-3 rounded-lg hover:bg-amber-50 transition-colors border border-transparent hover:border-amber-200 group">
+                            <span className="text-base mt-0.5">🛡️</span>
+                            <div>
+                              <p className="font-semibold text-slate-900 text-sm group-hover:text-amber-700">Admin Dashboard</p>
+                              <p className="text-xs text-slate-500">Platform administration &amp; oversight</p>
+                            </div>
                           </Link>
                         )}
-                        {userRoles.includes('admin') && (
-                          <Link to={createPageUrl("AdminDashboard")} className="block p-4 rounded-lg hover:bg-amber-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-amber-200">
-                            Admin Dashboard
+                        {user && user.reviewer_status === 'active' && (
+                          <Link to={createPageUrl("ReviewerDashboard")} className="flex items-start gap-3 p-3 rounded-lg hover:bg-amber-50 transition-colors border border-transparent hover:border-amber-200 group">
+                            <span className="text-base mt-0.5">🔍</span>
+                            <div>
+                              <p className="font-semibold text-slate-900 text-sm group-hover:text-amber-700">Reviewer Dashboard</p>
+                              <p className="text-xs text-slate-500">Your active peer review assignments</p>
+                            </div>
                           </Link>
                         )}
                       </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                )}
+
+                      {/* Why edit */}
+                      <div className="mt-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Editor benefits</p>
+                        <ul className="space-y-1">
+                          {["Listed on the journal's official editorial board", "Advance African research visibility globally", "Complimentary open-access article processing"].map(b => (
+                            <li key={b} className="flex items-center gap-1.5 text-xs text-slate-600">
+                              <span className="text-amber-500 font-bold">✓</span> {b}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
           </div>
