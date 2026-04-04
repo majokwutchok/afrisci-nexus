@@ -268,7 +268,7 @@ export default function PrivacyPolicy() {
 
         <div className="mt-10 p-6 bg-teal-50 rounded-2xl border border-teal-200 text-center">
           <p className="text-slate-700 text-sm">Questions about this policy?</p>
-          <a href="mailto:privacy@afriscinexus.org" className="font-bold text-teal-700 hover:underline text-sm">
+          <a href="mailto:privacy@afriscinexus.com" className="font-bold text-teal-700 hover:underline text-sm">
             privacy@afriscinexus.org
           </a>
         </div>
