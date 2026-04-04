@@ -296,6 +296,25 @@ export default function AuthorResources() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
 
+        {/* Google Scholar Indexing Banner */}
+        <section className="max-w-4xl mx-auto">
+          <a
+            href="https://scholar.google.com/intl/en/scholar/inclusion.html"
+            target="_blank"
+            rel="noreferrer"
+            className="flex flex-col sm:flex-row items-center gap-4 p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all group"
+          >
+            <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <BookOpen className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="font-bold text-base">Register AfriSci Nexus with Google Scholar</p>
+              <p className="text-blue-100 text-sm mt-0.5">Submit our OAI-PMH endpoint for inclusion in Google Scholar's academic index so your articles are discoverable worldwide.</p>
+            </div>
+            <ExternalLink className="w-5 h-5 text-blue-200 group-hover:text-white flex-shrink-0 transition-colors" />
+          </a>
+        </section>
+
         {/* Writing & Preparation Tools */}
         <section>
           <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">Writing & Preparation Tools</h2>
