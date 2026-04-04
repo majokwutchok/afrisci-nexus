@@ -197,19 +197,58 @@ export default function HomeHeader() {
                     For Reviewers
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-80 p-3 bg-white shadow-xl rounded-lg border-t-4 border-blue-500">
-                      <Link to={createPageUrl("ReviewerDashboard")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
-                        Reviewer Dashboard
+                    <div className="w-96 p-4 bg-white shadow-xl rounded-lg border-t-4 border-blue-500">
+                      {/* Apply CTA */}
+                      <Link
+                        to={createPageUrl("Apply") + "?role=reviewer"}
+                        className="flex items-center gap-3 p-4 mb-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md group"
+                      >
+                        <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <span className="text-lg">🎓</span>
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm">Apply to Become a Reviewer</p>
+                          <p className="text-blue-100 text-xs mt-0.5">Join 500+ expert peer reviewers — free &amp; open to all scholars</p>
+                        </div>
+                        <Badge className="bg-white/20 text-white text-xs ml-auto flex-shrink-0">Apply Now</Badge>
                       </Link>
-                      <Link to={createPageUrl("Profile")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
-                        Become a Reviewer
-                      </Link>
-                      <Link to={createPageUrl("ReviewGuidelines")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
-                        Review Guidelines
-                      </Link>
-                      <Link to={createPageUrl("ReviewerAwards")} className="block p-4 rounded-lg hover:bg-blue-50 text-slate-900 font-medium transition-colors border border-transparent hover:border-blue-200">
-                        Reviewer Awards
-                      </Link>
+
+                      {/* Info items */}
+                      <div className="space-y-1">
+                        <Link to={createPageUrl("ReviewerDashboard")} className="flex items-start gap-3 p-3 rounded-lg hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-200 group">
+                          <span className="text-base mt-0.5">📋</span>
+                          <div>
+                            <p className="font-semibold text-slate-900 text-sm group-hover:text-blue-700">Reviewer Dashboard</p>
+                            <p className="text-xs text-slate-500">Manage your active review assignments</p>
+                          </div>
+                        </Link>
+                        <Link to={createPageUrl("ReviewGuidelines")} className="flex items-start gap-3 p-3 rounded-lg hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-200 group">
+                          <span className="text-base mt-0.5">📖</span>
+                          <div>
+                            <p className="font-semibold text-slate-900 text-sm group-hover:text-blue-700">Review Guidelines</p>
+                            <p className="text-xs text-slate-500">Best practices for constructive peer review</p>
+                          </div>
+                        </Link>
+                        <Link to={createPageUrl("ReviewerAwards")} className="flex items-start gap-3 p-3 rounded-lg hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-200 group">
+                          <span className="text-base mt-0.5">🏆</span>
+                          <div>
+                            <p className="font-semibold text-slate-900 text-sm group-hover:text-blue-700">Reviewer Awards</p>
+                            <p className="text-xs text-slate-500">Recognition, certificates &amp; annual awards programme</p>
+                          </div>
+                        </Link>
+                      </div>
+
+                      {/* Why review */}
+                      <div className="mt-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Why review with us?</p>
+                        <ul className="space-y-1">
+                          {["Verified reviewer certificate for your CV", "Priority access to published articles", "Counted toward academic service records"].map(b => (
+                            <li key={b} className="flex items-center gap-1.5 text-xs text-slate-600">
+                              <span className="text-emerald-500 font-bold">✓</span> {b}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
