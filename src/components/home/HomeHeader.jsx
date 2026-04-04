@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Search, Upload, User as UserIcon, LogOut, LayoutDashboard, ChevronDown, ShieldCheck, Eye, Edit, UserPlus, LogIn } from "lucide-react";
+import { Search, Upload, User as UserIcon, LogOut, LayoutDashboard, ShieldCheck, Eye, Edit, UserPlus, LogIn } from "lucide-react";
 import AfriSciLogo from "../brand/AfriSciLogo";
 import {
   NavigationMenu,
@@ -18,8 +18,6 @@ import { Input } from "@/components/ui/input";
 export default function HomeHeader() {
   const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const menuRef = useRef(null);
 
   useEffect(() => {
     base44.auth.me()
@@ -27,15 +25,7 @@ export default function HomeHeader() {
       .catch(() => setUser(null));
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setUserMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -87,93 +77,57 @@ export default function HomeHeader() {
                 <span className="text-sky-200">🌍 Serving 54 African Countries</span>
                 <span className="text-sky-200 hidden sm:inline">📊 10,000+ Published Articles</span>
               </div>
-              <div className="flex items-center space-x-3 ml-auto">
+              <div className="flex items-center gap-2 ml-auto flex-wrap justify-end">
                 {user ? (
-                  <div className="relative flex justify-end" ref={menuRef}>
-                    <button
-                      onClick={() => setUserMenuOpen(!userMenuOpen)}
-                      className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/20 transition-colors"
-                    >
-                      <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center">
+                  <>
+                    {/* User avatar + name */}
+                    <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+                      <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center">
                         <UserIcon className="w-3 h-3 text-white" />
                       </div>
-                      <span className="text-teal-200 text-sm font-medium max-w-[120px] truncate">{user.full_name}</span>
+                      <span className="text-white text-sm font-semibold max-w-[120px] truncate">{user.full_name}</span>
                       {user.role === 'admin' && <Badge className="bg-red-500 text-white text-xs">Admin</Badge>}
-                      {user.editor_roles?.length > 0 && <Badge className="bg-sky-500 text-white text-xs">Editor</Badge>}
-                      <ChevronDown className={`w-3 h-3 text-white/70 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                      {user.editor_roles?.length > 0 && <Badge className="bg-sky-400 text-white text-xs">Editor</Badge>}
+                    </div>
+
+                    {/* Dashboard links inline */}
+                    {getDashboardLinks().map(({ label, url, icon: Icon }) => (
+                      <Link
+                        key={label}
+                        to={url}
+                        className="flex items-center gap-1.5 text-teal-200 hover:text-white text-xs font-medium px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors border border-white/10 hover:border-white/30"
+                      >
+                        <Icon className="w-3 h-3" />
+                        {label}
+                      </Link>
+                    ))}
+
+                    {/* Sign Out */}
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center gap-1.5 text-red-300 hover:text-red-200 text-xs font-medium px-2.5 py-1.5 rounded-lg hover:bg-red-500/20 transition-colors border border-red-400/20 hover:border-red-400/40"
+                    >
+                      <LogOut className="w-3 h-3" />
+                      Sign Out
                     </button>
-
-                    {userMenuOpen && (
-                      <div className="fixed right-4 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 z-[9999] overflow-y-auto max-h-[85vh]" style={{top: '52px'}}>
-                        {/* User info */}
-                        <div className="px-4 py-3 bg-gradient-to-r from-blue-900 to-blue-800">
-                          <p className="text-white font-semibold text-sm">{user.full_name}</p>
-                          <p className="text-blue-200 text-xs mt-0.5">{user.email}</p>
-                        </div>
-
-                        {/* Dashboard links */}
-                        <div className="p-2">
-                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide px-2 py-1">My Dashboards</p>
-                          {getDashboardLinks().map(({ label, url, icon: Icon, color }) => (
-                            <Link
-                              key={label}
-                              to={url}
-                              onClick={() => setUserMenuOpen(false)}
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors group"
-                            >
-                              <Icon className={`w-4 h-4 ${color}`} />
-                              <span className="text-sm text-slate-700 group-hover:text-slate-900 font-medium">{label}</span>
-                            </Link>
-                          ))}
-                        </div>
-
-                        {/* Apply for roles */}
-                        <div className="px-2 pb-2 border-t border-slate-100 pt-2">
-                          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide px-2 py-1">Apply for a Role</p>
-                          <Link to={createPageUrl('Apply') + '?role=author'} onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-emerald-50 transition-colors group">
-                            <UserPlus className="w-4 h-4 text-emerald-600" />
-                            <span className="text-sm text-slate-700 group-hover:text-emerald-700 font-medium">Apply as Author</span>
-                          </Link>
-                          <Link to={createPageUrl('Apply') + '?role=reviewer'} onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors group">
-                            <Eye className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm text-slate-700 group-hover:text-blue-700 font-medium">Apply as Reviewer</span>
-                          </Link>
-                          <Link to={createPageUrl('Apply') + '?role=editor'} onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-amber-50 transition-colors group">
-                            <Edit className="w-4 h-4 text-amber-600" />
-                            <span className="text-sm text-slate-700 group-hover:text-amber-700 font-medium">Apply as Editor</span>
-                          </Link>
-                        </div>
-
-                        {/* Sign out */}
-                        <div className="border-t border-slate-100 p-2">
-                          <button
-                            onClick={handleSignOut}
-                            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-red-50 transition-colors group"
-                          >
-                            <LogOut className="w-4 h-4 text-red-500" />
-                            <span className="text-sm text-red-600 font-medium">Sign Out</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  </>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <>
                     <button
                       onClick={handleSignIn}
-                      className="flex items-center gap-1.5 text-white/90 hover:text-white text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                      className="flex items-center gap-1.5 text-white/90 hover:text-white text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors border border-white/20"
                     >
                       <LogIn className="w-4 h-4" />
                       Sign In
                     </button>
                     <button
                       onClick={handleSignIn}
-                      className="flex items-center gap-1.5 bg-teal-500 hover:bg-teal-600 text-white text-sm font-semibold px-4 py-1.5 rounded-lg shadow transition-colors"
+                      className="flex items-center gap-1.5 bg-teal-500 hover:bg-teal-400 text-white text-sm font-semibold px-4 py-1.5 rounded-lg shadow transition-colors"
                     >
                       <UserPlus className="w-4 h-4" />
                       Sign Up
                     </button>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
