@@ -1,0 +1,56 @@
+{
+  "name": "PerformanceNotification",
+  "type": "object",
+  "properties": {
+    "author_email": {
+      "type": "string",
+      "description": "Email of the author to notify"
+    },
+    "manuscript_id": {
+      "type": "string",
+      "description": "ID of the manuscript"
+    },
+    "manuscript_title": {
+      "type": "string",
+      "description": "Title of the manuscript for display"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "download_milestone",
+        "citation_milestone",
+        "view_milestone",
+        "trending"
+      ],
+      "description": "Type of performance notification"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short notification title"
+    },
+    "message": {
+      "type": "string",
+      "description": "Full notification message"
+    },
+    "metric_value": {
+      "type": "number",
+      "description": "The metric value that triggered this notification"
+    },
+    "milestone": {
+      "type": "number",
+      "description": "The milestone threshold that was crossed"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the author has read this notification"
+    }
+  },
+  "required": [
+    "author_email",
+    "manuscript_id",
+    "type",
+    "title",
+    "message"
+  ]
+}

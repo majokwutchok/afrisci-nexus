@@ -25,6 +25,7 @@ import {
   Lightbulb
 } from 'lucide-react';
 import AuthorJournalRecommendations from './AuthorJournalRecommendations';
+import PerformanceNotifications from './PerformanceNotifications';
 
 const statusConfig = {
   draft: { color: 'bg-slate-100 text-slate-800 border-slate-300', icon: Edit, label: 'Draft' },
@@ -246,6 +247,9 @@ export default function AuthorDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Performance Notifications */}
+        <PerformanceNotifications userEmail={user?.email} />
 
         {/* Recommended Journals Widget */}
         <AuthorJournalRecommendations userProfile={user} />
