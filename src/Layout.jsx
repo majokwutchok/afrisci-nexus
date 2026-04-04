@@ -156,6 +156,13 @@ const mainMenuItems = [
         url: createPageUrl("AuthorResources"), 
         description: "Writing tools and templates",
         icon: BookOpen
+      },
+      { 
+        title: "LaTeX Proof Generator", 
+        url: createPageUrl("LaTeXProof"), 
+        description: "Convert LaTeX to PDF proof before submission",
+        icon: FileText,
+        badge: "New"
       }
     ]
   },
