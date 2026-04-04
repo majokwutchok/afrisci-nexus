@@ -250,7 +250,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col">
-      <div className="sticky top-0 z-50">
+      <style>
         {`
           :root {
             --primary: #1E40AF; /* blue-800 */
