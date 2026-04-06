@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const BASE_URL = "https://afrisco-nexus.base44.app";
+const BASE_URL = "https://afriscinexus.com";
 
 Deno.serve(async (req) => {
   try {
