@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import ProgressTracker from "../components/submission/ProgressTracker";
+import InlinePDFViewer from "../components/publication/InlinePDFViewer";
 import ScholarMetaTags from "../components/publication/ScholarMetaTags";
 import DOIPanel from "../components/publication/DOIPanel";
 import CitationTracker from "../components/publication/CitationTracker";
@@ -255,6 +256,14 @@ export default function ManuscriptDetail() {
                       </div>
                     </div>
                   </>
+                )}
+                <Separator />
+                {/* Inline PDF Viewer */}
+                {manuscript.manuscript_file_url && (
+                  <div>
+                    <h3 className="font-bold text-slate-800 mb-3">Read Article</h3>
+                    <InlinePDFViewer fileUrl={manuscript.manuscript_file_url} />
+                  </div>
                 )}
                 <Separator />
                 <div className="flex items-center justify-between">
