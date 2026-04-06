@@ -11,11 +11,11 @@ export default function SEO({
   keywords,
   canonicalPath = "",
   ogType = "website",
-  ogImage = "https://afrisco-nexus.base44.app/og-image.png",
+  ogImage = "https://media.base44.com/images/public/689712620d81bb990dd76bb3/21f8643a1_generated_image.png",
   structuredData = null,
   noIndex = false,
 }) {
-  const BASE_URL = "https://afrisco-nexus.base44.app";
+  const BASE_URL = "https://afriscinexus.com";
   const SITE_NAME = "AfriSci Nexus";
   const DEFAULT_DESC =
     "Africa's leading open-access academic publishing platform. 50+ peer-reviewed journals, 10,000+ articles, serving 54 African countries.";
