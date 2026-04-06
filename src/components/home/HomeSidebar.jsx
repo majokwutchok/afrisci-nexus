@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  FileText, Upload, UserPlus, Eye, ShieldCheck,
+  FileText, Upload, UserPlus, Eye, ShieldCheck, Building2,
   BookOpen, Calendar, TrendingUp, ArrowRight, Sparkles, Star, Megaphone
 } from "lucide-react";
 import { format } from "date-fns";
@@ -157,7 +157,17 @@ export default function HomeSidebar() {
       cta: "Learn More",
       href: createPageUrl("OpenAccess"),
     },
-  ];
+    {
+      gradient: "bg-gradient-to-br from-indigo-600 to-indigo-800",
+      icon: Building2,
+      badge: "🤝 Institutions",
+      badgeColor: "bg-white/20 text-white border-0",
+      title: "Institutional Partnership",
+      description: "10–50 authors publish freely under one annual agreement. From $1,200/yr.",
+      cta: "Partner with Us",
+      href: createPageUrl("InstitutionalPartnership"),
+    },
+    ];
 
   return (
     <aside className="space-y-6">

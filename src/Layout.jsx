@@ -22,7 +22,8 @@ import {
   Star,
   Target,
   Phone,
-  Archive as ArchiveIcon
+  Archive as ArchiveIcon,
+  Handshake
 } from "lucide-react";
 import AfriSciLogo from "./components/brand/AfriSciLogo";
 import {
@@ -223,6 +224,40 @@ const mainMenuItems = [
         url: createPageUrl("Editorial"), 
         description: "Meet our editorial team",
         icon: Users
+      }
+    ]
+  },
+  {
+    title: "Institutions",
+    icon: Handshake,
+    highlight: true,
+    items: [
+      {
+        title: "Partner with Us",
+        url: createPageUrl("InstitutionalPartnership"),
+        description: "Institutional publishing agreements for 10–50 authors",
+        icon: Handshake,
+        featured: true,
+        badge: "New"
+      },
+      {
+        title: "Pricing & Tiers",
+        url: createPageUrl("InstitutionalPartnership"),
+        description: "Starter, Growth & Premier plans from $1,200/yr",
+        icon: Star
+      },
+      {
+        title: "Why Partner?",
+        url: createPageUrl("InstitutionalPartnership"),
+        description: "Global discoverability for African research",
+        icon: Globe
+      },
+      {
+        title: "Apply Now",
+        url: createPageUrl("InstitutionalPartnership"),
+        description: "Submit your partnership application",
+        icon: Upload,
+        badge: "Apply Now"
       }
     ]
   }
