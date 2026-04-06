@@ -15,6 +15,7 @@ const DisciplineExplorer = React.lazy(() => import('../components/home/Disciplin
 const ReviewerCTA = React.lazy(() => import('../components/home/ReviewerCTA'));
 const ReadershipMap = React.lazy(() => import('../components/home/ReadershipMap'));
 const ImpactMetrics = React.lazy(() => import('../components/home/ImpactMetrics'));
+import HomeSidebar from '../components/home/HomeSidebar';
 
 export default function HomePage() {
   const [data, setData] = useState({
@@ -98,33 +99,30 @@ export default function HomePage() {
         </Suspense>
       </main>
 
-      <div className="space-y-24 py-24">
-         <Suspense fallback={<ComponentLoader />}>
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <FeaturedJournals journals={data.journals} isLoading={isLoading} />
-            </div>
-            
-            <WhyNexus />
-
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <LatestPublications publications={data.publications} journals={data.journals} isLoading={isLoading} />
-            </div>
-            
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-               <DisciplineExplorer />
-            </div>
-
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <ImpactMetrics />
+      <div className="py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-4 gap-8 items-start">
+            {/* Main Content Column */}
+            <div className="lg:col-span-3 space-y-24">
+              <Suspense fallback={<ComponentLoader />}>
+                <FeaturedJournals journals={data.journals} isLoading={isLoading} />
+                <WhyNexus />
+                <LatestPublications publications={data.publications} journals={data.journals} isLoading={isLoading} />
+                <DisciplineExplorer />
+                <ImpactMetrics />
+                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                  <ReadershipMap stats={data.stats} isLoading={isLoading} />
+                  <ReviewerCTA />
+                </div>
+              </Suspense>
             </div>
 
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
-                <ReadershipMap stats={data.stats} isLoading={isLoading} />
-                <ReviewerCTA />
-              </div>
+            {/* Sticky Sidebar */}
+            <div className="lg:col-span-1 lg:sticky lg:top-8">
+              <HomeSidebar />
             </div>
-         </Suspense>
+          </div>
+        </div>
       </div>
       
        <Footer />
