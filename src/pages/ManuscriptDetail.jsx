@@ -25,6 +25,7 @@ import ProgressTracker from "../components/submission/ProgressTracker";
 import ScholarMetaTags from "../components/publication/ScholarMetaTags";
 import DOIPanel from "../components/publication/DOIPanel";
 import CitationTracker from "../components/publication/CitationTracker";
+import ArticleEngagementMetrics from "../components/publication/ArticleEngagementMetrics";
 
 const statusColors = {
   draft: "bg-gray-100 text-gray-800 border-gray-200",
@@ -319,6 +320,7 @@ export default function ManuscriptDetail() {
               journal={journal}
               onCitationAdded={handleCitationAdded}
             />
+            <ArticleEngagementMetrics manuscript={manuscript} />
           </div>
         </div>
       </div>
