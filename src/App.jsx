@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import InstitutionalPartnership from './pages/InstitutionalPartnership';
 import Accreditations from './pages/Accreditations';
+import PublisherCompliance from './pages/PublisherCompliance';
 import LaTeXProof from './pages/LaTeXProof';
 import TermsConditions from './pages/TermsConditions';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -67,6 +68,7 @@ const AuthenticatedApp = () => {
       <Route path="/PrivacyPolicy" element={<LayoutWrapper currentPageName="PrivacyPolicy"><PrivacyPolicy /></LayoutWrapper>} />
       <Route path="/InstitutionalPartnership" element={<LayoutWrapper currentPageName="InstitutionalPartnership"><InstitutionalPartnership /></LayoutWrapper>} />
       <Route path="/Accreditations" element={<LayoutWrapper currentPageName="Accreditations"><Accreditations /></LayoutWrapper>} />
+      <Route path="/PublisherCompliance" element={<LayoutWrapper currentPageName="PublisherCompliance"><PublisherCompliance /></LayoutWrapper>} />
       <Route path="/TermsConditions" element={<LayoutWrapper currentPageName="TermsConditions"><TermsConditions /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
