@@ -16,52 +16,61 @@ import {
 const tiers = [
   {
     name: "Starter",
-    price: 1200,
+    price: 10000,
     authors: 10,
     color: "border-slate-200",
     headerColor: "bg-slate-50",
     badge: "",
     perks: [
       "10 author slots annually",
+      "Unlimited submissions per enrolled author",
       "All journals open access",
       "Priority submission processing",
       "Institutional profile page",
       "Annual impact report",
+      "DOI assignment & CrossRef registration",
     ],
   },
   {
     name: "Growth",
-    price: 3500,
+    price: 15000,
     authors: 25,
     color: "border-teal-400 ring-2 ring-teal-400",
     headerColor: "bg-teal-600",
     badge: "Most Popular",
     perks: [
       "25 author slots annually",
+      "Unlimited submissions per enrolled author",
       "All journals open access",
       "Expedited review (14-day target)",
       "Dedicated editorial liaison",
       "Institutional profile page",
       "Bi-annual impact report",
       "Co-branded press releases",
+      "DOI assignment & CrossRef registration",
+      "Google Scholar & Scopus indexing support",
     ],
   },
   {
     name: "Premier",
-    price: 6500,
+    price: 25000,
     authors: 50,
     color: "border-amber-400",
     headerColor: "bg-amber-500",
     badge: "Best Value",
     perks: [
       "50 author slots annually",
+      "Unlimited submissions per enrolled author",
       "All journals open access",
       "Fast-track review (10-day target)",
       "Dedicated editorial team",
       "Custom journal branding option",
       "Quarterly impact dashboards",
       "Full co-branded marketing",
+      "DOI assignment & CrossRef registration",
+      "Google Scholar, Scopus & DOAJ indexing",
       "Annual gala recognition",
+      "Research visibility PR campaign",
     ],
   },
 ];
@@ -246,9 +255,12 @@ ${form.message}
         {/* ── PRICING ── */}
         {activeTab === "pricing" && (
           <div className="space-y-10">
-            <div className="text-center max-w-2xl mx-auto">
+            <div className="text-center max-w-3xl mx-auto">
               <h2 className="text-3xl font-bold text-slate-900 mb-3">Institutional Pricing Tiers</h2>
-              <p className="text-slate-600">One upfront annual agreement. All your enrolled authors publish freely across all AfriSci Nexus journals. No per-article fees.</p>
+              <p className="text-slate-600 mb-3">One upfront annual agreement. All your enrolled authors publish freely across all AfriSci Nexus journals. No per-article fees.</p>
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800 text-left">
+                <strong>💡 How we compare:</strong> Springer Nature institutional read-&-publish agreements start at <strong>$50,000+/yr</strong> for small institutions. Elsevier deals regularly exceed <strong>$200,000/yr</strong>. Individual APCs on these platforms average <strong>$2,000–$5,000 per article</strong>. AfriSci Nexus offers comparable global indexing, DOI registration, and peer review at a fraction of the cost — purpose-built for the African research context.
+              </div>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {tiers.map(tier => (
@@ -449,9 +461,9 @@ ${form.message}
                         className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-teal-500"
                         required
                       >
-                        <option value="Starter">Starter — 10 authors / $1,200/yr</option>
-                        <option value="Growth">Growth — 25 authors / $3,500/yr</option>
-                        <option value="Premier">Premier — 50 authors / $6,500/yr</option>
+                        <option value="Starter">Starter — 10 authors / $10,000/yr</option>
+                        <option value="Growth">Growth — 25 authors / $15,000/yr</option>
+                        <option value="Premier">Premier — 50 authors / $25,000/yr</option>
                         <option value="Custom">Custom Enterprise Plan</option>
                       </select>
                     </div>
