@@ -73,6 +73,13 @@ const mainMenuItems = [
         icon: Globe
       },
       { 
+        title: "Accreditations & Indexing", 
+        url: createPageUrl("Accreditations"), 
+        description: "Our global registration & recognition roadmap",
+        icon: Award,
+        badge: "Roadmap"
+      },
+      { 
         title: "Contact Us", 
         url: createPageUrl("Contact"), 
         description: "Get in touch with our editorial team",
