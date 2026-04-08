@@ -1,0 +1,92 @@
+{
+  "name": "ReviewerProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Linked platform user ID"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "affiliation": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "academic_title": {
+      "type": "string"
+    },
+    "expertise_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Expertise/discipline tags for matching"
+    },
+    "orcid": {
+      "type": "string"
+    },
+    "google_scholar_url": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "availability": {
+      "type": "string",
+      "enum": [
+        "available",
+        "busy",
+        "unavailable"
+      ],
+      "default": "available"
+    },
+    "max_reviews_per_month": {
+      "type": "number",
+      "default": 3
+    },
+    "preferred_journals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "total_reviews_completed": {
+      "type": "number",
+      "default": 0
+    },
+    "average_rating": {
+      "type": "number",
+      "default": 0
+    },
+    "on_time_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentage of reviews submitted on time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "suspended"
+      ],
+      "default": "active"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal editor notes about this reviewer"
+    }
+  },
+  "required": [
+    "full_name",
+    "email"
+  ]
+}

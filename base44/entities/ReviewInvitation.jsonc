@@ -1,0 +1,95 @@
+{
+  "name": "ReviewInvitation",
+  "type": "object",
+  "properties": {
+    "manuscript_id": {
+      "type": "string"
+    },
+    "manuscript_title": {
+      "type": "string"
+    },
+    "reviewer_email": {
+      "type": "string"
+    },
+    "reviewer_name": {
+      "type": "string"
+    },
+    "reviewer_profile_id": {
+      "type": "string"
+    },
+    "editor_email": {
+      "type": "string"
+    },
+    "journal_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined",
+        "completed",
+        "expired"
+      ],
+      "default": "pending"
+    },
+    "invitation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "response_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "decline_reason": {
+      "type": "string"
+    },
+    "review_report_url": {
+      "type": "string",
+      "description": "Uploaded review report file URL"
+    },
+    "review_comments": {
+      "type": "string",
+      "description": "Public comments to authors"
+    },
+    "confidential_comments": {
+      "type": "string",
+      "description": "Confidential comments to editor"
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": [
+        "accept",
+        "minor_revision",
+        "major_revision",
+        "reject"
+      ]
+    },
+    "reviewer_rating": {
+      "type": "number",
+      "description": "Editor's rating of this reviewer (1-5)"
+    },
+    "reviewer_self_rating": {
+      "type": "number",
+      "description": "Reviewer's self-assessed confidence (1-5)"
+    },
+    "custom_message": {
+      "type": "string",
+      "description": "Custom invitation message from editor"
+    },
+    "reminder_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "manuscript_id",
+    "reviewer_email",
+    "manuscript_title"
+  ]
+}

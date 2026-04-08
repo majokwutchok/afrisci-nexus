@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen } from "lucide-react";
 import AutomatedReminderSystem from "../components/admin/AutomatedReminderSystem";
+import ReviewerDatabase from "../components/editor/ReviewerDatabase";
 import JournalManagementPanel from "../components/editor/JournalManagementPanel";
 import AIReviewAnalyzer from "../components/editor/AIReviewAnalyzer";
 import ReviewScoreSummary from "../components/editor/ReviewScoreSummary";
@@ -317,11 +318,12 @@ Editorial Team`
         </div>
 
         <Tabs defaultValue="new_submissions">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="flex flex-wrap gap-1 h-auto p-1">
             <TabsTrigger value="new_submissions">New Submissions</TabsTrigger>
             <TabsTrigger value="under_review">Under Review</TabsTrigger>
             <TabsTrigger value="revisions">Revisions</TabsTrigger>
             <TabsTrigger value="publication">Publication</TabsTrigger>
+            <TabsTrigger value="reviewer_db" className="text-teal-700 font-semibold">👥 Reviewer Database</TabsTrigger>
             <TabsTrigger value="journal_management" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
               Journals
@@ -379,6 +381,10 @@ Editorial Team`
 
           <TabsContent value="publication" className="mt-6">
             <PublicationWorkflow manuscripts={manuscripts} onRefresh={loadData} />
+          </TabsContent>
+
+          <TabsContent value="reviewer_db" className="mt-6">
+            <ReviewerDatabase manuscripts={manuscripts} journals={editorJournals} />
           </TabsContent>
 
           <TabsContent value="reminders" className="mt-6">
