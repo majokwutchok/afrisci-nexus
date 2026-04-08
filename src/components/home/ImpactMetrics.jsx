@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Eye, Download, BookMarked, RefreshCw, Globe2 } from 'lucide-react';
+import { TrendingUp, Eye, Download, BookMarked, RefreshCw, Globe } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // ISO2 country code map for flag emoji
@@ -155,7 +155,7 @@ export default function ImpactMetrics() {
             { label: "Total Views", value: data?.totalViews, icon: Eye, color: "from-blue-500/20 to-cyan-500/20 border-blue-400/30" },
             { label: "Downloads", value: data?.totalDownloads, icon: Download, color: "from-emerald-500/20 to-teal-500/20 border-emerald-400/30" },
             { label: "Citations", value: data?.totalCitations, icon: BookMarked, color: "from-purple-500/20 to-indigo-500/20 border-purple-400/30" },
-            { label: "Countries", value: data?.uniqueCountries, icon: Globe2, color: "from-amber-500/20 to-orange-500/20 border-amber-400/30" },
+            { label: "Countries", value: data?.uniqueCountries, icon: Globe, color: "from-amber-500/20 to-orange-500/20 border-amber-400/30" },
           ].map(({ label, value, icon: Icon, color }) => (
             <div key={label} className={`rounded-xl border bg-gradient-to-br ${color} p-3 backdrop-blur`}>
               <Icon className="w-4 h-4 text-white/70 mb-1" />
@@ -172,7 +172,7 @@ export default function ImpactMetrics() {
         {/* Country Pie Chart */}
         <div className="lg:col-span-2 p-6">
           <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-2">
-            <Globe2 className="w-4 h-4" /> Visitors by Country
+            <Globe className="w-4 h-4" /> Visitors by Country
           </h3>
           {loading ? (
             <div className="flex items-center justify-center h-64"><Skeleton className="w-48 h-48 rounded-full" /></div>
@@ -209,7 +209,7 @@ export default function ImpactMetrics() {
             </ResponsiveContainer>
           ) : (
             <div className="text-center py-12 text-slate-400">
-              <Globe2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <Globe className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p className="text-sm">No readership data yet. Visitor stats will appear here once articles are read.</p>
             </div>
           )}
