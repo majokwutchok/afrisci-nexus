@@ -6,6 +6,8 @@ import { Download, Eye, X, FileText, Award, Handshake, Users, Mail, Megaphone } 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
+const LOGO_ICON_URL = "https://media.base44.com/images/public/689712620d81bb990dd76bb3/698e59606_generated_image.png";
+const LOGO_FULL_URL = "https://media.base44.com/images/public/689712620d81bb990dd76bb3/6189be205_generated_image.png";
 const FOUNDER = "Majok Wutchok";
 const TITLE = "Founder & CEO | Principal Chief Editor";
 const PLATFORM = "AfriSci Nexus";
@@ -16,12 +18,20 @@ const TODAY = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "l
 // ─── Document Templates ───────────────────────────────────────────────────────
 
 const HEADER = (extra = "") => `
-  <div style="background:linear-gradient(135deg,#1e3a8a 0%,#0d9488 100%);padding:32px 40px 24px;color:white;">
+  <div style="background:linear-gradient(135deg,#1e3a8a 0%,#0d9488 100%);padding:28px 40px 22px;color:white;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-      <div>
-        <div style="font-size:28px;font-weight:900;letter-spacing:-0.5px;">AfriSci <span style="color:#99f6e4;">Nexus</span></div>
-        <div style="font-size:12px;color:#bfdbfe;margin-top:2px;">Africa's Premier Open-Access Research Platform</div>
-        <div style="font-size:11px;color:#7dd3fc;margin-top:2px;">🌍 Serving 54 African Countries | ${WEBSITE}</div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#0D9488,#0F766E 60%,#F59E0B 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(13,148,136,0.4);flex-shrink:0;overflow:hidden;">
+          <img src="${LOGO_ICON_URL}" alt="AfriSci Nexus" style="width:44px;height:44px;object-fit:contain;" />
+        </div>
+        <div>
+          <div style="display:flex;align-items:baseline;gap:4px;">
+            <span style="font-size:26px;font-weight:900;color:white;letter-spacing:-0.5px;">AfriSci</span>
+            <span style="font-size:26px;font-weight:900;color:#F59E0B;letter-spacing:-0.5px;">Nexus</span>
+          </div>
+          <div style="font-size:11px;color:#bfdbfe;margin-top:2px;letter-spacing:1px;text-transform:uppercase;">Africa's Premier Open-Access Research Platform</div>
+          <div style="font-size:11px;color:#7dd3fc;margin-top:2px;">🌍 Serving 54 African Countries | ${WEBSITE}</div>
+        </div>
       </div>
       <div style="text-align:right;font-size:11px;color:#bfdbfe;">
         <div>${TODAY}</div>
@@ -34,16 +44,20 @@ const HEADER = (extra = "") => `
 
 const FOOTER = () => `
   <div style="margin-top:40px;padding-top:20px;border-top:2px solid #e2e8f0;">
-    <div style="margin-bottom:20px;">
-      <p style="margin:0 0 4px;font-weight:700;color:#0f172a;">${FOUNDER}</p>
-      <p style="margin:0;color:#64748b;font-size:13px;">${TITLE}</p>
-      <p style="margin:4px 0 0;color:#0d9488;font-size:13px;font-weight:600;">${PLATFORM}</p>
-      <p style="margin:2px 0 0;color:#94a3b8;font-size:12px;">${EMAIL} | ${WEBSITE}</p>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0D9488,#0F766E 60%,#F59E0B 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
+        <img src="${LOGO_ICON_URL}" alt="" style="width:34px;height:34px;object-fit:contain;" />
+      </div>
+      <div>
+        <p style="margin:0 0 2px;font-weight:700;color:#0f172a;">${FOUNDER}</p>
+        <p style="margin:0;color:#64748b;font-size:13px;">${TITLE}</p>
+        <p style="margin:2px 0 0;color:#0d9488;font-size:13px;font-weight:600;">${PLATFORM}</p>
+        <p style="margin:2px 0 0;color:#94a3b8;font-size:12px;">${EMAIL} | ${WEBSITE}</p>
+      </div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;background:#f0fdf4;border-radius:8px;padding:12px 16px;">
-      <div style="font-size:22px;">🌍</div>
+      <img src="${LOGO_FULL_URL}" alt="AfriSci Nexus" style="height:32px;object-fit:contain;" />
       <div style="font-size:11px;color:#166534;">
-        <strong>AfriSci Nexus</strong> — Advancing African Science Globally<br/>
         Open Access · Peer Reviewed · Africa-Led · Globally Indexed
       </div>
     </div>
@@ -473,8 +487,8 @@ const DOCUMENTS = [
                 <div style="color:#64748b;font-size:12px;">${TITLE}</div>
               </div>
               <div style="text-align:center;">
-                <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#1e3a8a,#0d9488);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
-                  <span style="color:white;font-size:28px;">🌍</span>
+                <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#1e3a8a,#0d9488);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;box-shadow:0 4px 16px rgba(13,148,136,0.4);overflow:hidden;">
+                  <img src="${LOGO_ICON_URL}" alt="" style="width:54px;height:54px;object-fit:contain;" />
                 </div>
                 <div style="font-size:11px;color:#94a3b8;">AfriSci Nexus Seal</div>
               </div>
