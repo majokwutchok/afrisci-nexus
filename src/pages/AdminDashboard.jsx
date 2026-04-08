@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import RevenueAnalytics from "../components/admin/RevenueAnalytics";
+import ComplianceTracker from "../components/admin/ComplianceTracker";
 import PaymentManagement from "../components/admin/PaymentManagement";
 import AllApplications from "../components/admin/AllApplications";
 
@@ -140,6 +141,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="journals">Journal Management</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="payments">Payment Management</TabsTrigger>
+            <TabsTrigger value="compliance" className="text-purple-700 font-semibold">📋 Publisher Compliance</TabsTrigger>
             <TabsTrigger value="brand" className="text-amber-700 font-semibold">🎨 Brand Assets</TabsTrigger>
           </TabsList>
           
@@ -272,6 +274,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="payments" className="mt-6">
             <PaymentManagement />
+          </TabsContent>
+
+          <TabsContent value="compliance" className="mt-6">
+            <ComplianceTracker />
           </TabsContent>
 
           <TabsContent value="brand" className="mt-6">
