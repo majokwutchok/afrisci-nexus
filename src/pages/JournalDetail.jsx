@@ -247,7 +247,17 @@ export default function JournalDetailPage() {
                       <Users className="w-4 h-4 text-teal-600" />
                       Editor-in-Chief
                     </h4>
-                    <p className="text-slate-700">{journal.editor_in_chief}</p>
+                    <p className="text-slate-700 font-medium">{journal.editor_in_chief || 'To be announced'}</p>
+                    {(journal.assistant_editors || []).length > 0 && (
+                      <div className="mt-3">
+                        <h5 className="text-sm font-semibold text-slate-600 mb-1">Assistant / Associate Editors</h5>
+                        <ul className="space-y-1">
+                          {journal.assistant_editors.map((name, i) => (
+                            <li key={i} className="text-sm text-slate-700">• {name}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
@@ -404,8 +414,21 @@ export default function JournalDetailPage() {
                   <div className="space-y-4">
                     <div className="mb-6">
                       <h3 className="font-semibold text-lg text-slate-900 mb-2">Editor-in-Chief</h3>
-                      <p className="text-slate-700">{journal.editor_in_chief}</p>
+                      <p className="text-slate-700 font-medium">{journal.editor_in_chief || 'To be announced'}</p>
                     </div>
+                  {(journal.assistant_editors || []).length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="font-semibold text-lg text-slate-900 mb-2">Assistant / Associate Editors</h3>
+                      <div className="grid md:grid-cols-2 gap-3">
+                        {journal.assistant_editors.map((name, i) => (
+                          <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{name.charAt(0)}</div>
+                            <span className="text-sm font-medium text-slate-700">{name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                     
                     <div>
                       <h3 className="font-semibold text-lg text-slate-900 mb-4">Associate Editors</h3>

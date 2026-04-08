@@ -1,0 +1,96 @@
+{
+  "name": "Journal",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Journal title"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "stem",
+        "medicine_health",
+        "agriculture_environment",
+        "social_sciences",
+        "law_policy",
+        "arts_humanities",
+        "business_economics",
+        "education_pedagogy",
+        "interdisciplinary"
+      ],
+      "description": "Journal category"
+    },
+    "description": {
+      "type": "string",
+      "description": "Journal description and scope"
+    },
+    "editor_in_chief": {
+      "type": "string",
+      "description": "Editor in chief name"
+    },
+    "assistant_editors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of assistant / associate editor names"
+    },
+    "issn": {
+      "type": "string",
+      "description": "International Standard Serial Number"
+    },
+    "is_open_access": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether journal is open access"
+    },
+    "submission_fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Submission fee in USD"
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "english"
+      ],
+      "description": "Supported languages"
+    },
+    "impact_factor": {
+      "type": "number",
+      "description": "Current impact factor"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "under_review"
+      ],
+      "default": "active",
+      "description": "Journal status"
+    },
+    "aims_and_scope": {
+      "type": "string",
+      "description": "Detailed aims and scope content (SEO-rich)"
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "SEO keywords for the journal"
+    }
+  },
+  "required": [
+    "title",
+    "category",
+    "description"
+  ]
+}

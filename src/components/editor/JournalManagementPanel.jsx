@@ -25,12 +25,13 @@ const categoryLabels = {
   interdisciplinary: "Interdisciplinary"
 };
 
-const JournalForm = ({ journal, isOpen, onClose, onSave, allUsers }) => {
+const JournalForm = ({ journal, isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState(journal || {
     title: "",
     category: "stem",
     description: "",
     editor_in_chief: "",
+    assistant_editors: [],
     issn: "",
     is_open_access: true,
     submission_fee: 0,
@@ -38,6 +39,18 @@ const JournalForm = ({ journal, isOpen, onClose, onSave, allUsers }) => {
     impact_factor: 0,
     status: "active"
   });
+  const [newAsst, setNewAsst] = useState("");
+
+  const addAsstEditor = () => {
+    const name = newAsst.trim();
+    if (!name) return;
+    setFormData(f => ({ ...f, assistant_editors: [...(f.assistant_editors || []), name] }));
+    setNewAsst("");
+  };
+
+  const removeAsstEditor = (idx) => {
+    setFormData(f => ({ ...f, assistant_editors: f.assistant_editors.filter((_, i) => i !== idx) }));
+  };
 
   const handleSubmit = () => {
     onSave(formData);
@@ -110,9 +123,6 @@ const JournalForm = ({ journal, isOpen, onClose, onSave, allUsers }) => {
                 className="mt-2"
               />
             </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="submission_fee">Submission Fee (USD)</Label>
               <Input
@@ -134,6 +144,30 @@ const JournalForm = ({ journal, isOpen, onClose, onSave, allUsers }) => {
                 className="mt-2"
               />
             </div>
+          </div>
+
+          {/* Assistant Editors */}
+          <div>
+            <Label>Assistant / Associate Editors</Label>
+            <div className="mt-2 flex gap-2">
+              <Input
+                value={newAsst}
+                onChange={e => setNewAsst(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addAsstEditor())}
+                placeholder="Dr. Name — add and press Enter or Add"
+              />
+              <Button type="button" variant="outline" onClick={addAsstEditor}><Plus className="w-4 h-4" /></Button>
+            </div>
+            {(formData.assistant_editors || []).length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {formData.assistant_editors.map((name, idx) => (
+                  <span key={idx} className="flex items-center gap-1 bg-slate-100 text-slate-700 text-sm px-2 py-1 rounded-lg">
+                    {name}
+                    <button type="button" onClick={() => removeAsstEditor(idx)} className="text-slate-400 hover:text-red-500"><X className="w-3 h-3" /></button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">
@@ -232,6 +266,9 @@ export default function JournalManagementPanel({ journals, manuscripts, onRefres
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-slate-900">{journal.title}</h3>
                         <p className="text-sm text-slate-600">{journal.editor_in_chief || 'No editor assigned'}</p>
+                      {(journal.assistant_editors || []).length > 0 && (
+                        <p className="text-xs text-slate-500 mt-0.5">Asst. Editors: {journal.assistant_editors.join(', ')}</p>
+                      )}
                       </div>
                     </div>
 
