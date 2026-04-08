@@ -45,7 +45,7 @@ function generateSlug(title) {
 }
 
 function SEOPreview({ title, summary, slug, tags }) {
-  const baseUrl = 'https://afrisco-nexus.base44.app';
+  const baseUrl = 'https://afriscinexus.com';
   const url = `${baseUrl}/news/${slug || generateSlug(title || 'untitled')}`;
   const metaDesc = summary?.slice(0, 160) || '';
   return (
