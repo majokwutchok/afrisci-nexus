@@ -25,6 +25,7 @@ import ComplianceTracker from "../components/admin/ComplianceTracker";
 import MarketingDocuments from "../components/admin/MarketingDocuments";
 import PaymentManagement from "../components/admin/PaymentManagement";
 import AllApplications from "../components/admin/AllApplications";
+import NewsManager from "../components/admin/NewsManager";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -137,6 +138,7 @@ export default function AdminDashboard() {
         <Tabs defaultValue="applications">
           <TabsList className="flex flex-wrap gap-1 h-auto p-1">
             <TabsTrigger value="applications" className="text-blue-700 font-semibold">📋 Applications</TabsTrigger>
+            <TabsTrigger value="news" className="text-teal-700 font-semibold">📰 News Manager</TabsTrigger>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="revenue">Revenue & Analytics</TabsTrigger>
             <TabsTrigger value="journals">Journal Management</TabsTrigger>
@@ -169,6 +171,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="applications" className="mt-6">
             <AllApplications />
+          </TabsContent>
+
+          <TabsContent value="news" className="mt-6">
+            <NewsManager />
           </TabsContent>
 
           <TabsContent value="revenue" className="mt-6">

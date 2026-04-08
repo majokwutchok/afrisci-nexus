@@ -1,0 +1,89 @@
+{
+  "name": "NewsPost",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "News headline"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly slug for SEO"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "call_for_papers",
+        "indexing",
+        "conference",
+        "announcement",
+        "award",
+        "partnership"
+      ],
+      "description": "News category"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Short teaser shown in cards (1-2 sentences)"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full rich-text content of the post"
+    },
+    "cover_image_url": {
+      "type": "string",
+      "description": "Optional cover image URL"
+    },
+    "journal_id": {
+      "type": "string",
+      "description": "Related journal ID if applicable"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "SEO tags"
+    },
+    "external_url": {
+      "type": "string",
+      "description": "Optional link to external resource"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "Deadline if applicable (e.g. CFP deadline)"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Pin to top of news section"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft",
+      "description": "Publication status"
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date published"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Display author name",
+      "default": "AfriSci Nexus Editorial Team"
+    }
+  },
+  "required": [
+    "title",
+    "category",
+    "summary"
+  ]
+}

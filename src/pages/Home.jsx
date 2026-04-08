@@ -15,6 +15,7 @@ const DisciplineExplorer = React.lazy(() => import('../components/home/Disciplin
 const ReviewerCTA = React.lazy(() => import('../components/home/ReviewerCTA'));
 const ReadershipMap = React.lazy(() => import('../components/home/ReadershipMap'));
 const ImpactMetrics = React.lazy(() => import('../components/home/ImpactMetrics'));
+const NewsSection = React.lazy(() => import('../components/home/NewsSection'));
 import HomeSidebar from '../components/home/HomeSidebar';
 
 export default function HomePage() {
@@ -105,6 +106,7 @@ export default function HomePage() {
             {/* Main Content Column */}
             <div className="lg:col-span-3 space-y-24">
               <Suspense fallback={<ComponentLoader />}>
+                <NewsSection />
                 <FeaturedJournals journals={data.journals} isLoading={isLoading} />
                 <WhyNexus />
                 <LatestPublications publications={data.publications} journals={data.journals} isLoading={isLoading} />
