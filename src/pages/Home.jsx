@@ -5,17 +5,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Footer from '../components/layout/Footer';
 import HomeHeader from '../components/home/HomeHeader';
 
-// Lazy load components for better initial page load performance
-const HeroSection = React.lazy(() => import('../components/home/HeroSection'));
-const StatsBar = React.lazy(() => import('../components/home/StatsBar'));
-const FeaturedJournals = React.lazy(() => import('../components/home/FeaturedJournals'));
-const WhyNexus = React.lazy(() => import('../components/home/WhyNexus'));
-const LatestPublications = React.lazy(() => import('../components/home/LatestPublications'));
-const DisciplineExplorer = React.lazy(() => import('../components/home/DisciplineExplorer'));
-const ReviewerCTA = React.lazy(() => import('../components/home/ReviewerCTA'));
-const ReadershipMap = React.lazy(() => import('../components/home/ReadershipMap'));
-const ImpactMetrics = React.lazy(() => import('../components/home/ImpactMetrics'));
-const NewsSection = React.lazy(() => import('../components/home/NewsSection'));
+import HeroSection from '../components/home/HeroSection';
+import StatsBar from '../components/home/StatsBar';
+import FeaturedJournals from '../components/home/FeaturedJournals';
+import WhyNexus from '../components/home/WhyNexus';
+import LatestPublications from '../components/home/LatestPublications';
+import DisciplineExplorer from '../components/home/DisciplineExplorer';
+import ReviewerCTA from '../components/home/ReviewerCTA';
+import ReadershipMap from '../components/home/ReadershipMap';
+import ImpactMetrics from '../components/home/ImpactMetrics';
+import NewsSection from '../components/home/NewsSection';
 import HomeSidebar from '../components/home/HomeSidebar';
 
 export default function HomePage() {
