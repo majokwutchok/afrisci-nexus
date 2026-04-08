@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { CheckCircle, FileText, Loader2, Sparkles, ChevronRight, AlertTriangle, BookOpen, Clock, Download } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { assignDOI } from "@/functions/assignDOI";
+import { CheckCircle, FileText, Loader2, Sparkles, ChevronRight, AlertTriangle, BookOpen, Clock, Download, Hash, ExternalLink, Pencil } from "lucide-react";
 
 const REVIEW_ACCEPT_STATUSES = ["accept", "minor_revision"];
 
@@ -143,7 +145,10 @@ function GalleyProofView({ proof, manuscriptTitle, onClose }) {
 export default function PublicationWorkflow({ manuscripts, onRefresh }) {
   const [loadingId, setLoadingId] = useState(null);
   const [transitioningId, setTransitioningId] = useState(null);
-  const [proofDialog, setProofDialog] = useState(null); // { manuscript, proof }
+  const [proofDialog, setProofDialog] = useState(null);
+  const [doiLoadingId, setDoiLoadingId] = useState(null);
+  const [doiEditId, setDoiEditId] = useState(null);
+  const [doiInputs, setDoiInputs] = useState({});
 
   // Filter to manuscripts that are review-complete or ready
   const workflowManuscripts = manuscripts.filter(m =>
@@ -162,6 +167,25 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
     await base44.entities.Manuscript.update(manuscript.id, { status: 'accepted', timeline });
     onRefresh();
     setTransitioningId(null);
+  };
+
+  const handleGenerateDOI = async (manuscript) => {
+    setDoiLoadingId(manuscript.id);
+    try {
+      const res = await assignDOI({ manuscript_id: manuscript.id });
+      onRefresh();
+    } catch (e) {
+      alert('Failed to generate DOI.');
+    }
+    setDoiLoadingId(null);
+  };
+
+  const handleSaveManualDOI = async (manuscript) => {
+    const doi = (doiInputs[manuscript.id] || '').trim();
+    if (!doi) return;
+    await base44.entities.Manuscript.update(manuscript.id, { doi });
+    setDoiEditId(null);
+    onRefresh();
   };
 
   const handleGenerateProof = async (manuscript) => {
@@ -237,31 +261,56 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
                   </div>
                 </div>
 
+                {/* DOI Section */}
+                <div className="mt-3 pt-3 border-t border-slate-100">
+                  {ms.doi ? (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-semibold text-blue-700 flex items-center gap-1"><Hash className="w-3 h-3" />DOI:</span>
+                      <a href={`https://doi.org/${ms.doi}`} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline font-mono flex items-center gap-1">
+                        {ms.doi}<ExternalLink className="w-3 h-3" />
+                      </a>
+                      <button onClick={() => { setDoiEditId(ms.id); setDoiInputs(p => ({ ...p, [ms.id]: ms.doi })); }} className="text-slate-400 hover:text-slate-600">
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : doiEditId === ms.id ? null : (
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <Hash className="w-3 h-3" /> No DOI assigned
+                    </div>
+                  )}
+                  {doiEditId === ms.id && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <Input
+                        className="h-7 text-xs font-mono"
+                        placeholder="e.g. 10.55490/afrisci.2025.abc12345"
+                        value={doiInputs[ms.id] || ''}
+                        onChange={e => setDoiInputs(p => ({ ...p, [ms.id]: e.target.value }))}
+                      />
+                      <Button size="sm" className="h-7 text-xs bg-blue-600 hover:bg-blue-700" onClick={() => handleSaveManualDOI(ms)}>Save</Button>
+                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setDoiEditId(null)}>✕</Button>
+                    </div>
+                  )}
+                </div>
+
                 {/* Actions */}
                 <div className="flex flex-col gap-2 flex-shrink-0">
-                  {wf.readyForPublication && !isAccepted && !isOnlineFirst && (
+                  {/* DOI generation button */}
+                  {(isAccepted || isOnlineFirst) && !ms.doi && doiEditId !== ms.id && (
                     <Button
                       size="sm"
-                      onClick={() => handleAutoTransition(ms)}
-                      disabled={transitioningId === ms.id}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
+                      variant="outline"
+                      onClick={() => handleGenerateDOI(ms)}
+                      disabled={doiLoadingId === ms.id}
+                      className="text-blue-700 border-blue-200 hover:bg-blue-50 text-xs"
                     >
-                      {transitioningId === ms.id
-                        ? <Loader2 className="w-3 h-3 animate-spin" />
-                        : <><CheckCircle className="w-3 h-3 mr-1" /> Accept & Publish</>}
+                      {doiLoadingId === ms.id
+                        ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Generating DOI...</>
+                        : <><Hash className="w-3 h-3 mr-1" /> Generate DOI</>}
                     </Button>
                   )}
-
-                  {(isAccepted || isOnlineFirst) && (
-                    <Button
-                      size="sm"
-                      onClick={() => handleGenerateProof(ms)}
-                      disabled={loadingId === ms.id}
-                      className="bg-teal-600 hover:bg-teal-700 text-white text-xs"
-                    >
-                      {loadingId === ms.id
-                        ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Generating...</>
-                        : <><Sparkles className="w-3 h-3 mr-1" /> Generate Galley Proof</>}
+                  {(isAccepted || isOnlineFirst) && !ms.doi && (
+                    <Button size="sm" variant="ghost" className="text-xs text-slate-500" onClick={() => { setDoiEditId(ms.id); setDoiInputs(p => ({ ...p, [ms.id]: '' })); }}>
+                      <Pencil className="w-3 h-3 mr-1" /> Enter DOI manually
                     </Button>
                   )}
 
