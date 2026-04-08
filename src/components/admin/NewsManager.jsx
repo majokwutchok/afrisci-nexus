@@ -312,7 +312,7 @@ export default function NewsManager() {
 
       {/* Create / Edit Dialog — Full-featured, large */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-4xl w-full max-h-[95vh] overflow-y-auto p-0">
+        <DialogContent className="max-w-4xl w-full max-h-[95vh] overflow-y-auto p-0 bg-white">
           <div className="sticky top-0 z-10 bg-gradient-to-r from-teal-700 to-teal-600 text-white px-8 py-5 rounded-t-xl">
             <DialogTitle className="text-xl font-bold text-white flex items-center gap-2 m-0">
               {editing ? <><Edit className="w-5 h-5" /> Edit Post</> : <><Plus className="w-5 h-5" /> Create News Post</>}
