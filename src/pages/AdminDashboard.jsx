@@ -22,6 +22,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import RevenueAnalytics from "../components/admin/RevenueAnalytics";
 import ComplianceTracker from "../components/admin/ComplianceTracker";
+import MarketingDocuments from "../components/admin/MarketingDocuments";
 import PaymentManagement from "../components/admin/PaymentManagement";
 import AllApplications from "../components/admin/AllApplications";
 
@@ -142,6 +143,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="payments">Payment Management</TabsTrigger>
             <TabsTrigger value="compliance" className="text-purple-700 font-semibold">📋 Publisher Compliance</TabsTrigger>
+            <TabsTrigger value="marketing_docs" className="text-indigo-700 font-semibold">📄 Marketing Docs</TabsTrigger>
             <TabsTrigger value="brand" className="text-amber-700 font-semibold">🎨 Brand Assets</TabsTrigger>
           </TabsList>
           
@@ -278,6 +280,14 @@ export default function AdminDashboard() {
 
           <TabsContent value="compliance" className="mt-6">
             <ComplianceTracker />
+          </TabsContent>
+
+          <TabsContent value="marketing_docs" className="mt-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-slate-900">Marketing & Official Documents</h2>
+              <p className="text-sm text-slate-500 mt-1">Generate, preview and download branded AfriSci Nexus documents. Signed by Majok Wutchok.</p>
+            </div>
+            <MarketingDocuments />
           </TabsContent>
 
           <TabsContent value="brand" className="mt-6">
