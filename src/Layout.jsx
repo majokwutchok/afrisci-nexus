@@ -382,18 +382,10 @@ function EditorialDropdown({ user, userRoles }) {
                 <div><h4 className="font-semibold text-sm text-slate-900">Reviewer Dashboard</h4><p className="text-xs text-slate-500">Manage review assignments</p></div>
               </Link>
             )}
-            {(userRoles.includes('editor') || userRoles.includes('admin')) && (
-              <Link to={createPageUrl("EditorDashboard")} onClick={() => setOpen(false)} className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-colors">
-                <div className="p-2 bg-teal-100 rounded-lg"><Edit className="w-4 h-4 text-teal-600" /></div>
-                <div><h4 className="font-semibold text-sm text-slate-900">Editor Dashboard</h4><p className="text-xs text-slate-500">Manage journal submissions</p></div>
-              </Link>
-            )}
-            {userRoles.includes('admin') && (
-              <Link to={createPageUrl("AdminDashboard")} onClick={() => setOpen(false)} className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-colors">
-                <div className="p-2 bg-red-100 rounded-lg"><ShieldCheck className="w-4 h-4 text-red-600" /></div>
-                <div><h4 className="font-semibold text-sm text-slate-900">Admin Dashboard</h4><p className="text-xs text-slate-500">Platform administration</p></div>
-              </Link>
-            )}
+            <Link to={createPageUrl("Editorial")} onClick={() => setOpen(false)} className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-colors">
+              <div className="p-2 bg-teal-100 rounded-lg"><Users className="w-4 h-4 text-teal-600" /></div>
+              <div><h4 className="font-semibold text-sm text-slate-900">Editorial Board</h4><p className="text-xs text-slate-500">View approved editor profiles</p></div>
+            </Link>
           </div>
         </div>
       </DropdownPortal>
@@ -409,8 +401,7 @@ export default function Layout({ children, currentPageName }) {
   React.useEffect(() => {
     User.me().then(setUser).catch(() => setUser(null));
   }, []);
-  
-  // Do not render layout on the new Home page
+
   if (currentPageName === 'Home') {
     return <>{children}</>;
   }
