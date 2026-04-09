@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import {
   Plus, Edit, Trash2, Eye, EyeOff, Megaphone, Search, Globe, Tag,
   Calendar, ExternalLink, Star, Clock, CheckCircle, Archive, FileText,
-  Zap, BookOpen, Award, Handshake, ChevronRight
+  Zap, BookOpen, Award, Handshake, ChevronRight, Sparkles, Wand2
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -79,6 +79,9 @@ export default function NewsManager() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [tagsInput, setTagsInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiError, setAiError] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -151,6 +154,48 @@ export default function NewsManager() {
   };
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
+
+  const handleAIWrite = async () => {
+    if (!aiPrompt.trim()) return;
+    setAiGenerating(true);
+    setAiError('');
+    const catLabel = CATEGORIES.find(c => c.value === form.category)?.label || form.category;
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `You are a professional science communications editor for AfriSci Nexus, an African open-access research publisher. Write a complete, SEO-optimised news post based on the following topic and category.
+
+Category: ${catLabel}
+Topic / Brief: ${aiPrompt}
+
+Return:
+- title: a compelling, keyword-rich headline (max 80 chars)
+- summary: 1–2 sentence meta description (120–160 chars, SEO-optimised)
+- content: full body text (4–6 paragraphs, include relevant context, details, calls to action, and use clear headings where helpful)
+- tags: 6–10 comma-separated SEO keywords relevant to African research, the discipline, and the topic
+
+Be professional, factual, and relevant to African scientific publishing.`,
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          summary: { type: 'string' },
+          content: { type: 'string' },
+          tags: { type: 'array', items: { type: 'string' } }
+        }
+      }
+    }).catch(e => { setAiError('AI generation failed. Please try again.'); return null; });
+
+    if (result) {
+      setForm(f => ({
+        ...f,
+        title: result.title || f.title,
+        summary: result.summary || f.summary,
+        content: result.content || f.content,
+        slug: generateSlug(result.title || f.title),
+      }));
+      setTagsInput((result.tags || []).join(', '));
+    }
+    setAiGenerating(false);
+  };
 
   const parsedTags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
 
@@ -321,6 +366,33 @@ export default function NewsManager() {
           </div>
 
           <div className="p-8 space-y-6">
+            {/* AI Writer */}
+            <div className="rounded-xl border-2 border-dashed border-teal-300 bg-teal-50/40 p-5 space-y-3">
+              <h3 className="text-sm font-bold text-teal-700 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" /> AI News Writer
+              </h3>
+              <p className="text-xs text-teal-600">Describe what you want to announce in a sentence or two. The AI will generate the full post — title, summary, body, and SEO tags.</p>
+              <div className="flex gap-2">
+                <Textarea
+                  className="flex-1 border-teal-200 bg-white resize-none text-sm focus:border-teal-400"
+                  rows={2}
+                  placeholder='e.g. "Call for papers for the 2026 AfriSci Journal of Medicine. Deadline June 30. Topics: tropical diseases, public health, surgery in low-resource settings."'
+                  value={aiPrompt}
+                  onChange={e => setAiPrompt(e.target.value)}
+                />
+              </div>
+              {aiError && <p className="text-xs text-red-500">{aiError}</p>}
+              <Button
+                onClick={handleAIWrite}
+                disabled={aiGenerating || !aiPrompt.trim()}
+                className="bg-teal-600 hover:bg-teal-700 text-white font-semibold w-full"
+              >
+                {aiGenerating
+                  ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />Generating post…</>
+                  : <><Wand2 className="w-4 h-4 mr-2" />Generate Full Post with AI</>}
+              </Button>
+            </div>
+
             {/* Core info */}
             <div className="space-y-4">
               <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2"><Zap className="w-4 h-4 text-teal-500" /> Core Content</h3>
