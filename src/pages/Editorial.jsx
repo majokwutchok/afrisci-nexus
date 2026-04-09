@@ -10,6 +10,7 @@ import {
   Mail, Globe, Award, BookOpen, Users, Edit3, CheckCircle,
   ExternalLink, Building2, GraduationCap
 } from 'lucide-react';
+import OrcidBadge from '@/components/OrcidBadge';
 
 const GRAD_COLORS = [
   'from-teal-500 to-emerald-600',
@@ -86,12 +87,7 @@ function EditorCard({ editor }) {
 
             {/* Links */}
             <div className="mt-3 flex flex-wrap gap-2">
-              {editor.orcid && (
-                <a href={`https://orcid.org/${editor.orcid}`} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 border border-green-200 rounded-full px-2.5 py-0.5 hover:bg-green-100 transition-colors">
-                  <ExternalLink className="w-3 h-3" /> ORCID
-                </a>
-              )}
+              {editor.orcid && <OrcidBadge orcid={editor.orcid} showVerified size="sm" />}
               {editor.google_scholar_url && (
                 <a href={editor.google_scholar_url} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2.5 py-0.5 hover:bg-blue-100 transition-colors">

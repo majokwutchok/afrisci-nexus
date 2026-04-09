@@ -12,6 +12,7 @@ import {
   ArrowRight, User as UserIcon, BookOpen, Globe, Award,
   ChevronLeft, AlertCircle
 } from "lucide-react";
+import { isValidOrcid } from '@/utils/orcidValidator';
 
 const ROLES = [
   {
@@ -98,6 +99,7 @@ export default function Apply() {
     orcid: "", google_scholar_url: "", motivation: "",
     research_interests: "", cv_url: "", credentials_url: ""
   });
+  const [orcidError, setOrcidError] = useState('');
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -384,7 +386,20 @@ export default function Apply() {
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5 block">ORCID</label>
-                <Input value={form.orcid} onChange={e => setForm(f => ({ ...f, orcid: e.target.value }))} placeholder="0000-0000-0000-0000" />
+                <Input
+                  value={form.orcid}
+                  onChange={e => setForm(f => ({ ...f, orcid: e.target.value }))}
+                  onBlur={() => {
+                    if (form.orcid && !isValidOrcid(form.orcid)) {
+                      setOrcidError('Invalid ORCID format. Use: XXXX-XXXX-XXXX-XXXX');
+                    } else {
+                      setOrcidError('');
+                    }
+                  }}
+                  placeholder="0000-0000-0000-0000"
+                  className={orcidError ? 'border-red-300 focus:border-red-400' : ''}
+                />
+                {orcidError && <p className="text-xs text-red-500 mt-1">{orcidError}</p>}
               </div>
             </div>
 
@@ -459,7 +474,7 @@ export default function Apply() {
               <Button
                 className={`w-full ${c.btn} text-white font-semibold py-3`}
                 onClick={handleSubmit}
-                disabled={submitting || !form.full_name || !form.affiliation || !form.country || !form.motivation || !user}
+                disabled={submitting || !form.full_name || !form.affiliation || !form.country || !form.motivation || !user || orcidError}
               >
                 {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting…</> : `Submit ${role.label} Application`}
               </Button>
