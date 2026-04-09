@@ -63,15 +63,15 @@ const categoryLabels = {
   interdisciplinary: "Interdisciplinary"
 };
 
+const getJournalImage = (journal, index) => {
+  if (journal.category && categoryImages[journal.category]) {
+    return categoryImages[journal.category];
+  }
+  return fallbackImages[index % fallbackImages.length];
+};
+
 export default function FeaturedJournals({ journals, isLoading }) {
   const displayJournals = journals;
-
-  const getJournalImage = (journal, index) => {
-    if (journal.category && categoryImages[journal.category]) {
-      return categoryImages[journal.category];
-    }
-    return fallbackImages[index % fallbackImages.length];
-  };
 
   return (
     <section>
