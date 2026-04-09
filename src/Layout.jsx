@@ -161,9 +161,9 @@ const mainMenuItems = [
         icon: BookOpen
       },
       { 
-        title: "LaTeX Proof Generator", 
-        url: createPageUrl("LaTeXProof"), 
-        description: "Convert LaTeX to PDF proof before submission",
+        title: "Manuscript Editor", 
+        url: createPageUrl("ManuscriptEditor"), 
+        description: "Create and format manuscripts with ease",
         icon: FileText,
         badge: "New"
       }
