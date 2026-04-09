@@ -192,7 +192,9 @@ Be professional, factual, and relevant to African scientific publishing.`,
         content: result.content || f.content,
         slug: generateSlug(result.title || f.title),
       }));
-      setTagsInput((result.tags || []).join(', '));
+      const rawTags = result.tags;
+      const tagsArr = Array.isArray(rawTags) ? rawTags : typeof rawTags === 'string' ? rawTags.split(',').map(t => t.trim()).filter(Boolean) : [];
+      setTagsInput(tagsArr.join(', '));
     }
     setAiGenerating(false);
   };
