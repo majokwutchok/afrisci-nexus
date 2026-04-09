@@ -10,7 +10,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import InstitutionalPartnership from './pages/InstitutionalPartnership';
 import Accreditations from './pages/Accreditations';
 import PublisherCompliance from './pages/PublisherCompliance';
-import LaTeXProof from './pages/LaTeXProof';
+import ManuscriptEditor from './pages/ManuscriptEditor';
 import TermsConditions from './pages/TermsConditions';
 import ReviewerPortal from './pages/ReviewerPortal';
 import AuthorProfile from './pages/AuthorProfile';
@@ -68,7 +68,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="/LaTeXProof" element={<LayoutWrapper currentPageName="LaTeXProof"><LaTeXProof /></LayoutWrapper>} />
+      <Route path="/ManuscriptEditor" element={<LayoutWrapper currentPageName="ManuscriptEditor"><ManuscriptEditor /></LayoutWrapper>} />
       <Route path="/PrivacyPolicy" element={<LayoutWrapper currentPageName="PrivacyPolicy"><PrivacyPolicy /></LayoutWrapper>} />
       <Route path="/InstitutionalPartnership" element={<LayoutWrapper currentPageName="InstitutionalPartnership"><InstitutionalPartnership /></LayoutWrapper>} />
       <Route path="/Accreditations" element={<LayoutWrapper currentPageName="Accreditations"><Accreditations /></LayoutWrapper>} />
