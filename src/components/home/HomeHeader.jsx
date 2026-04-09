@@ -53,8 +53,16 @@ const NAV_SECTIONS = [
     label: "For Editors", color: "bg-amber-600/70 border-amber-500/50",
     links: [
       { title: "Apply as Editor", url: "Apply?role=editor" },
-      { title: "Editorial Board", url: "Editorial" },
-      { title: "Editor Dashboard", url: "EditorDashboard" },
+      { title: "Editor Login", url: "EditorDashboard" },
+    ]
+  },
+  {
+    label: "Institutions", color: "bg-purple-700/60 border-purple-500/40", badge: "New",
+    links: [
+      { title: "Partner with Us", url: "InstitutionalPartnership" },
+      { title: "Pricing & Tiers", url: "InstitutionalPartnership" },
+      { title: "Why Partner?", url: "InstitutionalPartnership" },
+      { title: "Apply Now", url: "InstitutionalPartnership" },
     ]
   },
 ];

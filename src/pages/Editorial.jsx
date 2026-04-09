@@ -1,239 +1,217 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Journal } from '@/entities/Journal';
-import EditorApplicationForm from '../components/editor/EditorApplicationForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Mail, Globe, Award, BookOpen, Users as UsersIcon, Edit3, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import {
+  Mail, Globe, Award, BookOpen, Users, Edit3, CheckCircle,
+  ExternalLink, Building2, GraduationCap
+} from 'lucide-react';
 
-const EditorCard = ({ editor, journals }) => {
-  const editorJournals = journals.filter(j => editor.editor_roles?.includes(j.id));
-  
+const GRAD_COLORS = [
+  'from-teal-500 to-emerald-600',
+  'from-blue-500 to-sky-600',
+  'from-purple-500 to-indigo-600',
+  'from-amber-500 to-orange-600',
+  'from-rose-500 to-pink-600',
+  'from-cyan-500 to-blue-600',
+];
+
+function editorColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return GRAD_COLORS[Math.abs(hash) % GRAD_COLORS.length];
+}
+
+function EditorCard({ editor }) {
   return (
-    <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+    <Card className="border-0 bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+      {/* Top accent */}
+      <div className={`h-1.5 bg-gradient-to-r ${editorColor(editor.full_name)}`} />
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
-            {editor.full_name?.charAt(0) || 'E'}
+          {/* Avatar / Photo */}
+          <div className="flex-shrink-0">
+            {editor.profile_photo_url ? (
+              <img
+                src={editor.profile_photo_url}
+                alt={editor.full_name}
+                className="w-20 h-20 rounded-full object-cover shadow-md border-2 border-white ring-2 ring-slate-100"
+              />
+            ) : (
+              <div className={`w-20 h-20 bg-gradient-to-br ${editorColor(editor.full_name)} rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-md`}>
+                {editor.full_name?.charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-slate-900 mb-1">{editor.full_name}</h3>
-            <p className="text-teal-700 font-medium mb-2">{editor.academic_title || 'Editor'}</p>
-            
-            <div className="space-y-2 mb-4">
+
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-bold text-slate-900 leading-tight">{editor.full_name}</h3>
+            {editor.academic_title && (
+              <p className="text-teal-700 font-medium text-sm mt-0.5 flex items-center gap-1">
+                <GraduationCap className="w-3.5 h-3.5" /> {editor.academic_title}
+              </p>
+            )}
+
+            <div className="mt-2 space-y-1">
               {editor.affiliation && (
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <BookOpen className="w-4 h-4 text-slate-400" />
-                  <span>{editor.affiliation}</span>
-                </div>
+                <p className="flex items-center gap-1.5 text-xs text-slate-600">
+                  <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                  <span className="truncate">{editor.affiliation}</span>
+                </p>
               )}
               {editor.country && (
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <Globe className="w-4 h-4 text-slate-400" />
-                  <span>{editor.country}</span>
-                </div>
+                <p className="flex items-center gap-1.5 text-xs text-slate-600">
+                  <Globe className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" /> {editor.country}
+                </p>
               )}
-              {editor.email && (
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <Mail className="w-4 h-4 text-slate-400" />
-                  <a href={`mailto:${editor.email}`} className="hover:text-teal-600 transition-colors">
-                    {editor.email}
-                  </a>
-                </div>
+              {editor.applicant_email && (
+                <a href={`mailto:${editor.applicant_email}`} className="flex items-center gap-1.5 text-xs text-teal-600 hover:underline">
+                  <Mail className="w-3.5 h-3.5 flex-shrink-0" /> {editor.applicant_email}
+                </a>
               )}
             </div>
 
-            {editor.research_interests && editor.research_interests.length > 0 && (
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-slate-600 mb-2">Research Interests:</p>
-                <div className="flex flex-wrap gap-2">
-                  {editor.research_interests.map((interest, idx) => (
-                    <Badge key={idx} variant="secondary" className="text-xs">
-                      {interest}
-                    </Badge>
-                  ))}
-                </div>
+            {/* Research interests */}
+            {editor.research_interests?.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1">
+                {editor.research_interests.slice(0, 4).map((tag, i) => (
+                  <Badge key={i} variant="secondary" className="text-xs">{tag}</Badge>
+                ))}
               </div>
             )}
 
-            {editorJournals.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-slate-600 mb-2">Editor for:</p>
-                <div className="flex flex-wrap gap-2">
-                  {editorJournals.map((journal) => (
-                    <Badge key={journal.id} className="bg-emerald-100 text-emerald-800 text-xs">
-                      {journal.title}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Links */}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {editor.orcid && (
+                <a href={`https://orcid.org/${editor.orcid}`} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 border border-green-200 rounded-full px-2.5 py-0.5 hover:bg-green-100 transition-colors">
+                  <ExternalLink className="w-3 h-3" /> ORCID
+                </a>
+              )}
+              {editor.google_scholar_url && (
+                <a href={editor.google_scholar_url} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2.5 py-0.5 hover:bg-blue-100 transition-colors">
+                  <ExternalLink className="w-3 h-3" /> Scholar
+                </a>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Motivation snippet */}
+        {editor.motivation && (
+          <p className="mt-4 text-xs text-slate-500 italic border-t border-slate-100 pt-3 line-clamp-2">
+            "{editor.motivation}"
+          </p>
+        )}
       </CardContent>
     </Card>
   );
-};
+}
 
 export default function EditorialBoardPage() {
   const [editors, setEditors] = useState([]);
-  const [journals, setJournals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    loadEditorialBoard();
+    loadEditors();
   }, []);
 
-  const loadEditorialBoard = async () => {
+  const loadEditors = async () => {
     setIsLoading(true);
-    try {
-      const [allUsers, allJournals] = await Promise.all([
-        base44.entities.User.list(),
-        Journal.list()
-      ]);
-      
-      // Filter users who are editors (have editor_roles or are admin)
-      const editorialMembers = allUsers.filter(
-        u => (u.editor_roles && u.editor_roles.length > 0) || u.role === 'admin'
-      );
-      
-      setEditors(editorialMembers);
-      setJournals(allJournals);
-    } catch (error) {
-      console.error("Error loading editorial board:", error);
-    }
+    const approved = await base44.entities.RoleApplication.filter(
+      { role: 'editor', status: 'approved' },
+      '-reviewed_date',
+      200
+    );
+    setEditors(approved);
     setIsLoading(false);
   };
 
-  const editorInChiefs = editors.filter(e => 
-    journals.some(j => j.editor_in_chief === e.full_name)
-  );
-  
-  const associateEditors = editors.filter(e => 
-    !journals.some(j => j.editor_in_chief === e.full_name) && e.editor_roles?.length > 0
-  );
+  const uniqueCountries = [...new Set(editors.map(e => e.country).filter(Boolean))].length;
 
   return (
-    <>
     <div className="bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-100 min-h-screen">
-      {/* Hero Section */}
+      {/* Hero */}
       <div className="text-center py-24 px-4 bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white">
-        <UsersIcon className="w-16 h-16 mx-auto mb-6 text-sky-200" />
+        <Users className="w-16 h-16 mx-auto mb-6 text-sky-200" />
         <h1 className="text-5xl font-extrabold tracking-tight drop-shadow-lg">Editorial Board</h1>
         <p className="mt-4 max-w-3xl mx-auto text-xl text-sky-200">
           Meet our distinguished international team of editors committed to advancing African scientific research.
         </p>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        {/* Statistics */}
-        <div className="grid md:grid-cols-4 gap-6 mb-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-14">
           <Card className="border-0 bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-lg">
             <CardContent className="p-6 text-center">
               <Award className="w-8 h-8 mx-auto mb-3 text-blue-200" />
-              <p className="text-4xl font-bold mb-1">{editors.length}</p>
-              <p className="text-sm text-blue-100">Total Editors</p>
-            </CardContent>
-          </Card>
-          <Card className="border-0 bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-lg">
-            <CardContent className="p-6 text-center">
-              <BookOpen className="w-8 h-8 mx-auto mb-3 text-emerald-200" />
-              <p className="text-4xl font-bold mb-1">{journals.length}</p>
-              <p className="text-sm text-emerald-100">Journals Managed</p>
+              <p className="text-4xl font-bold mb-1">{isLoading ? '—' : editors.length}</p>
+              <p className="text-sm text-blue-100">Active Editors</p>
             </CardContent>
           </Card>
           <Card className="border-0 bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-lg">
             <CardContent className="p-6 text-center">
               <Globe className="w-8 h-8 mx-auto mb-3 text-purple-200" />
-              <p className="text-4xl font-bold mb-1">{[...new Set(editors.map(e => e.country))].filter(Boolean).length}</p>
+              <p className="text-4xl font-bold mb-1">{isLoading ? '—' : uniqueCountries}</p>
               <p className="text-sm text-purple-100">Countries Represented</p>
             </CardContent>
           </Card>
-          <Card className="border-0 bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg">
+          <Card className="border-0 bg-gradient-to-br from-teal-600 to-emerald-600 text-white shadow-lg col-span-2 md:col-span-1">
             <CardContent className="p-6 text-center">
-              <UsersIcon className="w-8 h-8 mx-auto mb-3 text-amber-200" />
-              <p className="text-4xl font-bold mb-1">{editorInChiefs.length}</p>
-              <p className="text-sm text-amber-100">Editors-in-Chief</p>
+              <BookOpen className="w-8 h-8 mx-auto mb-3 text-teal-200" />
+              <p className="text-4xl font-bold mb-1">
+                {isLoading ? '—' : [...new Set(editors.flatMap(e => e.research_interests || []))].length}
+              </p>
+              <p className="text-sm text-teal-100">Research Specialties</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Editors-in-Chief Section */}
-        <div className="mb-16">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">Editors-in-Chief</h2>
-            <p className="text-slate-600">Leading our journals with excellence and integrity</p>
-          </div>
-          {isLoading ? (
-            <div className="grid md:grid-cols-2 gap-6">
-              {Array(4).fill(0).map((_, i) => (
-                <Card key={i} className="border-0 bg-white/80">
-                  <CardContent className="p-6">
-                    <div className="flex gap-4">
-                      <Skeleton className="w-16 h-16 rounded-full" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-4 w-full" />
-                      </div>
+        {/* Editors Grid */}
+        {isLoading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="border-0 bg-white">
+                <CardContent className="p-6">
+                  <div className="flex gap-4">
+                    <Skeleton className="w-20 h-20 rounded-full flex-shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : editorInChiefs.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-6">
-              {editorInChiefs.map((editor) => (
-                <EditorCard key={editor.id} editor={editor} journals={journals} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-slate-500 py-8">No editors-in-chief information available yet.</p>
-          )}
-        </div>
-
-        {/* Associate Editors Section */}
-        <div>
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">Associate Editors</h2>
-            <p className="text-slate-600">Expert scholars supporting our peer review process</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-          {isLoading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array(6).fill(0).map((_, i) => (
-                <Card key={i} className="border-0 bg-white/80">
-                  <CardContent className="p-6">
-                    <div className="flex gap-4">
-                      <Skeleton className="w-16 h-16 rounded-full" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-4 w-full" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : associateEditors.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {associateEditors.map((editor) => (
-                <EditorCard key={editor.id} editor={editor} journals={journals} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-slate-500 py-8">No associate editors information available yet.</p>
-          )}
-        </div>
+        ) : editors.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {editors.map(editor => (
+              <EditorCard key={editor.id} editor={editor} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20 text-slate-400">
+            <Users className="w-16 h-16 mx-auto mb-4 opacity-30" />
+            <p className="text-lg">No editors listed yet. Check back soon.</p>
+          </div>
+        )}
 
-        {/* Call to Action */}
+        {/* CTA */}
         <div className="mt-20 text-center bg-white p-12 rounded-2xl shadow-xl border border-slate-200/60">
           <h2 className="text-3xl font-bold text-slate-900 mb-4">Join Our Editorial Team</h2>
           <p className="max-w-2xl mx-auto text-slate-600 mb-6">
-            We are always looking for dedicated scholars to join our editorial board. If you're passionate about advancing African research and maintaining the highest standards of peer review, we'd love to hear from you.
+            We are always looking for dedicated scholars to join our editorial board. If you're passionate about advancing African research, we'd love to hear from you.
           </p>
           {submitted ? (
             <div className="inline-flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 px-8 py-4 rounded-xl font-semibold">
@@ -241,24 +219,15 @@ export default function EditorialBoardPage() {
               Application Submitted! We'll be in touch soon.
             </div>
           ) : (
-            <button
-              onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
-            >
-              <Edit3 className="w-5 h-5" />
-              Apply to Join Editorial Board
-            </button>
+            <Link to={createPageUrl("Apply?role=editor")}>
+              <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 inline-flex items-center gap-2">
+                <Edit3 className="w-5 h-5" />
+                Apply to Join Editorial Board
+              </Button>
+            </Link>
           )}
         </div>
       </div>
     </div>
-
-    {showForm && (
-      <EditorApplicationForm
-        onClose={() => setShowForm(false)}
-        onSuccess={() => { setShowForm(false); setSubmitted(true); }}
-      />
-    )}
-  </>
   );
 }

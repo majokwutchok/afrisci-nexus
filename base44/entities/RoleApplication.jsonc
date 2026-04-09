@@ -50,6 +50,10 @@
       "type": "string",
       "description": "URL to uploaded credentials/certificates"
     },
+    "profile_photo_url": {
+      "type": "string",
+      "description": "URL to profile photo (used on public editorial board page)"
+    },
     "orcid": {
       "type": "string",
       "description": "ORCID identifier"
