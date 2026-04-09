@@ -105,8 +105,8 @@ export default function HomePage() {
             {/* Main Content Column */}
             <div className="lg:col-span-3 space-y-24">
               <Suspense fallback={<ComponentLoader />}>
-                <NewsSection />
                 <FeaturedJournals journals={data.journals} isLoading={isLoading} />
+                <NewsSection />
                 <WhyNexus />
                 <LatestPublications publications={data.publications} journals={data.journals} isLoading={isLoading} />
                 <DisciplineExplorer />

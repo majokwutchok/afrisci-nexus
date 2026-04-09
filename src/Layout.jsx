@@ -95,9 +95,9 @@ const mainMenuItems = [
       { 
         title: "All Journals", 
         url: createPageUrl("Journals"), 
-        description: "Explore 50+ peer-reviewed journals",
+        description: "Explore 12 peer-reviewed journals",
         icon: BookOpen,
-        badge: "50+ Journals"
+        badge: "12 Journals"
       },
       { 
         title: "Latest Publications", 

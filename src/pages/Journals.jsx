@@ -150,8 +150,8 @@ export default function Journals() {
   return (
     <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
       <SEO
-        title="Browse African Academic Journals — 50+ Peer-Reviewed Publications"
-        description="Explore 50+ peer-reviewed African academic journals covering STEM, medicine, law, agriculture, social sciences, humanities and more. All open-access, all serving African research."
+        title="Browse African Academic Journals — 12 Peer-Reviewed Publications"
+        description="Explore 12 peer-reviewed African academic journals covering STEM, medicine, law, agriculture, social sciences, humanities and more. All open-access, all serving African research."
         keywords="African academic journals, peer reviewed journals Africa, open access journals Africa, STEM journals Africa, medical journals Africa, social science journals Africa"
         canonicalPath="/Journals"
         structuredData={{
@@ -172,7 +172,7 @@ export default function Journals() {
             <h1 className="text-3xl font-bold text-slate-900">Scientific Journals</h1>
           </div>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Explore our comprehensive collection of peer-reviewed journals across all disciplines
+            Explore our 12 peer-reviewed journals across all major disciplines
           </p>
         </div>
 
