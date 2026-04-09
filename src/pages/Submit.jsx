@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Journal } from "@/entities/Journal";
-import { Manuscript } from "@/entities/Manuscript";
 import { createPageUrl } from "@/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,7 +35,7 @@ export default function Submit() {
 
   const loadJournals = async () => {
     try {
-      const data = await Journal.list('-created_date');
+      const data = await base44.entities.Journal.list('-created_date');
       setJournals(data.filter(j => j.status === 'active'));
     } catch (error) {
       console.error("Error loading journals:", error);
@@ -58,7 +56,7 @@ export default function Submit() {
         comment: 'Manuscript submitted for review'
       }];
 
-      await Manuscript.create({
+      await base44.entities.Manuscript.create({
         ...manuscriptData,
         status: 'submitted',
         submission_date: new Date().toISOString().split('T')[0],
@@ -70,8 +68,8 @@ export default function Submit() {
         navigate(createPageUrl("MyManuscripts"));
       }, 2000);
     } catch (error) {
-      console.error("Submission error:", error);
-      setError("Failed to submit manuscript. Please try again.");
+    console.error("Submission error:", error);
+    setError(error.message || "Failed to submit manuscript. Please try again.");
     }
     setIsLoading(false);
   };

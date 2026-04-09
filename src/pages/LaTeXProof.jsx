@@ -90,11 +90,14 @@ export default function LaTeXProof() {
         manuscript_title: manuscript?.title || 'Manuscript',
       });
 
-      if (res.data?.error) {
-        setError(res.data.error);
-        setErrorLog(res.data.log || res.data.details || null);
-      } else if (res.data?.pdf_base64) {
-        const binary = atob(res.data.pdf_base64);
+      // Handle response (axios or raw)
+      const responseData = res.data || res;
+      
+      if (responseData?.error) {
+        setError(responseData.error);
+        setErrorLog(responseData.log || responseData.details || null);
+      } else if (responseData?.pdf_base64) {
+        const binary = atob(responseData.pdf_base64);
         const bytes = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
         const blob = new Blob([bytes], { type: 'application/pdf' });
@@ -102,9 +105,12 @@ export default function LaTeXProof() {
         setPdfUrl(url);
         setSuccess(true);
         setActiveTab('preview');
+      } else {
+        setError('No PDF generated. Please check your LaTeX syntax.');
       }
     } catch (err) {
-      setError('Compilation request failed. Please try again.');
+      console.error('LaTeX compilation error:', err);
+      setError(err.message || 'Compilation request failed. Please try again.');
     }
     setIsCompiling(false);
   };
