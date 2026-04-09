@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
@@ -8,10 +9,7 @@ import {
   BookOpen, FileText, ChevronDown, ChevronRight
 } from "lucide-react";
 import AfriSciLogo from "../brand/AfriSciLogo";
-import {
-  NavigationMenu, NavigationMenuContent,
-  NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -60,6 +58,53 @@ const NAV_SECTIONS = [
     ]
   },
 ];
+
+function PortalNavDropdown({ section }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+
+  const updateCoords = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setCoords({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+    }
+  };
+
+  return (
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={() => { updateCoords(); setOpen(true); }}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button className={`flex items-center gap-2 text-white font-medium px-3 py-2 rounded-lg transition-colors border text-sm ${section.color}`}>
+        {section.label}
+        {section.badge && <Badge className="bg-teal-400 text-teal-900 text-xs ml-1">{section.badge}</Badge>}
+        <ChevronDown className="w-3 h-3 opacity-70" />
+      </button>
+      {open && ReactDOM.createPortal(
+        <div
+          style={{ position: 'absolute', top: coords.top + 4, left: coords.left, zIndex: 9999 }}
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+        >
+          <div className="w-72 p-3 bg-white shadow-xl rounded-lg border-t-4 border-teal-500">
+            {section.links.map(link => (
+              <Link key={link.title}
+                to={link.url.includes('?') ? `/${link.url}` : createPageUrl(link.url)}
+                onClick={() => setOpen(false)}
+                className="block p-3 rounded-lg hover:bg-slate-50 text-slate-800 font-medium text-sm transition-colors border border-transparent hover:border-slate-200">
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
 
 function MobileNavSection({ section, onClose }) {
   const [open, setOpen] = useState(false);
@@ -273,37 +318,16 @@ export default function HomeHeader() {
         </div>
 
         {/* ── DESKTOP NAV ── */}
-        <div className="hidden lg:block relative z-20 bg-white/5 backdrop-blur-md border-t border-white/10">
+        <div className="hidden lg:block bg-white/5 border-t border-white/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <NavigationMenu>
-              <NavigationMenuList className="flex items-center space-x-1 py-3 flex-wrap gap-y-1">
-                <NavigationMenuItem>
-                  <Link to={createPageUrl("Home")} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors font-medium text-sm">
-                    Home
-                  </Link>
-                </NavigationMenuItem>
-
-                {NAV_SECTIONS.map(section => (
-                  <NavigationMenuItem key={section.label}>
-                    <NavigationMenuTrigger className={`flex items-center gap-2 text-white hover:text-white font-medium px-3 py-2 rounded-lg transition-colors border text-sm ${section.color}`}>
-                      {section.label}
-                      {section.badge && <Badge className="bg-teal-400 text-teal-900 text-xs ml-1">{section.badge}</Badge>}
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <div className="w-72 p-3 bg-white shadow-xl rounded-lg border-t-4 border-teal-500">
-                        {section.links.map(link => (
-                          <Link key={link.title}
-                            to={link.url.includes('?') ? `/${link.url}` : createPageUrl(link.url)}
-                            className="block p-3 rounded-lg hover:bg-slate-50 text-slate-800 font-medium text-sm transition-colors border border-transparent hover:border-slate-200">
-                            {link.title}
-                          </Link>
-                        ))}
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                ))}
-              </NavigationMenuList>
-            </NavigationMenu>
+            <div className="flex items-center space-x-1 py-3 flex-wrap gap-y-1">
+              <Link to={createPageUrl("Home")} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors font-medium text-sm">
+                Home
+              </Link>
+              {NAV_SECTIONS.map(section => (
+                <PortalNavDropdown key={section.label} section={section} />
+              ))}
+            </div>
           </div>
         </div>
 
