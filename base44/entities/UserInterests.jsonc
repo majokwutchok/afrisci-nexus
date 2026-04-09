@@ -1,0 +1,45 @@
+{
+  "name": "UserInterests",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "User email"
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Selected research interest tags"
+    },
+    "recent_searches": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Recent search queries"
+    },
+    "viewed_article_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "IDs of recently viewed articles"
+    },
+    "viewed_article_titles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Titles of recently viewed articles for LLM context"
+    }
+  },
+  "required": [
+    "user_email"
+  ]
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import AIRecommendations from "@/components/recommendations/AIRecommendations";
 import { createPageUrl } from "@/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -171,6 +172,9 @@ export default function HomeSidebar() {
 
   return (
     <aside className="space-y-6">
+      {/* AI Recommendations */}
+      <AIRecommendations />
+
       {/* Marketing Banners */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
