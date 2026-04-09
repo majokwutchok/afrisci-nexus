@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import {
-  BookOpen, Globe, Mail, Award, TrendingUp, Download, Eye,
-  ExternalLink, Building2, Calendar, Quote, User as UserIcon
+  BookOpen, Globe, Mail, Award, Download, Eye,
+  ExternalLink, Building2, Calendar, Quote, User as UserIcon,
+  UserPlus, UserCheck, Microscope, Users
 } from 'lucide-react';
 
 function StatCard({ icon: Icon, value, label, color }) {
@@ -72,18 +74,62 @@ export default function AuthorProfile() {
   const [journals, setJournals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [authorInfo, setAuthorInfo] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followCount, setFollowCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [roleProfile, setRoleProfile] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!authorEmail && !authorName) { setLoading(false); return; }
     loadProfile();
   }, [authorEmail, authorName]);
 
+  useEffect(() => {
+    if (!authorEmail) return;
+    loadFollowData();
+  }, [authorEmail, currentUser]);
+
+  const loadFollowData = async () => {
+    const allFollows = await base44.entities.AuthorFollow.filter({ followed_email: authorEmail });
+    setFollowCount(allFollows.length);
+    if (currentUser) {
+      setIsFollowing(allFollows.some(f => f.follower_email === currentUser.email));
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!currentUser) { base44.auth.redirectToLogin(); return; }
+    setFollowLoading(true);
+    if (isFollowing) {
+      const follows = await base44.entities.AuthorFollow.filter({ followed_email: authorEmail, follower_email: currentUser.email });
+      if (follows.length > 0) await base44.entities.AuthorFollow.delete(follows[0].id);
+      setIsFollowing(false);
+      setFollowCount(c => c - 1);
+    } else {
+      await base44.entities.AuthorFollow.create({
+        follower_email: currentUser.email,
+        followed_email: authorEmail || '',
+        followed_name: displayName
+      });
+      setIsFollowing(true);
+      setFollowCount(c => c + 1);
+    }
+    setFollowLoading(false);
+  };
+
   const loadProfile = async () => {
     setLoading(true);
-    const allManuscripts = await base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 500);
-    const allJournals = await base44.entities.Journal.list('-created_date', 200);
+    const [allManuscripts, allJournals, roleApps] = await Promise.all([
+      base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 500),
+      base44.entities.Journal.list('-created_date', 200),
+      authorEmail ? base44.entities.RoleApplication.filter({ applicant_email: authorEmail, status: 'approved' }) : Promise.resolve([])
+    ]);
 
-    // Find manuscripts where this person is an author
     const authored = allManuscripts.filter(m =>
       m.authors?.some(a =>
         (authorEmail && a.email?.toLowerCase() === authorEmail.toLowerCase()) ||
@@ -91,7 +137,6 @@ export default function AuthorProfile() {
       )
     );
 
-    // Extract consistent author info from first match
     let info = null;
     for (const m of authored) {
       const match = m.authors?.find(a =>
@@ -101,6 +146,7 @@ export default function AuthorProfile() {
       if (match) { info = match; break; }
     }
 
+    if (roleApps.length > 0) setRoleProfile(roleApps[0]);
     setManuscripts(authored);
     setJournals(allJournals);
     setAuthorInfo(info);
@@ -119,6 +165,7 @@ export default function AuthorProfile() {
 
   const displayName = authorInfo?.name || authorName || 'Author';
   const displayEmail = authorInfo?.email || authorEmail;
+  const researchInterests = roleProfile?.research_interests || [];
 
   if (!authorEmail && !authorName) {
     return (
@@ -161,14 +208,32 @@ export default function AuthorProfile() {
                     <ExternalLink className="w-3 h-3" /> ORCID: {authorInfo.orcid}
                   </a>
                 )}
-                <div className="flex items-center justify-center sm:justify-start gap-3 mt-3">
+                <div className="flex items-center justify-center sm:justify-start gap-3 mt-3 flex-wrap">
                   <Badge className="bg-teal-500/20 text-teal-200 border border-teal-400/30">
                     {manuscripts.length} Publications
                   </Badge>
                   {authorInfo?.is_corresponding && (
                     <Badge className="bg-amber-500/20 text-amber-200 border border-amber-400/30">Corresponding Author</Badge>
                   )}
+                  <Badge className="bg-white/10 text-sky-200 border border-white/20">
+                    <Users className="w-3 h-3 mr-1" />{followCount} Followers
+                  </Badge>
                 </div>
+                {authorEmail && currentUser?.email !== authorEmail && (
+                  <div className="mt-4">
+                    <Button
+                      onClick={handleFollow}
+                      disabled={followLoading}
+                      className={isFollowing
+                        ? 'bg-white/10 border border-white/30 text-white hover:bg-red-500/20 hover:border-red-400/40'
+                        : 'bg-teal-500 hover:bg-teal-600 text-white'}
+                    >
+                      {isFollowing
+                        ? <><UserCheck className="w-4 h-4 mr-2" />Following</>
+                        : <><UserPlus className="w-4 h-4 mr-2" />Follow Author</>}
+                    </Button>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -211,6 +276,59 @@ export default function AuthorProfile() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Research Interests */}
+            {(researchInterests.length > 0 || roleProfile?.affiliation) && (
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-5">
+                  <h3 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <Microscope className="w-4 h-4 text-purple-600" /> Research Interests
+                  </h3>
+                  {roleProfile?.academic_title && (
+                    <p className="text-sm text-slate-600 font-medium mb-2">{roleProfile.academic_title}</p>
+                  )}
+                  {researchInterests.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {researchInterests.map(interest => (
+                        <Badge key={interest} className="bg-purple-50 text-purple-700 border border-purple-200 text-xs">{interest}</Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-400">No research interests listed</p>
+                  )}
+                  {roleProfile?.google_scholar_url && (
+                    <a href={roleProfile.google_scholar_url} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 mt-3 text-xs text-blue-600 hover:underline">
+                      <ExternalLink className="w-3 h-3" /> Google Scholar
+                    </a>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Contact Card */}
+            {displayEmail && (
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-5">
+                  <h3 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-teal-600" /> Contact
+                  </h3>
+                  <a href={`mailto:${displayEmail}`}
+                    className="flex items-center gap-2 text-sm text-teal-700 hover:text-teal-900 transition-colors">
+                    <Mail className="w-4 h-4" /> {displayEmail}
+                  </a>
+                  {(authorInfo?.affiliation || roleProfile?.affiliation) && (
+                    <p className="flex items-start gap-2 mt-2 text-sm text-slate-600">
+                      <Building2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      {authorInfo?.affiliation || roleProfile?.affiliation}
+                    </p>
+                  )}
+                  {roleProfile?.country && (
+                    <p className="text-sm text-slate-500 mt-1 ml-6">{roleProfile.country}</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Journals Published In */}
             <Card className="border-0 shadow-md">
               <CardContent className="p-5">

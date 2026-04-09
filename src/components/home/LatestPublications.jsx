@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -20,7 +19,18 @@ const PublicationCard = ({ pub, journal }) => (
         {pub.title}
       </Link>
       <p className="text-sm text-slate-600 mt-1 line-clamp-1">
-        {pub.authors?.map(a => a.name).join(', ')}
+        {pub.authors?.map((a, i) => (
+          <span key={i}>
+            {i > 0 && ', '}
+            <Link
+              to={`/AuthorProfile?email=${encodeURIComponent(a.email || '')}&name=${encodeURIComponent(a.name || '')}`}
+              className="hover:text-teal-600 transition-colors"
+              onClick={e => e.stopPropagation()}
+            >
+              {a.name}
+            </Link>
+          </span>
+        ))}
       </p>
       <div className="flex items-center justify-center md:justify-start gap-2 mt-2 text-xs">
         {journal && <Badge variant="secondary">{journal.title}</Badge>}
