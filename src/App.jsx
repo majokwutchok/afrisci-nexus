@@ -13,6 +13,7 @@ import PublisherCompliance from './pages/PublisherCompliance';
 import LaTeXProof from './pages/LaTeXProof';
 import TermsConditions from './pages/TermsConditions';
 import ReviewerPortal from './pages/ReviewerPortal';
+import AuthorProfile from './pages/AuthorProfile';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
       <Route path="/PublisherCompliance" element={<LayoutWrapper currentPageName="PublisherCompliance"><PublisherCompliance /></LayoutWrapper>} />
       <Route path="/TermsConditions" element={<LayoutWrapper currentPageName="TermsConditions"><TermsConditions /></LayoutWrapper>} />
       <Route path="/ReviewerPortal" element={<LayoutWrapper currentPageName="ReviewerPortal"><ReviewerPortal /></LayoutWrapper>} />
+      <Route path="/AuthorProfile" element={<LayoutWrapper currentPageName="AuthorProfile"><AuthorProfile /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
