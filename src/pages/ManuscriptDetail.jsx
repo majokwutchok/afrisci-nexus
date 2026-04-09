@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import ProgressTracker from "../components/submission/ProgressTracker";
+import AISummary from "../components/publication/AISummary";
 import InlinePDFViewer from "../components/publication/InlinePDFViewer";
 import ScholarMetaTags from "../components/publication/ScholarMetaTags";
 import DOIPanel from "../components/publication/DOIPanel";
@@ -245,6 +246,9 @@ export default function ManuscriptDetail() {
                 <div>
                   <h3 className="font-bold text-slate-800 mb-2">Abstract</h3>
                   <p className="text-slate-700 leading-relaxed">{manuscript.abstract}</p>
+                  <div className="mt-4">
+                    <AISummary title={manuscript.title} abstract={manuscript.abstract} />
+                  </div>
                 </div>
                 {manuscript.keywords && manuscript.keywords.length > 0 && (
                   <>

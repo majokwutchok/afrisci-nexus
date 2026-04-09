@@ -19,6 +19,7 @@ import {
   Users,
   BookOpen
 } from 'lucide-react';
+import AISummary from '../components/publication/AISummary';
 import { format } from 'date-fns';
 
 const PublicationCard = ({ manuscript, journal }) => (
@@ -40,6 +41,7 @@ const PublicationCard = ({ manuscript, journal }) => (
     </CardHeader>
     <CardContent className="space-y-4">
       <p className="text-slate-600 text-sm line-clamp-3">{manuscript.abstract}</p>
+      <AISummary title={manuscript.title} abstract={manuscript.abstract} compact />
       
       <div className="flex flex-wrap gap-2">
         {manuscript.keywords?.slice(0, 4).map((keyword) => (
