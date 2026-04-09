@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Eye, Download, BookMarked, RefreshCw, Globe } from 'lucide-react';
+import { TrendingUp, Eye, Download, BookMarked, RefreshCw, Globe, FileText } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // ISO2 country code map for flag emoji
@@ -79,7 +79,7 @@ export default function ImpactMetrics() {
       base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 200),
     ]);
 
-    // Aggregate by country
+    // Aggregate by country from ReadershipStats
     const countryMap = {};
     readershipStats.forEach(s => {
       if (!s.country) return;
@@ -93,10 +93,11 @@ export default function ImpactMetrics() {
       .sort((a, b) => b.views - a.views)
       .slice(0, 15);
 
-    const totalViews = readershipStats.length;
-    const totalDownloads = readershipStats.filter(s => s.view_type === 'pdf_download').length;
+    // Use manuscript fields for accurate KPI totals
+    const totalViews = manuscripts.reduce((sum, m) => sum + (m.view_count || 0), 0);
+    const totalDownloads = manuscripts.reduce((sum, m) => sum + (m.download_count || 0), 0);
     const totalCitations = manuscripts.reduce((sum, m) => sum + (m.citation_count || 0), 0);
-    const uniqueCountries = Object.keys(countryMap).length;
+    const uniqueCountries = Object.keys(countryMap).length || new Set(manuscripts.flatMap(m => m.authors?.map(a => a.affiliation)).filter(Boolean)).size;
 
     // Continent breakdown
     const continentMap = {};
@@ -105,7 +106,7 @@ export default function ImpactMetrics() {
       continentMap[s.continent] = (continentMap[s.continent] || 0) + 1;
     });
 
-    setData({ countryRows, totalViews, totalDownloads, totalCitations, uniqueCountries, continentMap, maxViews: countryRows[0]?.views || 1 });
+    setData({ countryRows, totalViews, totalDownloads, totalCitations, uniqueCountries, continentMap, maxViews: countryRows[0]?.views || 1, totalPublished: manuscripts.length });
     setLastUpdated(new Date());
     setLoading(false);
   }, []);
@@ -150,12 +151,13 @@ export default function ImpactMetrics() {
         </div>
 
         {/* Top KPI strip */}
-        <div className="grid grid-cols-4 gap-3 mt-5">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-5">
           {[
             { label: "Total Views", value: data?.totalViews, icon: Eye, color: "from-blue-500/20 to-cyan-500/20 border-blue-400/30" },
             { label: "Downloads", value: data?.totalDownloads, icon: Download, color: "from-emerald-500/20 to-teal-500/20 border-emerald-400/30" },
             { label: "Citations", value: data?.totalCitations, icon: BookMarked, color: "from-purple-500/20 to-indigo-500/20 border-purple-400/30" },
             { label: "Countries", value: data?.uniqueCountries, icon: Globe, color: "from-amber-500/20 to-orange-500/20 border-amber-400/30" },
+            { label: "Published", value: data?.totalPublished, icon: FileText, color: "from-rose-500/20 to-pink-500/20 border-rose-400/30" },
           ].map(({ label, value, icon: Icon, color }) => (
             <div key={label} className={`rounded-xl border bg-gradient-to-br ${color} p-3 backdrop-blur`}>
               <Icon className="w-4 h-4 text-white/70 mb-1" />
