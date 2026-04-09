@@ -26,6 +26,8 @@ import MarketingDocuments from "../components/admin/MarketingDocuments";
 import PaymentManagement from "../components/admin/PaymentManagement";
 import AllApplications from "../components/admin/AllApplications";
 import NewsManager from "../components/admin/NewsManager";
+import AdminProfileSetup from "../components/admin/AdminProfileSetup";
+import AdminManuscriptAccelerator from "../components/admin/AdminManuscriptAccelerator";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -137,6 +139,8 @@ export default function AdminDashboard() {
 
         <Tabs defaultValue="applications">
           <TabsList className="flex flex-wrap gap-1 h-auto p-1">
+            <TabsTrigger value="admin_profile" className="text-emerald-700 font-semibold">👤 My Admin Profiles</TabsTrigger>
+            <TabsTrigger value="accelerator" className="text-amber-700 font-semibold">⚡ Manuscript Accelerator</TabsTrigger>
             <TabsTrigger value="applications" className="text-blue-700 font-semibold">📋 Applications</TabsTrigger>
             <TabsTrigger value="news" className="text-teal-700 font-semibold">📰 News Manager</TabsTrigger>
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -149,6 +153,14 @@ export default function AdminDashboard() {
             <TabsTrigger value="brand" className="text-amber-700 font-semibold">🎨 Brand Assets</TabsTrigger>
           </TabsList>
           
+          <TabsContent value="admin_profile" className="mt-6">
+            <AdminProfileSetup />
+          </TabsContent>
+
+          <TabsContent value="accelerator" className="mt-6">
+            <AdminManuscriptAccelerator />
+          </TabsContent>
+
           <TabsContent value="overview" className="mt-6">
             <Card className="shadow-lg">
               <CardHeader>
