@@ -167,16 +167,16 @@ const registrations = [
     category: "🆔 Author & Research Identity",
     items: [
       {
-        name: "ORCID Integration",
+        name: "ORCID Integration & Validation",
         acronym: "ORCID",
         status: "achieved",
         priority: "High",
         priorityColor: "bg-orange-100 text-orange-700",
         logo: "👤",
         url: "https://orcid.org/",
-        description: "ORCID provides persistent digital identifiers for researchers. Integration with the submission system means author identity is verified, reducing fraud and ensuring correct attribution. Required by Nature, Elsevier, and increasingly by all major journals.",
-        impact: "Required by all major publishers",
-        why: "ORCID integration builds author trust and is increasingly mandatory for grant applications in Africa.",
+        description: "ORCID provides persistent digital identifiers for researchers. Full integration includes: (1) automatic ORCID format validation on author, reviewer, and editor signup forms; (2) verified ORCID badges linking to official profiles on editorial boards and reviewer pages; (3) author profiles with clickable ORCID links. Reduces fraud, ensures correct attribution, and builds trust with major publishers.",
+        impact: "Complete integration + verification + public profiles",
+        why: "ORCID validation eliminates fake identities at signup. Public ORCID display on editorial boards signals institutional credibility to Nature, Elsevier, and African government funders.",
       },
       {
         name: "ROR — Research Organization Registry",
