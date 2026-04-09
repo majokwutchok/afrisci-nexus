@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FileText, Download, Plus, X, ArrowLeft, Eye, Edit3, AlertCircle, CheckCircle, Loader, Info } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import PlagiarismChecker from '@/components/submission/PlagiarismChecker';
 
 export default function ManuscriptEditor() {
   const [activeTab, setActiveTab] = useState('template'); // 'template', 'markdown', 'preview'
@@ -177,6 +178,14 @@ ${formData.body}`;
           >
             <Eye className="w-4 h-4" /> Preview
           </button>
+          <button
+            onClick={() => setActiveTab('plagiarism')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+              activeTab === 'plagiarism' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <AlertCircle className="w-4 h-4" /> Plagiarism Check
+          </button>
         </div>
 
         {/* Template Form Tab */}
@@ -342,6 +351,15 @@ ${formData.body}`;
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Plagiarism Check Tab */}
+        {activeTab === 'plagiarism' && (
+          <PlagiarismChecker
+            title={formData.title}
+            abstract={formData.abstract}
+            body={formData.body}
+          />
         )}
       </div>
     </div>
