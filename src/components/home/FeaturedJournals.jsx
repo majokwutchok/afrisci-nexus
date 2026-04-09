@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -65,12 +64,12 @@ const categoryLabels = {
 };
 
 export default function FeaturedJournals({ journals, isLoading }) {
+  const displayJournals = journals;
+
   const getJournalImage = (journal, index) => {
-    // First priority: category-specific image
     if (journal.category && categoryImages[journal.category]) {
       return categoryImages[journal.category];
     }
-    // Fallback: use index-based fallback image
     return fallbackImages[index % fallbackImages.length];
   };
 
@@ -82,13 +81,13 @@ export default function FeaturedJournals({ journals, isLoading }) {
           View All <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {isLoading ? (
-          Array(4).fill(0).map((_, i) => (
+          Array(8).fill(0).map((_, i) => (
             <Card key={i} className="overflow-hidden"><Skeleton className="h-80 w-full" /></Card>
           ))
         ) : (
-          journals.slice(0, 4).map((journal, index) => (
+          displayJournals.map((journal, index) => (
             <Card key={journal.id} className="group overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-0 bg-white">
               {/* Custom Image with Overlay */}
               <div className="relative h-48 overflow-hidden">

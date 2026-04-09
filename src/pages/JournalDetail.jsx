@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Journal } from '@/entities/Journal';
-import { Manuscript } from '@/entities/Manuscript';
-import { User } from '@/entities/User';
+import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -91,15 +89,13 @@ export default function JournalDetailPage() {
   const loadJournalData = async () => {
     setIsLoading(true);
     try {
-      const [journalData, journalManuscripts, allJournalManuscripts, allUsers] = await Promise.all([
-        Journal.get(journalId).catch(async () => {
-          const all = await Journal.list();
-          return all.find(j => j.id === journalId);
-        }),
-        Manuscript.filter({ journal_id: journalId, status: 'published' }, '-publication_date', 20).catch(() => []),
-        Manuscript.filter({ journal_id: journalId }, '-created_date', 500).catch(() => []),
-        User.list('-created_date', 200)
+      const [journalManuscripts, allJournalManuscripts, allUsers, allJournals] = await Promise.all([
+        base44.entities.Manuscript.filter({ journal_id: journalId, status: 'published' }, '-publication_date', 20).catch(() => []),
+        base44.entities.Manuscript.filter({ journal_id: journalId }, '-created_date', 500).catch(() => []),
+        base44.entities.User.list('-created_date', 200),
+        base44.entities.Journal.list()
       ]);
+      const journalData = allJournals.find(j => j.id === journalId);
       setJournal(journalData);
       setManuscripts(journalManuscripts);
       setAllManuscripts(allJournalManuscripts);
