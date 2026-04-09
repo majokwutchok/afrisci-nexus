@@ -28,7 +28,7 @@ export default function ContactPage() {
     try {
       // Send email using the Core.SendEmail integration
       await base44.integrations.Core.SendEmail({
-        to: 'editorial@afriscinexus.org',
+        to: 'editorial@afriscinexus.com',
         subject: `[${formData.category}] ${formData.subject}`,
         body: `Name: ${formData.name}
 Email: ${formData.email}
@@ -79,36 +79,38 @@ ${formData.message}`
                     <h3 className="font-bold text-slate-900">Email</h3>
                   </div>
                   <p className="text-slate-600 text-sm mb-2">General Inquiries:</p>
-                  <a href="mailto:info@afriscinexus.org" className="text-teal-600 hover:text-teal-700 font-medium">
-                    info@afriscinexus.org
+                  <a href="mailto:info@afriscinexus.com" className="text-teal-600 hover:text-teal-700 font-medium">
+                    info@afriscinexus.com
                   </a>
                   <p className="text-slate-600 text-sm mt-3 mb-2">Editorial:</p>
-                  <a href="mailto:editorial@afriscinexus.org" className="text-teal-600 hover:text-teal-700 font-medium">
-                    editorial@afriscinexus.org
+                  <a href="mailto:editorial@afriscinexus.com" className="text-teal-600 hover:text-teal-700 font-medium">
+                    editorial@afriscinexus.com
                   </a>
                 </div>
 
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                      <Phone className="w-5 h-5 text-emerald-600" />
-                    </div>
-                    <h3 className="font-bold text-slate-900">Phone</h3>
-                  </div>
-                  <p className="text-slate-700 font-medium">+254 700 123 456</p>
-                  <p className="text-slate-500 text-sm">Monday - Friday, 9 AM - 5 PM EAT</p>
-                </div>
+
 
                 <div>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                       <MapPin className="w-5 h-5 text-purple-600" />
                     </div>
-                    <h3 className="font-bold text-slate-900">Location</h3>
+                    <h3 className="font-bold text-slate-900">Locations</h3>
                   </div>
-                  <p className="text-slate-700">AfriSci Nexus</p>
-                  <p className="text-slate-600 text-sm">University Way, Nairobi</p>
-                  <p className="text-slate-600 text-sm">Kenya, East Africa</p>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-slate-700 font-medium text-sm">University of Juba</p>
+                      <p className="text-slate-500 text-xs">University Road, Juba, South Sudan, East Africa</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-700 font-medium text-sm">Dr. John Garang University of Science & Technology</p>
+                      <p className="text-slate-500 text-xs">Bor, South Sudan, East Africa</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-700 font-medium text-sm">Perth City</p>
+                      <p className="text-slate-500 text-xs">Western Australia</p>
+                    </div>
+                  </div>
                 </div>
 
                 <div>
