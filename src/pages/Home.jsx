@@ -31,17 +31,17 @@ export default function HomePage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [journalData, publicationData, readershipData, userData] = await Promise.all([
-          base44.entities.Journal.list('-created_date', 200),
-          base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 20),
-          base44.entities.ReadershipStats.list('-view_date', 500),
-          base44.entities.User.filter({ reviewer_status: 'active' }, '-created_date', 200),
+        const [journalData, publicationData, readershipData, reviewerData] = await Promise.all([
+          base44.entities.Journal.filter({ status: 'active' }, '-created_date', 500),
+          base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 500),
+          base44.entities.ReadershipStats.list('-view_date', 2000),
+          base44.entities.ReviewerProfile.filter({ status: 'active' }, '-created_date', 500),
         ]);
         setData({
           journals: journalData,
           publications: publicationData,
           stats: readershipData,
-          users: userData,
+          users: reviewerData,
         });
       } catch (error) {
         console.error("Failed to fetch homepage data:", error);
