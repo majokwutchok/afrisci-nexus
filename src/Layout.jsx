@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
@@ -264,17 +265,28 @@ const mainMenuItems = [
   }
 ];
 
+function DropdownPortal({ anchorRef, open, children }) {
+  const [coords, setCoords] = React.useState({ top: 0, left: 0 });
+
+  React.useEffect(() => {
+    if (open && anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setCoords({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+    }
+  }, [open, anchorRef]);
+
+  if (!open) return null;
+  return ReactDOM.createPortal(
+    <div style={{ position: 'absolute', top: coords.top + 4, left: coords.left, zIndex: 9999 }}>
+      {children}
+    </div>,
+    document.body
+  );
+}
+
 function NavDropdown({ menu }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
-
-  React.useEffect(() => {
-    const handleClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
 
   return (
     <div
@@ -293,8 +305,12 @@ function NavDropdown({ menu }) {
         {menu.highlight && <Badge className="bg-teal-500 text-white text-xs ml-1">Popular</Badge>}
         <svg className="w-3 h-3 ml-1 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
       </button>
-      {open && (
-        <div className="absolute top-full left-0 z-50 mt-1 w-96 bg-white rounded-xl shadow-2xl border border-slate-200 border-t-4 border-t-teal-500 p-6">
+      <DropdownPortal anchorRef={ref} open={open}>
+        <div
+          className="w-96 bg-white rounded-xl shadow-2xl border border-slate-200 border-t-4 border-t-teal-500 p-6"
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+        >
           <div className="grid gap-3">
             <div className="mb-1">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
@@ -335,7 +351,7 @@ function NavDropdown({ menu }) {
             ))}
           </div>
         </div>
-      )}
+      </DropdownPortal>
     </div>
   );
 }
@@ -343,14 +359,6 @@ function NavDropdown({ menu }) {
 function EditorialDropdown({ user, userRoles }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
-
-  React.useEffect(() => {
-    const handleClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
 
   return (
     <div ref={ref} className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
@@ -360,8 +368,12 @@ function EditorialDropdown({ user, userRoles }) {
         <Badge className="bg-amber-400 text-amber-900 text-xs ml-1">Staff</Badge>
         <svg className="w-3 h-3 ml-1 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
       </button>
-      {open && (
-        <div className="absolute top-full left-0 z-50 mt-1 w-80 bg-white rounded-xl shadow-2xl border border-slate-200 border-t-4 border-t-amber-500 p-6">
+      <DropdownPortal anchorRef={ref} open={open}>
+        <div
+          className="w-80 bg-white rounded-xl shadow-2xl border border-slate-200 border-t-4 border-t-amber-500 p-6"
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+        >
           <div className="grid gap-3">
             <div className="mb-1">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
@@ -390,7 +402,7 @@ function EditorialDropdown({ user, userRoles }) {
             )}
           </div>
         </div>
-      )}
+      </DropdownPortal>
     </div>
   );
 }
@@ -450,9 +462,9 @@ export default function Layout({ children, currentPageName }) {
         `}
       </style>
 
-      <div className="sticky top-0 z-50">
+      <div className="sticky top-0 z-50 overflow-visible">
         {/* Visual Header Section */}
-        <header className="relative bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white overflow-hidden shadow-xl">
+        <header className="relative bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white shadow-xl">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
@@ -533,7 +545,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           {/* Navigation Menu */}
-          <div className="relative z-20 bg-white/5 backdrop-blur-md border-t border-white/10">
+          <div className="relative z-[100] bg-white/5 border-t border-white/10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="hidden lg:flex items-center space-x-1 py-4">
                     {/* Home Link */}
@@ -632,7 +644,7 @@ export default function Layout({ children, currentPageName }) {
       </header>
 
       {/* Breadcrumb Navigation */}
-      <nav className="bg-white border-b border-slate-200 shadow-sm">
+      <nav className="bg-white border-b border-slate-200 shadow-sm relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-2 text-sm py-3">
             <Link to={createPageUrl("Home")} className="text-slate-500 hover:text-slate-700 transition-colors">
