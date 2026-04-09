@@ -92,8 +92,8 @@ export default function JournalDetailPage() {
       const [journalManuscripts, allJournalManuscripts, allUsers, allJournals] = await Promise.all([
         base44.entities.Manuscript.filter({ journal_id: journalId, status: 'published' }, '-publication_date', 20).catch(() => []),
         base44.entities.Manuscript.filter({ journal_id: journalId }, '-created_date', 500).catch(() => []),
-        base44.entities.User.list('-created_date', 200),
-        base44.entities.Journal.list()
+        base44.entities.User.list('-created_date', 200).catch(() => []),
+        base44.entities.Journal.list('-created_date', 200).catch(() => [])
       ]);
       const journalData = allJournals.find(j => j.id === journalId);
       setJournal(journalData);
