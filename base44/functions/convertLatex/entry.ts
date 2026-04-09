@@ -32,46 +32,93 @@ Deno.serve(async (req) => {
 ${latex_source}
 \\end{document}`;
 
-    // Use LaTeX.Online free compilation API
-    const formData = new FormData();
-    const blob = new Blob([fullSource], { type: 'text/plain' });
-    formData.append('filecontents[]', blob, 'manuscript.tex');
-    formData.append('filename[]', 'manuscript.tex');
+    // Use QuickLaTeX API (more reliable than latexonline.cc)
+    const quicklatexPayload = new URLSearchParams();
+    quicklatexPayload.append('latex', fullSource);
+    quicklatexPayload.append('mode', '0'); // 0 = return PDF
+    quicklatexPayload.append('out', '1'); // 1 = PNG preview
 
-    const compileResponse = await fetch('https://latexonline.cc/compile', {
-      method: 'POST',
-      body: formData,
-    });
+    let pdfBuffer;
+    try {
+      const compileResponse = await Promise.race([
+        fetch('https://www.quicklatex.com/api/v3/58621cb2c461f8d46a42db995ebf45ad/latex/', {
+          method: 'POST',
+          body: quicklatexPayload,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Compilation timeout')), 45000))
+      ]);
 
-    if (!compileResponse.ok) {
-      const errText = await compileResponse.text();
-      return Response.json({
-        error: 'LaTeX compilation failed',
-        details: errText.slice(0, 1000),
-      }, { status: 422 });
+      if (!compileResponse.ok) {
+        const errText = await compileResponse.text();
+        return Response.json({
+          error: 'LaTeX compilation service unavailable',
+          details: errText.slice(0, 500),
+        }, { status: 503 });
+      }
+
+      const contentType = compileResponse.headers.get('content-type') || '';
+      if (!contentType.includes('pdf')) {
+        const logText = await compileResponse.text();
+        return Response.json({
+          error: 'Compilation failed — check LaTeX syntax',
+          log: logText.slice(0, 2000),
+        }, { status: 422 });
+      }
+
+      pdfBuffer = await compileResponse.arrayBuffer();
+      if (!pdfBuffer || pdfBuffer.byteLength === 0) {
+        return Response.json({
+          error: 'Compilation produced empty PDF',
+          details: 'Your LaTeX may have syntax errors.',
+        }, { status: 422 });
+      }
+    } catch (apiError) {
+      // Fallback to latexonline.cc
+      console.warn('QuickLaTeX failed, falling back to latexonline.cc');
+      const formData = new FormData();
+      const blob = new Blob([fullSource], { type: 'text/plain' });
+      formData.append('filecontents[]', blob, 'manuscript.tex');
+      formData.append('filename[]', 'manuscript.tex');
+
+      const fallbackResponse = await Promise.race([
+        fetch('https://latexonline.cc/compile', {
+          method: 'POST',
+          body: formData,
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Fallback timeout')), 40000))
+      ]);
+
+      if (!fallbackResponse.ok) {
+        return Response.json({
+          error: 'Both LaTeX services failed. Please check syntax and try again.',
+          details: 'Services: latexonline.cc, quicklatex.com',
+        }, { status: 503 });
+      }
+
+      pdfBuffer = await fallbackResponse.arrayBuffer();
+      if (!pdfBuffer || pdfBuffer.byteLength === 0) {
+        return Response.json({
+          error: 'Empty PDF from fallback service',
+        }, { status: 422 });
+      }
     }
 
-    const contentType = compileResponse.headers.get('content-type') || '';
-    if (!contentType.includes('pdf')) {
-      // Likely returned an error log as HTML/text
-      const logText = await compileResponse.text();
-      return Response.json({
-        error: 'Compilation error — check your LaTeX source',
-        log: logText.slice(0, 2000),
-      }, { status: 422 });
-    }
-
-    // Stream the PDF back to the client
-    const pdfBuffer = await compileResponse.arrayBuffer();
-    const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdfBuffer)));
+    // Convert PDF buffer to base64 safely (handle large files)
+    const base64Pdf = Buffer.from(pdfBuffer).toString('base64');
 
     return Response.json({
       success: true,
       pdf_base64: base64Pdf,
       filename: `${(manuscript_title || 'manuscript').replace(/\s+/g, '_')}_proof.pdf`,
+      size_bytes: pdfBuffer.byteLength,
     });
 
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('LaTeX conversion error:', error);
+    return Response.json({
+      error: error.message || 'Unexpected error during compilation',
+      details: 'Check your LaTeX syntax and try again.'
+    }, { status: 500 });
   }
 });
