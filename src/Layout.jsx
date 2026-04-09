@@ -216,16 +216,10 @@ const mainMenuItems = [
         badge: "Apply Now"
       },
       { 
-        title: "Editor Dashboard", 
+        title: "Editor Login", 
         url: createPageUrl("EditorDashboard"), 
-        description: "Manage journal submissions",
-        icon: Edit
-      },
-      { 
-        title: "Editorial Board", 
-        url: createPageUrl("Editorial"), 
-        description: "Meet our editorial team",
-        icon: Users
+        description: "Sign in to access your editor dashboard",
+        icon: ShieldCheck
       }
     ]
   },
