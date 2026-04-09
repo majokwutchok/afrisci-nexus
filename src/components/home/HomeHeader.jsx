@@ -241,14 +241,15 @@ export default function HomeHeader() {
               <div className="flex items-center gap-2">
                 {user ? (
                   <>
-                    <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+                    <Link to={getDashboardLinks()[0]?.url || createPageUrl('MyManuscripts')}
+                      className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/20 hover:border-teal-400/50 transition-colors cursor-pointer">
                       <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center">
                         <UserIcon className="w-3 h-3 text-white" />
                       </div>
                       <span className="text-white text-sm font-semibold max-w-[140px] truncate">{user.full_name}</span>
                       {user.role === 'admin' && <Badge className="bg-red-500 text-white text-xs">Admin</Badge>}
                       {user.editor_roles?.length > 0 && <Badge className="bg-sky-400 text-white text-xs">Editor</Badge>}
-                    </div>
+                    </Link>
                     {getDashboardLinks().map(({ label, url, icon: Icon }) => (
                       <Link key={label} to={url}
                         className="flex items-center gap-1.5 text-teal-200 hover:text-white text-xs font-medium px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors border border-white/10 hover:border-white/30">
