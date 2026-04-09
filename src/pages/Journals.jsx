@@ -125,7 +125,7 @@ export default function Journals() {
   const loadJournals = async () => {
     setIsLoading(true);
     try {
-      const data = await base44.entities.Journal.list('-created_date');
+      const data = await base44.entities.Journal.list('-created_date', 200);
       setJournals(data);
     } catch (error) {
       console.error("Error loading journals:", error);
