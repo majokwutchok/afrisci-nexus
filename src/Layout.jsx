@@ -26,13 +26,7 @@ import {
   Handshake
 } from "lucide-react";
 import AfriSciLogo from "./components/brand/AfriSciLogo";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Footer from "./components/layout/Footer"; // Import the new Footer component
@@ -270,6 +264,137 @@ const mainMenuItems = [
   }
 ];
 
+function NavDropdown({ menu }) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        className={`flex items-center gap-2 text-white hover:text-teal-300 font-medium px-4 py-2 rounded-lg hover:bg-white/10 transition-colors ${
+          menu.highlight ? 'bg-white/5 border border-white/20' : ''
+        }`}
+      >
+        <menu.icon className="w-4 h-4" />
+        {menu.title}
+        {menu.highlight && <Badge className="bg-teal-500 text-white text-xs ml-1">Popular</Badge>}
+        <svg className="w-3 h-3 ml-1 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 z-50 mt-1 w-96 bg-white rounded-xl shadow-2xl border border-slate-200 border-t-4 border-t-teal-500 p-6">
+          <div className="grid gap-3">
+            <div className="mb-1">
+              <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                <menu.icon className="w-5 h-5 text-teal-600" />
+                {menu.title}
+              </h3>
+            </div>
+            {menu.items.map((item) => (
+              <Link
+                key={item.title}
+                to={item.url}
+                onClick={() => setOpen(false)}
+                className={`block p-3 rounded-lg hover:bg-slate-50 transition-all duration-200 border border-transparent hover:border-slate-200 group ${
+                  item.featured ? 'menu-item-featured' : ''
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-lg ${item.featured ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-teal-100'} transition-colors flex-shrink-0`}>
+                    <item.icon className={`w-4 h-4 ${item.featured ? 'text-white' : 'text-slate-600 group-hover:text-teal-600'}`} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h4 className={`font-semibold text-sm ${item.featured ? 'text-white' : 'text-slate-900'}`}>
+                        {item.title}
+                      </h4>
+                      {item.badge && (
+                        <Badge className={`text-xs ${item.featured ? 'bg-white/20 text-white' : 'bg-teal-100 text-teal-800'}`}>
+                          {item.badge}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className={`text-xs ${item.featured ? 'text-white/80' : 'text-slate-500'}`}>
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EditorialDropdown({ user, userRoles }) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <button className="flex items-center gap-2 text-amber-300 hover:text-amber-200 font-medium px-4 py-2 rounded-lg bg-amber-500/20 border border-amber-400/30">
+        <ShieldCheck className="w-4 h-4" />
+        Editorial
+        <Badge className="bg-amber-400 text-amber-900 text-xs ml-1">Staff</Badge>
+        <svg className="w-3 h-3 ml-1 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 z-50 mt-1 w-80 bg-white rounded-xl shadow-2xl border border-slate-200 border-t-4 border-t-amber-500 p-6">
+          <div className="grid gap-3">
+            <div className="mb-1">
+              <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-amber-600" />
+                Editorial Access
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">Manage journals and peer review</p>
+            </div>
+            {user.reviewer_status === 'active' && (
+              <Link to={createPageUrl("ReviewerDashboard")} onClick={() => setOpen(false)} className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-colors">
+                <div className="p-2 bg-blue-100 rounded-lg"><Eye className="w-4 h-4 text-blue-600" /></div>
+                <div><h4 className="font-semibold text-sm text-slate-900">Reviewer Dashboard</h4><p className="text-xs text-slate-500">Manage review assignments</p></div>
+              </Link>
+            )}
+            {(userRoles.includes('editor') || userRoles.includes('admin')) && (
+              <Link to={createPageUrl("EditorDashboard")} onClick={() => setOpen(false)} className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-colors">
+                <div className="p-2 bg-teal-100 rounded-lg"><Edit className="w-4 h-4 text-teal-600" /></div>
+                <div><h4 className="font-semibold text-sm text-slate-900">Editor Dashboard</h4><p className="text-xs text-slate-500">Manage journal submissions</p></div>
+              </Link>
+            )}
+            {userRoles.includes('admin') && (
+              <Link to={createPageUrl("AdminDashboard")} onClick={() => setOpen(false)} className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-colors">
+                <div className="p-2 bg-red-100 rounded-lg"><ShieldCheck className="w-4 h-4 text-red-600" /></div>
+                <div><h4 className="font-semibold text-sm text-slate-900">Admin Dashboard</h4><p className="text-xs text-slate-500">Platform administration</p></div>
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [user, setUser] = React.useState(null);
@@ -410,11 +535,9 @@ export default function Layout({ children, currentPageName }) {
           {/* Navigation Menu */}
           <div className="relative z-20 bg-white/5 backdrop-blur-md border-t border-white/10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="hidden lg:block">
-                <NavigationMenu>
-                  <NavigationMenuList className="flex items-center space-x-1 py-4">
+              <div className="hidden lg:flex items-center space-x-1 py-4">
                     {/* Home Link */}
-                    <NavigationMenuItem>
+                    <div>
                       <Link
                         to={createPageUrl("Home")}
                         className="flex items-center gap-2 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors font-medium"
@@ -422,131 +545,16 @@ export default function Layout({ children, currentPageName }) {
                         <Home className="w-4 h-4" />
                         Home
                       </Link>
-                    </NavigationMenuItem>
+                    </div>
 
                     {mainMenuItems.map((menu) => (
-                      <NavigationMenuItem key={menu.title}>
-                        <Link to={menu.items[0]?.url || '#'} className="w-full">
-                          <NavigationMenuTrigger className={`flex items-center gap-2 text-white hover:text-teal-300 font-medium px-4 py-2 rounded-lg hover:bg-white/10 transition-colors ${
-                            menu.highlight ? 'bg-white/5 border border-white/20' : ''
-                          }`}>
-                            <menu.icon className="w-4 h-4" />
-                            {menu.title}
-                            {menu.highlight && <Badge className="bg-teal-500 text-white text-xs ml-2">Popular</Badge>}
-                          </NavigationMenuTrigger>
-                        </Link>
-                        <NavigationMenuContent>
-                          <div className="w-96 p-6 bg-white dropdown-shadow border-t-4 border-teal-500">
-                            <div className="grid gap-4">
-                              <div className="mb-2">
-                                <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-                                  <menu.icon className="w-5 h-5 text-teal-600" />
-                                  {menu.title}
-                                </h3>
-                                <p className="text-sm text-slate-500 mt-1">
-                                  {menu.title === 'About' && 'Learn about our mission and team'}
-                                  {menu.title === 'Browse' && 'Discover research across all disciplines'}
-                                  {menu.title === 'For Authors' && 'Tools and resources for researchers'}
-                                  {menu.title === 'For Reviewers' && 'Join our peer review community'}
-                                </p>
-                              </div>
-                              {menu.items.map((item) => (
-                                <Link
-                                  key={item.title}
-                                  to={item.url}
-                                  className={`block p-4 rounded-lg hover:bg-slate-50 transition-all duration-200 border border-transparent hover:border-slate-200 group ${
-                                    item.featured ? 'menu-item-featured' : ''
-                                  }`}
-                                >
-                                  <div className="flex items-start gap-3">
-                                    <div className={`p-2 rounded-lg ${item.featured ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-teal-100'} transition-colors`}>
-                                      <item.icon className={`w-4 h-4 ${item.featured ? 'text-white' : 'text-slate-600 group-hover:text-teal-600'}`} />
-                                    </div>
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-1">
-                                        <h4 className={`font-semibold ${item.featured ? 'text-white' : 'text-slate-900'} group-hover:text-teal-700 transition-colors`}>
-                                          {item.title}
-                                        </h4>
-                                        {item.badge && (
-                                          <Badge className={`text-xs ${item.featured ? 'bg-white/20 text-white' : 'bg-teal-100 text-teal-800'}`}>
-                                            {item.badge}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      <p className={`text-sm ${item.featured ? 'text-white/80' : 'text-slate-600'} transition-colors`}>
-                                        {item.description}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
+                      <NavDropdown key={menu.title} menu={menu} />
                     ))}
 
-                    {/* Role-based Navigation */}
+                    {/* Role-based Editorial menu */}
                     {user && (userRoles.includes('admin') || userRoles.includes('editor') || user.reviewer_status === 'active') && (
-                      <NavigationMenuItem>
-                        <NavigationMenuTrigger className="flex items-center gap-2 text-amber-300 hover:text-amber-200 font-medium px-4 py-2 rounded-lg bg-amber-500/20 border border-amber-400/30">
-                          <ShieldCheck className="w-4 h-4" />
-                          Editorial
-                          <Badge className="bg-amber-400 text-amber-900 text-xs ml-2">Staff</Badge>
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent>
-                          <div className="w-80 p-6 bg-white dropdown-shadow border-t-4 border-amber-500">
-                            <div className="grid gap-4">
-                              <div className="mb-2">
-                                <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-                                  <ShieldCheck className="w-5 h-5 text-amber-600" />
-                                  Editorial Access
-                                </h3>
-                                <p className="text-sm text-slate-500 mt-1">Manage journals and peer review</p>
-                              </div>
-                              
-                              {user.reviewer_status === 'active' && (
-                                <Link to={createPageUrl("ReviewerDashboard")} className="flex items-center gap-3 p-4 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200">
-                                  <div className="p-2 bg-blue-100 rounded-lg">
-                                    <Eye className="w-4 h-4 text-blue-600" />
-                                  </div>
-                                  <div>
-                                    <h4 className="font-semibold text-slate-900">Reviewer Dashboard</h4>
-                                    <p className="text-sm text-slate-600">Manage review assignments</p>
-                                  </div>
-                                </Link>
-                              )}
-                              
-                              {(userRoles.includes('editor') || userRoles.includes('admin')) && (
-                                <Link to={createPageUrl("EditorDashboard")} className="flex items-center gap-3 p-4 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200">
-                                  <div className="p-2 bg-teal-100 rounded-lg">
-                                    <Edit className="w-4 h-4 text-teal-600" />
-                                  </div>
-                                  <div>
-                                    <h4 className="font-semibold text-slate-900">Editor Dashboard</h4>
-                                    <p className="text-sm text-slate-600">Manage journal submissions</p>
-                                  </div>
-                                </Link>
-                              )}
-                              
-                              {userRoles.includes('admin') && (
-                                <Link to={createPageUrl("AdminDashboard")} className="flex items-center gap-3 p-4 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200">
-                                  <div className="p-2 bg-red-100 rounded-lg">
-                                    <ShieldCheck className="w-4 h-4 text-red-600" />
-                                  </div>
-                                  <div>
-                                    <h4 className="font-semibold text-slate-900">Admin Dashboard</h4>
-                                    <p className="text-sm text-slate-600">Platform administration</p>
-                                  </div>
-                                </Link>
-                              )}
-                            </div>
-                          </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
+                      <EditorialDropdown user={user} userRoles={userRoles} />
                     )}
-                  </NavigationMenuList>
-                </NavigationMenu>
               </div>
             </div>
           </div>
