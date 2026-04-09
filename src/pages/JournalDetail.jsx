@@ -8,17 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  BookOpen,
-  Upload,
-  Globe,
-  Award,
-  CheckCircle,
-  FileText,
-  Users,
-  Calendar,
-  TrendingUp,
-  DollarSign,
-  BarChart3
+  BookOpen, Upload, Globe, Award, CheckCircle, FileText, Users,
+  DollarSign, ChevronLeft, ChevronRight, Mail, Building2,
+  ExternalLink, Quote, Download, Eye, Info, Microscope
 } from 'lucide-react';
 import JournalMetrics from '../components/journal/JournalMetrics';
 
@@ -58,17 +50,43 @@ const ArticleCard = ({ manuscript }) => (
 );
 
 const EditorCard = ({ editor }) => (
-  <div className="flex items-start gap-4 p-4 bg-white rounded-lg border border-slate-200">
-    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-      {editor.full_name?.charAt(0) || 'E'}
+  <div className="flex items-start gap-4 p-5 bg-white rounded-xl border border-slate-200 hover:shadow-md transition-shadow">
+    <div className="flex-shrink-0">
+      {editor.profile_photo_url ? (
+        <img src={editor.profile_photo_url} alt={editor.full_name} className="w-14 h-14 rounded-full object-cover" />
+      ) : (
+        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+          {editor.full_name?.charAt(0) || 'E'}
+        </div>
+      )}
     </div>
-    <div>
+    <div className="flex-1 min-w-0">
       <h4 className="font-semibold text-slate-900">{editor.full_name}</h4>
-      <p className="text-sm text-slate-600">{editor.affiliation || 'Affiliation not provided'}</p>
-      <p className="text-xs text-slate-500 mt-1">{editor.country || 'Country not specified'}</p>
+      {editor.academic_title && <p className="text-xs text-blue-600 font-medium mt-0.5">{editor.academic_title}</p>}
+      {editor.affiliation && (
+        <p className="text-sm text-slate-600 flex items-center gap-1 mt-1">
+          <Building2 className="w-3 h-3 flex-shrink-0" /> {editor.affiliation}
+        </p>
+      )}
+      {editor.country && <p className="text-xs text-slate-500 mt-0.5">{editor.country}</p>}
+      {editor.research_interests?.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {editor.research_interests.slice(0, 3).map(r => (
+            <Badge key={r} variant="secondary" className="text-xs">{r}</Badge>
+          ))}
+        </div>
+      )}
+      {editor.google_scholar_url && (
+        <a href={editor.google_scholar_url} target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 hover:underline">
+          <ExternalLink className="w-3 h-3" /> Google Scholar
+        </a>
+      )}
     </div>
   </div>
 );
+
+const ARTICLES_PER_PAGE = 10;
 
 export default function JournalDetailPage() {
   const [searchParams] = useSearchParams();
@@ -79,30 +97,25 @@ export default function JournalDetailPage() {
   const [allManuscripts, setAllManuscripts] = useState([]);
   const [editors, setEditors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [articlePage, setArticlePage] = useState(1);
 
   useEffect(() => {
-    if (journalId) {
-      loadJournalData();
-    }
+    if (journalId) loadJournalData();
   }, [journalId]);
 
   const loadJournalData = async () => {
     setIsLoading(true);
-    try {
-      const [journalManuscripts, allJournalManuscripts, allUsers, allJournals] = await Promise.all([
-        base44.entities.Manuscript.filter({ journal_id: journalId, status: 'published' }, '-publication_date', 20).catch(() => []),
-        base44.entities.Manuscript.filter({ journal_id: journalId }, '-created_date', 500).catch(() => []),
-        base44.entities.User.list('-created_date', 200).catch(() => []),
-        base44.entities.Journal.list('-created_date', 200).catch(() => [])
-      ]);
-      const journalData = allJournals.find(j => j.id === journalId);
-      setJournal(journalData);
-      setManuscripts(journalManuscripts);
-      setAllManuscripts(allJournalManuscripts);
-      setEditors(allUsers.filter(u => u.editor_roles?.includes(journalId)));
-    } catch (error) {
-      console.error("Error loading journal data:", error);
-    }
+    const [allJournalManuscripts, allJournals, approvedEditors] = await Promise.all([
+      base44.entities.Manuscript.filter({ journal_id: journalId }, '-publication_date', 500).catch(() => []),
+      base44.entities.Journal.list('-created_date', 200).catch(() => []),
+      base44.entities.RoleApplication.filter({ role: 'editor', status: 'approved' }).catch(() => [])
+    ]);
+    const journalData = allJournals.find(j => j.id === journalId);
+    const published = allJournalManuscripts.filter(m => m.status === 'published');
+    setJournal(journalData);
+    setManuscripts(published);
+    setAllManuscripts(allJournalManuscripts);
+    setEditors(approvedEditors);
     setIsLoading(false);
   };
 
@@ -223,62 +236,97 @@ export default function JournalDetailPage() {
             <TabsTrigger value="metrics">Metrics</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-8">
+          <TabsContent value="overview" className="space-y-6">
+            {/* About section */}
             <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-6 h-6 text-teal-600" />
+                  <Info className="w-6 h-6 text-teal-600" />
                   About This Journal
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold text-lg text-slate-900 mb-3">Description</h3>
-                  <p className="text-slate-700 leading-relaxed">{journal.description}</p>
-                </div>
+                <p className="text-slate-700 leading-relaxed text-base">{journal.description}</p>
 
-                <div className="grid md:grid-cols-2 gap-6 pt-6 border-t">
-                  <div>
-                    <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
-                      <Users className="w-4 h-4 text-teal-600" />
-                      Editor-in-Chief
-                    </h4>
-                    <p className="text-slate-700 font-medium">{journal.editor_in_chief || 'To be announced'}</p>
-                    {(journal.assistant_editors || []).length > 0 && (
-                      <div className="mt-3">
-                        <h5 className="text-sm font-semibold text-slate-600 mb-1">Assistant / Associate Editors</h5>
-                        <ul className="space-y-1">
-                          {journal.assistant_editors.map((name, i) => (
-                            <li key={i} className="text-sm text-slate-700">• {name}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                {journal.aims_and_scope && (
+                  <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <h3 className="font-semibold text-slate-900 mb-2">Aims & Scope</h3>
+                    <p className="text-slate-700 leading-relaxed text-sm">{journal.aims_and_scope}</p>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
-                      <Globe className="w-4 h-4 text-teal-600" />
-                      Supported Languages
-                    </h4>
-                    <p className="text-slate-700">
-                      {journal.languages?.join(', ') || 'English'}
-                    </p>
+                )}
+
+                <div className="grid md:grid-cols-3 gap-4 pt-2">
+                  <div className="bg-teal-50 p-4 rounded-xl border border-teal-200">
+                    <p className="text-xs font-semibold text-teal-600 uppercase tracking-wide mb-1">Category</p>
+                    <p className="font-semibold text-slate-900">{categoryLabels[journal.category]}</p>
+                  </div>
+                  <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Languages</p>
+                    <p className="font-semibold text-slate-900">{journal.languages?.join(', ') || 'English'}</p>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
+                    <p className="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-1">Access Type</p>
+                    <p className="font-semibold text-slate-900">{journal.is_open_access ? 'Open Access' : 'Subscription'}</p>
                   </div>
                 </div>
 
-                {journal.is_open_access && (
-                  <div className="bg-emerald-50 p-6 rounded-lg border border-emerald-200">
-                    <h4 className="font-semibold text-emerald-900 mb-2 flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5" />
-                      Open Access Journal
-                    </h4>
-                    <p className="text-emerald-800">
-                      All articles published in this journal are immediately available to read, download, and share under open access terms, ensuring maximum visibility and impact for your research.
-                    </p>
+                {journal.keywords?.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-slate-900 mb-2">Keywords</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {journal.keywords.map(kw => (
+                        <Badge key={kw} variant="secondary" className="text-xs">{kw}</Badge>
+                      ))}
+                    </div>
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Editor-in-Chief spotlight */}
+            {journal.editor_in_chief && (
+              <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-6 h-6 text-teal-600" />
+                    Editorial Leadership
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                      {journal.editor_in_chief.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-blue-500 uppercase tracking-wide">Editor-in-Chief</p>
+                      <p className="text-lg font-bold text-slate-900">{journal.editor_in_chief}</p>
+                    </div>
+                  </div>
+                  {(journal.assistant_editors || []).length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-slate-700 mb-2 text-sm">Associate / Assistant Editors</h4>
+                      <div className="grid md:grid-cols-2 gap-2">
+                        {journal.assistant_editors.map((name, i) => (
+                          <div key={i} className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+                            <div className="w-7 h-7 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0">{name.charAt(0)}</div>
+                            <span className="text-sm text-slate-700">{name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {journal.is_open_access && (
+              <div className="bg-emerald-50 p-5 rounded-xl border border-emerald-200">
+                <h4 className="font-semibold text-emerald-900 mb-1 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5" /> Open Access Journal
+                </h4>
+                <p className="text-emerald-800 text-sm">All articles are immediately available to read, download, and share — ensuring maximum visibility and impact for your research.</p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="aims" className="space-y-6">
@@ -405,41 +453,47 @@ export default function JournalDetailPage() {
                   Editorial Board
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
+                {/* Editor-in-Chief from Journal record */}
+                {journal.editor_in_chief && (
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-200">
+                    <p className="text-xs font-semibold text-blue-500 uppercase tracking-wide mb-1">Editor-in-Chief</p>
+                    <p className="text-lg font-bold text-slate-900">{journal.editor_in_chief}</p>
+                  </div>
+                )}
+
+                {/* Assistant editors from journal record */}
+                {(journal.assistant_editors || []).length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-slate-900 mb-3">Associate / Assistant Editors</h3>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      {journal.assistant_editors.map((name, i) => (
+                        <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                          <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{name.charAt(0)}</div>
+                          <span className="text-sm font-medium text-slate-700">{name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Approved editors from RoleApplication */}
                 {editors.length > 0 ? (
-                  <div className="space-y-4">
-                    <div className="mb-6">
-                      <h3 className="font-semibold text-lg text-slate-900 mb-2">Editor-in-Chief</h3>
-                      <p className="text-slate-700 font-medium">{journal.editor_in_chief || 'To be announced'}</p>
-                    </div>
-                  {(journal.assistant_editors || []).length > 0 && (
-                    <div className="mb-6">
-                      <h3 className="font-semibold text-lg text-slate-900 mb-2">Assistant / Associate Editors</h3>
-                      <div className="grid md:grid-cols-2 gap-3">
-                        {journal.assistant_editors.map((name, i) => (
-                          <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                            <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{name.charAt(0)}</div>
-                            <span className="text-sm font-medium text-slate-700">{name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                    
-                    <div>
-                      <h3 className="font-semibold text-lg text-slate-900 mb-4">Associate Editors</h3>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {editors.map(editor => (
-                          <EditorCard key={editor.id} editor={editor} />
-                        ))}
-                      </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900 mb-4">Editorial Board Members</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {editors.map(editor => (
+                        <EditorCard key={editor.id} editor={editor} />
+                      ))}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-600">Editorial board information will be updated soon.</p>
-                  </div>
+                  !journal.editor_in_chief && (
+                    <div className="text-center py-8">
+                      <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                      <p className="text-slate-600">Editorial board information will be updated soon.</p>
+                    </div>
+                  )
                 )}
               </CardContent>
             </Card>
@@ -451,22 +505,54 @@ export default function JournalDetailPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-6 h-6 text-teal-600" />
-                    Recent Publications
+                    Published Articles
+                    <Badge variant="secondary" className="ml-2">{manuscripts.length}</Badge>
                   </CardTitle>
                   <Link to={createPageUrl("Publications")}>
-                    <Button variant="outline" size="sm">
-                      View All Articles
-                    </Button>
+                    <Button variant="outline" size="sm">View All</Button>
                   </Link>
                 </div>
               </CardHeader>
               <CardContent>
                 {manuscripts.length > 0 ? (
-                  <div className="space-y-4">
-                    {manuscripts.map(manuscript => (
-                      <ArticleCard key={manuscript.id} manuscript={manuscript} />
-                    ))}
-                  </div>
+                  <>
+                    <div className="space-y-4">
+                      {manuscripts
+                        .slice((articlePage - 1) * ARTICLES_PER_PAGE, articlePage * ARTICLES_PER_PAGE)
+                        .map(manuscript => (
+                          <ArticleCard key={manuscript.id} manuscript={manuscript} />
+                        ))}
+                    </div>
+                    {/* Pagination */}
+                    {manuscripts.length > ARTICLES_PER_PAGE && (
+                      <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-200">
+                        <p className="text-sm text-slate-500">
+                          Showing {(articlePage - 1) * ARTICLES_PER_PAGE + 1}–{Math.min(articlePage * ARTICLES_PER_PAGE, manuscripts.length)} of {manuscripts.length}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => setArticlePage(p => p - 1)} disabled={articlePage === 1}>
+                            <ChevronLeft className="w-4 h-4" /> Prev
+                          </Button>
+                          {Array.from({ length: Math.ceil(manuscripts.length / ARTICLES_PER_PAGE) }, (_, i) => i + 1)
+                            .filter(p => p === 1 || p === Math.ceil(manuscripts.length / ARTICLES_PER_PAGE) || Math.abs(p - articlePage) <= 1)
+                            .map((p, idx, arr) => (
+                              <React.Fragment key={p}>
+                                {idx > 0 && arr[idx - 1] !== p - 1 && <span className="text-slate-400">…</span>}
+                                <Button
+                                  variant={p === articlePage ? 'default' : 'outline'}
+                                  size="sm"
+                                  className="w-9"
+                                  onClick={() => setArticlePage(p)}
+                                >{p}</Button>
+                              </React.Fragment>
+                            ))}
+                          <Button variant="outline" size="sm" onClick={() => setArticlePage(p => p + 1)} disabled={articlePage === Math.ceil(manuscripts.length / ARTICLES_PER_PAGE)}>
+                            Next <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-8">
                     <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
