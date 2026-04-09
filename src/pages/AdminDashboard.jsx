@@ -28,6 +28,7 @@ import AllApplications from "../components/admin/AllApplications";
 import NewsManager from "../components/admin/NewsManager";
 import AdminProfileSetup from "../components/admin/AdminProfileSetup";
 import AdminManuscriptAccelerator from "../components/admin/AdminManuscriptAccelerator";
+import OAIPMHMonitor from "../components/admin/OAIPMHMonitor";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -141,6 +142,7 @@ export default function AdminDashboard() {
           <TabsList className="flex flex-wrap gap-1 h-auto p-1">
             <TabsTrigger value="admin_profile" className="text-emerald-700 font-semibold">👤 My Admin Profiles</TabsTrigger>
             <TabsTrigger value="accelerator" className="text-amber-700 font-semibold">⚡ Manuscript Accelerator</TabsTrigger>
+            <TabsTrigger value="oai_pmh" className="text-purple-700 font-semibold">📡 OAI-PMH Monitor</TabsTrigger>
             <TabsTrigger value="applications" className="text-blue-700 font-semibold">📋 Applications</TabsTrigger>
             <TabsTrigger value="news" className="text-teal-700 font-semibold">📰 News Manager</TabsTrigger>
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -159,6 +161,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="accelerator" className="mt-6">
             <AdminManuscriptAccelerator />
+          </TabsContent>
+
+          <TabsContent value="oai_pmh" className="mt-6">
+            <OAIPMHMonitor />
           </TabsContent>
 
           <TabsContent value="overview" className="mt-6">

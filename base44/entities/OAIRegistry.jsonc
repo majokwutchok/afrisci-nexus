@@ -1,0 +1,54 @@
+{
+  "name": "OAIRegistry",
+  "type": "object",
+  "properties": {
+    "harvester_name": {
+      "type": "string",
+      "description": "Name of the harvesting service/aggregator"
+    },
+    "verb": {
+      "type": "string",
+      "enum": [
+        "Identify",
+        "ListMetadataFormats",
+        "GetRecord",
+        "ListRecords",
+        "ListIdentifiers"
+      ],
+      "description": "OAI-PMH verb used in the request"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "HTTP User-Agent of the harvester"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP address of the harvester"
+    },
+    "records_returned": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of records returned in this request"
+    },
+    "response_time_ms": {
+      "type": "number",
+      "description": "Response time in milliseconds"
+    },
+    "status_code": {
+      "type": "number",
+      "description": "HTTP response status code"
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message if request failed"
+    },
+    "request_params": {
+      "type": "object",
+      "description": "OAI-PMH parameters sent in request"
+    }
+  },
+  "required": [
+    "harvester_name",
+    "verb"
+  ]
+}

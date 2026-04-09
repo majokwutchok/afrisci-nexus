@@ -1,6 +1,28 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const BATCH_SIZE = 100;
+
+async function logHarvesterRequest(base44, verb, params, recordsReturned, responseTimeMs, statusCode, error) {
+  const ua = globalThis.requestHeaders?.get('user-agent') || 'Unknown';
+  const harvesterName = ua.includes('BASE') ? 'BASE' : 
+                       ua.includes('OpenAIRE') ? 'OpenAIRE' : 
+                       ua.includes('CORE') ? 'CORE' : 
+                       ua.includes('Googlebot') ? 'Google Scholar' : ua.split('/')[0];
+  try {
+    await base44.asServiceRole.entities.OAIRegistry.create({
+      harvester_name: harvesterName,
+      verb,
+      user_agent: ua,
+      records_returned: recordsReturned || 0,
+      response_time_ms: responseTimeMs || 0,
+      status_code: statusCode,
+      error: error || null,
+      request_params: params
+    });
+  } catch (e) {
+    console.error('Failed to log harvester request:', e);
+  }
+}
 const BASE_URL = 'https://afrisci-nexus.com/oai';
 const REPOSITORY_NAME = 'AfriSci Nexus';
 const ADMIN_EMAIL = 'admin@afriscinexus.com';
@@ -136,6 +158,7 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const params = Object.fromEntries(url.searchParams);
   const verb = params.verb;
+  const startTime = Date.now();
 
   try {
     const base44 = createClientFromRequest(req);
@@ -151,6 +174,9 @@ Deno.serve(async (req) => {
         <deletedRecord>persistent</deletedRecord>
         <granularity>YYYY-MM-DD</granularity>
       </Identify>`;
+      const base44 = createClientFromRequest(req);
+      const responseTime = Date.now() - startTime;
+      await logHarvesterRequest(base44, verb, params, 1, responseTime, 200);
       return new Response(buildOAIResponse(verb, params, data), {
         headers: { 'Content-Type': 'application/xml; charset=utf-8' }
       });
@@ -263,6 +289,8 @@ Deno.serve(async (req) => {
       }
 
       data += `</${verb}>`;
+      const responseTime = Date.now() - startTime;
+      await logHarvesterRequest(base44, verb, params, pagedMss.length, responseTime, 200);
       return new Response(buildOAIResponse(verb, params, data), {
         headers: { 'Content-Type': 'application/xml; charset=utf-8' }
       });
