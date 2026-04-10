@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -274,6 +275,102 @@ const FAQS = [
   { q: "What file formats are accepted for submission?", a: "Manuscripts: Word (.docx) or PDF. Figures: TIFF, PNG, or EPS at 300 DPI. Supplementary data: any format. Final accepted manuscripts must be submitted as editable Word files for typesetting." },
 ];
 
+function ContactForm() {
+  const [form, setForm] = useState({ name: '', email: '', topic: '', message: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    await base44.integrations.Core.SendEmail({
+      to: 'authors@afrisco.org',
+      subject: `Author Enquiry: ${form.topic} — ${form.name}`,
+      body: `Name: ${form.name}\nEmail: ${form.email}\nTopic: ${form.topic}\n\nMessage:\n${form.message}`
+    });
+    setSubmitted(true);
+    setSubmitting(false);
+  };
+
+  if (submitted) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-10 text-center">
+        <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-slate-900 mb-2">Message Sent!</h3>
+        <p className="text-slate-600 text-sm mb-6">Thank you for reaching out. Our editorial team will respond within 2 business days.</p>
+        <Button variant="outline" onClick={() => { setSubmitted(false); setForm({ name: '', email: '', topic: '', message: '' }); }}>Send Another Message</Button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-200 shadow-md p-6 space-y-4">
+      <h3 className="font-bold text-slate-900 mb-1">Send Us a Message</h3>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1">Full Name *</label>
+          <input
+            required
+            type="text"
+            value={form.name}
+            onChange={e => setForm({ ...form, name: e.target.value })}
+            placeholder="Dr. Jane Doe"
+            className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1">Email Address *</label>
+          <input
+            required
+            type="email"
+            value={form.email}
+            onChange={e => setForm({ ...form, email: e.target.value })}
+            placeholder="jane@university.ac.ke"
+            className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+        </div>
+      </div>
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-1">Topic *</label>
+        <select
+          required
+          value={form.topic}
+          onChange={e => setForm({ ...form, topic: e.target.value })}
+          className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+        >
+          <option value="">Select a topic...</option>
+          <option>Submission Assistance</option>
+          <option>Manuscript Status Enquiry</option>
+          <option>Peer Review Process</option>
+          <option>Fee Waiver Request</option>
+          <option>Author Ethics Question</option>
+          <option>Technical Issue</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-1">Message *</label>
+        <textarea
+          required
+          value={form.message}
+          onChange={e => setForm({ ...form, message: e.target.value })}
+          placeholder="Describe your question or issue in as much detail as possible..."
+          rows={5}
+          className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+        />
+      </div>
+      <Button
+        type="submit"
+        disabled={submitting}
+        className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white"
+      >
+        {submitting ? 'Sending...' : 'Send Message'}
+      </Button>
+      <p className="text-xs text-slate-400 text-center">We respond within 2 business days. For urgent matters, email us directly at authors@afrisco.org</p>
+    </form>
+  );
+}
+
 export default function AuthorResources() {
   const [activePanel, setActivePanel] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
@@ -501,18 +598,60 @@ export default function AuthorResources() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="max-w-3xl mx-auto text-center bg-white p-10 rounded-2xl shadow-xl border border-slate-200/60">
-          <Users className="w-10 h-10 text-teal-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Need More Help?</h2>
-          <p className="text-slate-600 mb-6 max-w-xl mx-auto text-sm">
-            Our editorial team is here to support you throughout the publication process. Don't hesitate to reach out.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Button className="bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white">
-              Contact Editorial Team
-            </Button>
-            <Button variant="outline">Browse Help Centre</Button>
+        {/* Contact Section */}
+        <section className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <Users className="w-10 h-10 text-teal-600 mx-auto mb-3" />
+            <h2 className="text-2xl font-bold text-slate-900">Contact the Editorial Team</h2>
+            <p className="text-slate-600 mt-2 text-sm max-w-xl mx-auto">
+              Our editorial team is here to support you throughout the publication process. Fill in the form and we'll respond within 2 business days.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-5 gap-8">
+            {/* Contact Info */}
+            <div className="lg:col-span-2 space-y-5">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-6 space-y-5">
+                <h3 className="font-bold text-slate-900">Get in Touch</h3>
+                {[
+                  { icon: '📧', label: 'General Enquiries', value: 'authors@afrisco.org' },
+                  { icon: '📋', label: 'Submission Support', value: 'submit@afrisco.org' },
+                  { icon: '🧑‍⚖️', label: 'Ethics & Integrity', value: 'ethics@afrisco.org' },
+                  { icon: '⏱️', label: 'Response Time', value: 'Within 2 business days' },
+                ].map(item => (
+                  <div key={item.label} className="flex items-start gap-3">
+                    <span className="text-xl">{item.icon}</span>
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">{item.label}</p>
+                      <p className="text-sm text-slate-800 font-semibold">{item.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-gradient-to-br from-teal-600 to-emerald-600 rounded-2xl p-6 text-white">
+                <h4 className="font-bold mb-2">Quick Help Links</h4>
+                <ul className="space-y-2 text-sm">
+                  {[
+                    'Submission Guidelines',
+                    'Peer Review Process',
+                    'Fee Waivers & APCs',
+                    'Preprint Policy',
+                    'Author Ethics Guidelines',
+                  ].map(link => (
+                    <li key={link} className="flex items-center gap-2 hover:opacity-90 cursor-pointer">
+                      <ChevronRight className="w-4 h-4 text-teal-200" />
+                      <span>{link}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Contact Form */}
+            <div className="lg:col-span-3">
+              <ContactForm />
+            </div>
           </div>
         </section>
       </div>
