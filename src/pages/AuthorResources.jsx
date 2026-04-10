@@ -284,7 +284,7 @@ function ContactForm() {
     e.preventDefault();
     setSubmitting(true);
     await base44.integrations.Core.SendEmail({
-      to: 'authors@afrisco.org',
+      to: 'editorial@afriscinexus.com',
       subject: `Author Enquiry: ${form.topic} — ${form.name}`,
       body: `Name: ${form.name}\nEmail: ${form.email}\nTopic: ${form.topic}\n\nMessage:\n${form.message}`
     });
@@ -366,7 +366,7 @@ function ContactForm() {
       >
         {submitting ? 'Sending...' : 'Send Message'}
       </Button>
-      <p className="text-xs text-slate-400 text-center">We respond within 2 business days. For urgent matters, email us directly at authors@afrisco.org</p>
+      <p className="text-xs text-slate-400 text-center">We respond within 2 business days. For urgent matters, email us directly at info@afriscinexus.com</p>
     </form>
   );
 }
@@ -614,9 +614,9 @@ export default function AuthorResources() {
               <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-6 space-y-5">
                 <h3 className="font-bold text-slate-900">Get in Touch</h3>
                 {[
-                  { icon: '📧', label: 'General Enquiries', value: 'authors@afrisco.org' },
-                  { icon: '📋', label: 'Submission Support', value: 'submit@afrisco.org' },
-                  { icon: '🧑‍⚖️', label: 'Ethics & Integrity', value: 'ethics@afrisco.org' },
+                  { icon: '📧', label: 'General Inquiries', value: 'info@afriscinexus.com' },
+                  { icon: '📋', label: 'Editorial', value: 'editorial@afriscinexus.com' },
+                  { icon: '🧑‍⚖️', label: 'Ethics & Integrity', value: 'editorial@afriscinexus.com' },
                   { icon: '⏱️', label: 'Response Time', value: 'Within 2 business days' },
                 ].map(item => (
                   <div key={item.label} className="flex items-start gap-3">
