@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -633,15 +635,17 @@ export default function AuthorResources() {
                 <h4 className="font-bold mb-2">Quick Help Links</h4>
                 <ul className="space-y-2 text-sm">
                   {[
-                    'Submission Guidelines',
-                    'Peer Review Process',
-                    'Fee Waivers & APCs',
-                    'Preprint Policy',
-                    'Author Ethics Guidelines',
+                    { label: 'Submission Guidelines', to: createPageUrl('Guidelines') },
+                    { label: 'Peer Review Process', to: createPageUrl('ReviewGuidelines') },
+                    { label: 'Fee Waivers & APCs', to: createPageUrl('OpenAccess') },
+                    { label: 'Preprint Policy', to: createPageUrl('OpenAccess') },
+                    { label: 'Author Ethics Guidelines', to: createPageUrl('Guidelines') },
                   ].map(link => (
-                    <li key={link} className="flex items-center gap-2 hover:opacity-90 cursor-pointer">
-                      <ChevronRight className="w-4 h-4 text-teal-200" />
-                      <span>{link}</span>
+                    <li key={link.label}>
+                      <Link to={link.to} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+                        <ChevronRight className="w-4 h-4 text-teal-200" />
+                        <span>{link.label}</span>
+                      </Link>
                     </li>
                   ))}
                 </ul>
