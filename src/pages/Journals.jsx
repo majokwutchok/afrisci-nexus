@@ -43,39 +43,65 @@ const categoryColors = {
   interdisciplinary: "bg-indigo-100 text-indigo-800 border-indigo-200"
 };
 
+const coverBgs = {
+  stem: "from-blue-950 via-blue-900 to-cyan-900",
+  medicine_health: "from-red-950 via-rose-900 to-pink-900",
+  agriculture_environment: "from-green-950 via-green-900 to-emerald-900",
+  social_sciences: "from-purple-950 via-violet-900 to-purple-900",
+  law_policy: "from-slate-950 via-slate-900 to-gray-900",
+  arts_humanities: "from-amber-950 via-orange-900 to-amber-900",
+  business_economics: "from-indigo-950 via-indigo-900 to-blue-900",
+  education_pedagogy: "from-sky-950 via-sky-900 to-blue-900",
+  interdisciplinary: "from-teal-950 via-teal-900 to-cyan-900",
+};
+
+const coverIcons = {
+  stem: "⚛️", medicine_health: "🏥", agriculture_environment: "🌱",
+  social_sciences: "🌐", law_policy: "⚖️", arts_humanities: "🎨",
+  business_economics: "📈", education_pedagogy: "🎓", interdisciplinary: "🔬",
+};
+
 const JournalCard = ({ journal }) => (
-  <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-    <div className={`h-1 ${journal.category === 'stem' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-      journal.category === 'medicine_health' ? 'bg-gradient-to-r from-red-500 to-red-600' :
-      journal.category === 'agriculture_environment' ? 'bg-gradient-to-r from-green-500 to-green-600' :
-      journal.category === 'social_sciences' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
-      journal.category === 'law_policy' ? 'bg-gradient-to-r from-gray-500 to-gray-600' :
-      journal.category === 'arts_humanities' ? 'bg-gradient-to-r from-pink-500 to-pink-600' :
-      journal.category === 'business_economics' ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
-      journal.category === 'education_pedagogy' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' :
-      'bg-gradient-to-r from-indigo-500 to-indigo-600'
-    }`} />
-    <CardHeader className="p-6 pb-4">
-      <div className="flex items-start justify-between mb-3">
+  <Card className="group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border-0 overflow-hidden">
+    {/* Branded Cover */}
+    <Link to={createPageUrl(`JournalDetail?id=${journal.id}`)}>
+      <div className={`relative bg-gradient-to-br ${coverBgs[journal.category] || 'from-slate-900 to-slate-800'} h-36 overflow-hidden`}>
+        <div className="absolute inset-0 opacity-10">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="85%" cy="30%" r="80" fill="white" fillOpacity="0.3"/>
+            <circle cx="10%" cy="80%" r="50" fill="white" fillOpacity="0.15"/>
+          </svg>
+        </div>
+        <div className="relative p-4 h-full flex flex-col justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold tracking-[0.2em] uppercase text-white/40">AfriSci Nexus Discovery</span>
+          </div>
+          <div>
+            <span className="text-2xl mb-1 block">{coverIcons[journal.category] || "📖"}</span>
+            <p className="text-white font-bold text-sm leading-tight line-clamp-2">{journal.title}</p>
+          </div>
+        </div>
+      </div>
+    </Link>
+    <CardHeader className="p-5 pb-3 bg-white">
+      <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
           <Link to={createPageUrl(`JournalDetail?id=${journal.id}`)}>
-            <CardTitle className="text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors duration-200 leading-tight">
+            <CardTitle className="text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight">
               {journal.title}
             </CardTitle>
           </Link>
-          <p className="text-sm text-slate-600 font-medium mt-1">{journal.editor_in_chief}</p>
+          {journal.editor_in_chief && <p className="text-xs text-slate-500 mt-0.5">{journal.editor_in_chief}</p>}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+        <div className="flex items-center gap-1 flex-shrink-0 ml-2">
           {journal.is_open_access && (
-            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs font-medium">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Open Access
+            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">
+              <CheckCircle className="w-3 h-3 mr-1" />OA
             </Badge>
           )}
           {journal.impact_factor && (
-            <div className="flex items-center gap-1 bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-semibold">
-              <Star className="w-3 h-3" />
-              {journal.impact_factor}
+            <div className="flex items-center gap-1 bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-semibold">
+              <Star className="w-3 h-3" />{journal.impact_factor}
             </div>
           )}
         </div>
@@ -84,26 +110,15 @@ const JournalCard = ({ journal }) => (
         {categoryLabels[journal.category]}
       </Badge>
     </CardHeader>
-    <CardContent className="p-6 pt-0">
-      <p className="text-slate-600 text-sm line-clamp-3 mb-4">{journal.description}</p>
+    <CardContent className="p-5 pt-0 bg-white">
+      <p className="text-slate-600 text-sm line-clamp-2 mb-3">{journal.description}</p>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-xs text-slate-500">
-          <div className="flex items-center gap-1">
-            <Globe className="w-3 h-3" />
-            <span>{journal.languages?.length || 1} language{(journal.languages?.length || 1) > 1 ? 's' : ''}</span>
-          </div>
-          {journal.issn && (
-            <div className="flex items-center gap-1">
-              <Award className="w-3 h-3" />
-              <span>ISSN: {journal.issn}</span>
-            </div>
-          )}
+        <div className="flex items-center gap-3 text-xs text-slate-500">
+          <div className="flex items-center gap-1"><Globe className="w-3 h-3" />{journal.languages?.length || 1} lang</div>
+          {journal.issn && <span className="font-mono">ISSN: {journal.issn}</span>}
         </div>
         <Link to={createPageUrl(`JournalDetail?id=${journal.id}`)}>
-          <Button 
-            size="sm" 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-all duration-200"
-          >
+          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs">
             View Details
           </Button>
         </Link>

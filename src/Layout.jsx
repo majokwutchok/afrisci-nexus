@@ -544,6 +544,18 @@ export default function Layout({ children, currentPageName }) {
                       </Link>
                     </div>
 
+                    {/* Direct Journals Link */}
+                    <div>
+                      <Link
+                        to={createPageUrl("Journals")}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors font-medium border border-white/20 bg-white/5"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        Our Journals
+                        <Badge className="bg-teal-500 text-white text-xs ml-1">12</Badge>
+                      </Link>
+                    </div>
+
                     {mainMenuItems.map((menu) => (
                       <NavDropdown key={menu.title} menu={menu} />
                     ))}

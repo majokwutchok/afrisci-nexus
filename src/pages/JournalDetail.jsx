@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import AfriSciLogo from '../components/brand/AfriSciLogo';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,137 @@ const categoryLabels = {
   business_economics: "Business & Economics",
   education_pedagogy: "Education & Pedagogy",
   interdisciplinary: "Interdisciplinary"
+};
+
+const coverDesigns = {
+  stem: {
+    bg: "from-blue-950 via-blue-900 to-cyan-900",
+    accent: "#38BDF8",
+    accent2: "#0EA5E9",
+    pattern: (
+      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5"/></pattern></defs>
+        <rect width="100%" height="100%" fill="url(#grid)"/>
+        <circle cx="80%" cy="30%" r="120" fill="#38BDF8" fillOpacity="0.15"/>
+        <circle cx="10%" cy="70%" r="80" fill="#0EA5E9" fillOpacity="0.1"/>
+      </svg>
+    ),
+    icon: "⚛️",
+    tagline: "Science · Technology · Engineering · Mathematics"
+  },
+  medicine_health: {
+    bg: "from-red-950 via-rose-900 to-pink-900",
+    accent: "#FB7185",
+    accent2: "#F43F5E",
+    pattern: (
+      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="85%" cy="20%" r="160" fill="#FB7185" fillOpacity="0.2"/>
+        <circle cx="15%" cy="80%" r="100" fill="#F43F5E" fillOpacity="0.15"/>
+        <path d="M0 50% Q25% 30% 50% 50% T100% 50%" fill="none" stroke="white" strokeWidth="1" strokeOpacity="0.2"/>
+      </svg>
+    ),
+    icon: "🏥",
+    tagline: "Medicine · Public Health · Clinical Research"
+  },
+  agriculture_environment: {
+    bg: "from-green-950 via-green-900 to-emerald-900",
+    accent: "#34D399",
+    accent2: "#10B981",
+    pattern: (
+      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="80%" cy="25%" r="140" fill="#34D399" fillOpacity="0.2"/>
+        <circle cx="20%" cy="75%" r="90" fill="#10B981" fillOpacity="0.15"/>
+        <path d="M0 60 Q200 20 400 60 T800 60" fill="none" stroke="white" strokeWidth="1.5" strokeOpacity="0.15"/>
+      </svg>
+    ),
+    icon: "🌱",
+    tagline: "Agriculture · Environment · Sustainability"
+  },
+  social_sciences: {
+    bg: "from-purple-950 via-violet-900 to-purple-900",
+    accent: "#A78BFA",
+    accent2: "#8B5CF6",
+    pattern: (
+      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="90%,10% 100%,35% 75%,35%" fill="#A78BFA" fillOpacity="0.3"/>
+        <polygon points="5%,65% 20%,90% 0%,90%" fill="#8B5CF6" fillOpacity="0.25"/>
+        <circle cx="50%" cy="50%" r="200" fill="none" stroke="white" strokeWidth="0.5" strokeOpacity="0.2"/>
+      </svg>
+    ),
+    icon: "🌐",
+    tagline: "Sociology · Psychology · Political Science · Development"
+  },
+  law_policy: {
+    bg: "from-slate-950 via-slate-900 to-gray-900",
+    accent: "#94A3B8",
+    accent2: "#64748B",
+    pattern: (
+      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="lines" width="20" height="20" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="20" y2="20" stroke="white" strokeWidth="0.3"/></pattern></defs>
+        <rect width="100%" height="100%" fill="url(#lines)"/>
+        <rect x="70%" y="10%" width="200" height="200" fill="#94A3B8" fillOpacity="0.1" transform="rotate(15,75%,20%)"/>
+      </svg>
+    ),
+    icon: "⚖️",
+    tagline: "Law · Policy · Governance · Human Rights"
+  },
+  arts_humanities: {
+    bg: "from-amber-950 via-orange-900 to-amber-900",
+    accent: "#FCD34D",
+    accent2: "#F59E0B",
+    pattern: (
+      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="75%" cy="30%" r="130" fill="#FCD34D" fillOpacity="0.2"/>
+        <circle cx="20%" cy="70%" r="80" fill="#F59E0B" fillOpacity="0.2"/>
+        <path d="M 0 100 C 200 0, 400 200, 600 100 S 800 0, 1000 100" fill="none" stroke="#FCD34D" strokeWidth="2" strokeOpacity="0.2"/>
+      </svg>
+    ),
+    icon: "🎨",
+    tagline: "Literature · History · Philosophy · African Heritage"
+  },
+  business_economics: {
+    bg: "from-indigo-950 via-indigo-900 to-blue-900",
+    accent: "#818CF8",
+    accent2: "#6366F1",
+    pattern: (
+      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="1.5" fill="white"/></pattern></defs>
+        <rect width="100%" height="100%" fill="url(#dots)"/>
+        <circle cx="80%" cy="25%" r="150" fill="#818CF8" fillOpacity="0.15"/>
+      </svg>
+    ),
+    icon: "📈",
+    tagline: "Economics · Finance · Management · Innovation"
+  },
+  education_pedagogy: {
+    bg: "from-sky-950 via-sky-900 to-blue-900",
+    accent: "#7DD3FC",
+    accent2: "#38BDF8",
+    pattern: (
+      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+        <rect x="60%" y="5%" width="150" height="150" rx="16" fill="#7DD3FC" fillOpacity="0.15" transform="rotate(25)"/>
+        <rect x="5%" y="60%" width="100" height="100" rx="10" fill="#38BDF8" fillOpacity="0.12" transform="rotate(-15)"/>
+        <circle cx="50%" cy="50%" r="180" fill="none" stroke="white" strokeWidth="0.5" strokeOpacity="0.15"/>
+      </svg>
+    ),
+    icon: "🎓",
+    tagline: "Education · Pedagogy · Teacher Training · Curriculum"
+  },
+  interdisciplinary: {
+    bg: "from-teal-950 via-teal-900 to-cyan-900",
+    accent: "#2DD4BF",
+    accent2: "#14B8A6",
+    pattern: (
+      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50%" cy="50%" r="250" fill="none" stroke="#2DD4BF" strokeWidth="1" strokeOpacity="0.3"/>
+        <circle cx="50%" cy="50%" r="180" fill="none" stroke="#14B8A6" strokeWidth="0.8" strokeOpacity="0.2"/>
+        <circle cx="50%" cy="50%" r="120" fill="none" stroke="white" strokeWidth="0.5" strokeOpacity="0.15"/>
+        <circle cx="80%" cy="20%" r="80" fill="#2DD4BF" fillOpacity="0.15"/>
+      </svg>
+    ),
+    icon: "🔬",
+    tagline: "Cross-disciplinary · Innovation · SDGs · Africa"
+  },
 };
 
 const InfoCard = ({ icon: Icon, title, value, color = "teal" }) => (
@@ -150,49 +282,85 @@ export default function JournalDetailPage() {
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-100 min-h-screen">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <Badge className="mb-4 bg-teal-500 text-white">
-                {categoryLabels[journal.category]}
-              </Badge>
-              <h1 className="text-4xl font-bold mb-4">{journal.title}</h1>
-              <p className="text-xl text-sky-200 mb-6 max-w-3xl">{journal.description}</p>
-              
-              <div className="flex flex-wrap gap-4 items-center">
+      {/* Hero Cover */}
+      {(() => {
+        const cover = coverDesigns[journal.category] || coverDesigns.interdisciplinary;
+        return (
+          <div className={`relative bg-gradient-to-br ${cover.bg} text-white overflow-hidden`} style={{ minHeight: '480px' }}>
+            {/* Unique pattern overlay */}
+            {cover.pattern}
+
+            {/* Dark vignette bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 to-transparent" />
+
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14">
+
+              {/* Brand header row */}
+              <div className="flex items-center justify-between mb-10">
+                <div className="flex items-center gap-4">
+                  <AfriSciLogo variant="header" theme="dark" />
+                  <div className="h-8 w-px bg-white/20" />
+                  <div>
+                    <p className="text-xs font-semibold tracking-[0.3em] uppercase text-white/50">Journal of</p>
+                    <p className="text-lg font-bold tracking-[0.15em] uppercase" style={{ color: cover.accent }}>AfriSci Nexus Discovery</p>
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <Link to={createPageUrl("Submit")}>
+                    <Button size="lg" style={{ backgroundColor: cover.accent, color: '#0f172a' }} className="font-bold hover:opacity-90">
+                      <Upload className="w-5 h-5 mr-2" />
+                      Submit to This Journal
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Discipline icon + category */}
+              <div className="flex items-center gap-3 mb-5">
+                <span className="text-4xl">{cover.icon}</span>
+                <div>
+                  <Badge className="text-xs font-semibold tracking-wider uppercase" style={{ backgroundColor: cover.accent + '30', color: cover.accent, border: `1px solid ${cover.accent}50` }}>
+                    {categoryLabels[journal.category]}
+                  </Badge>
+                  <p className="text-xs mt-1" style={{ color: cover.accent + 'cc' }}>{cover.tagline}</p>
+                </div>
+              </div>
+
+              {/* Journal title — large branded */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight mb-4 drop-shadow-2xl max-w-4xl">
+                {journal.title}
+              </h1>
+
+              {/* Description */}
+              <p className="text-lg text-white/70 max-w-3xl mb-8 leading-relaxed">{journal.description}</p>
+
+              {/* Metadata row */}
+              <div className="flex flex-wrap items-center gap-4">
                 {journal.is_open_access && (
                   <Badge className="bg-emerald-500 text-white flex items-center gap-1">
-                    <CheckCircle className="w-4 h-4" />
-                    Open Access
+                    <CheckCircle className="w-4 h-4" /> Open Access
                   </Badge>
                 )}
                 {journal.issn && (
-                  <Badge variant="outline" className="text-white border-white/50">
+                  <Badge variant="outline" className="text-white border-white/40 font-mono text-xs">
                     ISSN: {journal.issn}
                   </Badge>
                 )}
                 {journal.impact_factor && (
-                  <Badge variant="outline" className="text-white border-white/50 flex items-center gap-1">
-                    <Award className="w-4 h-4" />
-                    Impact Factor: {journal.impact_factor}
+                  <Badge variant="outline" className="text-white border-white/40 flex items-center gap-1">
+                    <Award className="w-4 h-4" /> IF: {journal.impact_factor}
                   </Badge>
+                )}
+                {journal.editor_in_chief && (
+                  <span className="text-sm text-white/60 flex items-center gap-1.5">
+                    <Users className="w-4 h-4" /> Editor-in-Chief: <strong className="text-white">{journal.editor_in_chief}</strong>
+                  </span>
                 )}
               </div>
             </div>
-            
-            <div className="hidden lg:block">
-              <Link to={createPageUrl("Submit")}>
-                <Button size="lg" className="bg-teal-500 hover:bg-teal-600 text-white">
-                  <Upload className="w-5 h-5 mr-2" />
-                  Submit to This Journal
-                </Button>
-              </Link>
-            </div>
           </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Quick Stats */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 mb-12">
