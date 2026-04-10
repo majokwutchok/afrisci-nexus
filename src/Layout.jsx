@@ -544,7 +544,10 @@ export default function Layout({ children, currentPageName }) {
                       </Link>
                     </div>
 
-                    {/* Direct Journals Link */}
+                    {/* About dropdown (first item) */}
+                    <NavDropdown key={mainMenuItems[0].title} menu={mainMenuItems[0]} />
+
+                    {/* Our Journals — between About and Browse */}
                     <div>
                       <Link
                         to={createPageUrl("Journals")}
@@ -556,7 +559,8 @@ export default function Layout({ children, currentPageName }) {
                       </Link>
                     </div>
 
-                    {mainMenuItems.map((menu) => (
+                    {/* Remaining menu items (Browse, For Authors, For Reviewers, For Editors, Institutions) */}
+                    {mainMenuItems.slice(1).map((menu) => (
                       <NavDropdown key={menu.title} menu={menu} />
                     ))}
 
