@@ -1,0 +1,83 @@
+{
+  "name": "PersonalizedOutreach",
+  "type": "object",
+  "properties": {
+    "prospect_id": {
+      "type": "string",
+      "description": "ID of the ProspectEmail record"
+    },
+    "prospect_email": {
+      "type": "string"
+    },
+    "prospect_name": {
+      "type": "string"
+    },
+    "institution": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "linkedin_url": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string",
+      "description": "AI-generated subject line"
+    },
+    "body_html": {
+      "type": "string",
+      "description": "AI-generated personalized email body"
+    },
+    "ai_reasoning": {
+      "type": "string",
+      "description": "Why the AI crafted this email this way"
+    },
+    "personalization_signals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Signals used: department, research area, LinkedIn headline, etc.",
+      "default": []
+    },
+    "campaign_goal": {
+      "type": "string",
+      "enum": [
+        "partnership_proposal",
+        "call_for_submissions",
+        "reviewer_recruitment",
+        "general_outreach"
+      ],
+      "default": "partnership_proposal"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "approved",
+        "sent",
+        "bounced",
+        "replied"
+      ],
+      "default": "draft"
+    },
+    "sent_at": {
+      "type": "string"
+    },
+    "opened_at": {
+      "type": "string"
+    },
+    "replied_at": {
+      "type": "string"
+    },
+    "admin_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "prospect_email",
+    "subject",
+    "body_html"
+  ]
+}

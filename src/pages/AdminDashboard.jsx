@@ -32,6 +32,7 @@ import OAIPMHMonitor from "../components/admin/OAIPMHMonitor";
 import EmailProspector from "../components/admin/EmailProspector";
 import EmailCampaignManager from "../components/admin/EmailCampaignManager";
 import LinkedInProfileAgent from "../components/admin/LinkedInProfileAgent";
+import PersonalizedOutreachEngine from "../components/admin/PersonalizedOutreachEngine";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -159,6 +160,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="email_prospector" className="text-teal-700 font-semibold">📧 Email Prospector</TabsTrigger>
             <TabsTrigger value="campaigns" className="text-indigo-700 font-semibold">🚀 Campaigns</TabsTrigger>
             <TabsTrigger value="linkedin_agent" className="text-blue-700 font-semibold">🔗 LinkedIn Agent</TabsTrigger>
+            <TabsTrigger value="outreach_engine" className="text-violet-700 font-semibold">✨ Outreach Engine</TabsTrigger>
           </TabsList>
           
           <TabsContent value="admin_profile" className="mt-6">
@@ -334,6 +336,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="linkedin_agent" className="mt-6">
             <LinkedInProfileAgent />
+          </TabsContent>
+
+          <TabsContent value="outreach_engine" className="mt-6">
+            <PersonalizedOutreachEngine />
           </TabsContent>
         </Tabs>
       </div>
