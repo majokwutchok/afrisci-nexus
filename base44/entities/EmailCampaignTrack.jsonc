@@ -1,0 +1,39 @@
+{
+  "name": "EmailCampaignTrack",
+  "type": "object",
+  "properties": {
+    "campaign_id": {
+      "type": "string",
+      "description": "ID of the parent campaign"
+    },
+    "prospect_email": {
+      "type": "string",
+      "description": "Recipient email address"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "opened",
+        "clicked",
+        "bounced"
+      ],
+      "description": "Type of tracking event"
+    },
+    "link_url": {
+      "type": "string",
+      "description": "URL clicked (for click events)"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "campaign_id",
+    "prospect_email",
+    "event_type"
+  ]
+}
