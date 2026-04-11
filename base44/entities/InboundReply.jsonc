@@ -1,0 +1,70 @@
+{
+  "name": "InboundReply",
+  "type": "object",
+  "properties": {
+    "gmail_message_id": {
+      "type": "string",
+      "description": "Gmail message ID for deduplication"
+    },
+    "sender_email": {
+      "type": "string"
+    },
+    "sender_name": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "body_preview": {
+      "type": "string",
+      "description": "First 500 chars of reply body"
+    },
+    "prospect_id": {
+      "type": "string",
+      "description": "Linked ProspectEmail ID"
+    },
+    "outreach_id": {
+      "type": "string",
+      "description": "Linked PersonalizedOutreach ID"
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": [
+        "interested",
+        "not_interested",
+        "needs_follow_up",
+        "auto_reply",
+        "unsubscribe_request"
+      ],
+      "description": "AI-detected sentiment"
+    },
+    "summary": {
+      "type": "string",
+      "description": "AI one-sentence summary of the reply"
+    },
+    "suggested_action": {
+      "type": "string",
+      "description": "AI-recommended next action"
+    },
+    "key_quote": {
+      "type": "string",
+      "description": "Most telling sentence from the reply"
+    },
+    "is_auto_reply": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_actioned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether admin has actioned this reply"
+    },
+    "admin_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sender_email",
+    "sentiment"
+  ]
+}
