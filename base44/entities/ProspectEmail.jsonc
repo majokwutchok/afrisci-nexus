@@ -1,0 +1,61 @@
+{
+  "name": "ProspectEmail",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Validated email address"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Name of the contact person"
+    },
+    "institution": {
+      "type": "string",
+      "description": "Name of the institution/organization"
+    },
+    "institution_type": {
+      "type": "string",
+      "enum": [
+        "university",
+        "hospital",
+        "school",
+        "research_institute",
+        "ngo",
+        "government",
+        "professional_association",
+        "other"
+      ],
+      "description": "Type of institution"
+    },
+    "country": {
+      "type": "string",
+      "description": "African country name"
+    },
+    "department": {
+      "type": "string",
+      "description": "Department or faculty"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "Source URL where email was found"
+    },
+    "campaign_status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "emailed",
+        "responded",
+        "unsubscribed"
+      ],
+      "default": "new"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "email",
+    "country"
+  ]
+}

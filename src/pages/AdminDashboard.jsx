@@ -29,6 +29,7 @@ import NewsManager from "../components/admin/NewsManager";
 import AdminProfileSetup from "../components/admin/AdminProfileSetup";
 import AdminManuscriptAccelerator from "../components/admin/AdminManuscriptAccelerator";
 import OAIPMHMonitor from "../components/admin/OAIPMHMonitor";
+import EmailProspector from "../components/admin/EmailProspector";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -153,6 +154,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="compliance" className="text-purple-700 font-semibold">📋 Publisher Compliance</TabsTrigger>
             <TabsTrigger value="marketing_docs" className="text-indigo-700 font-semibold">📄 Marketing Docs</TabsTrigger>
             <TabsTrigger value="brand" className="text-amber-700 font-semibold">🎨 Brand Assets</TabsTrigger>
+            <TabsTrigger value="email_prospector" className="text-teal-700 font-semibold">📧 Email Prospector</TabsTrigger>
           </TabsList>
           
           <TabsContent value="admin_profile" className="mt-6">
@@ -316,6 +318,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="brand" className="mt-6">
             <BrandAssets />
+          </TabsContent>
+
+          <TabsContent value="email_prospector" className="mt-6">
+            <EmailProspector />
           </TabsContent>
         </Tabs>
       </div>
