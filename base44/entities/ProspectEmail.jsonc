@@ -40,6 +40,30 @@
       "type": "string",
       "description": "Source URL where email was found"
     },
+    "linkedin_url": {
+      "type": "string",
+      "description": "LinkedIn profile URL of the contact"
+    },
+    "linkedin_headline": {
+      "type": "string",
+      "description": "LinkedIn headline / job title"
+    },
+    "linkedin_connections": {
+      "type": "string",
+      "description": "Connection count tier e.g. 500+"
+    },
+    "linkedin_verified_at": {
+      "type": "string",
+      "description": "ISO timestamp when LinkedIn was linked"
+    },
+    "google_scholar_url": {
+      "type": "string",
+      "description": "Google Scholar profile URL"
+    },
+    "researchgate_url": {
+      "type": "string",
+      "description": "ResearchGate profile URL"
+    },
     "campaign_status": {
       "type": "string",
       "enum": [

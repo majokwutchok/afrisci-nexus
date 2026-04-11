@@ -31,6 +31,7 @@ import AdminManuscriptAccelerator from "../components/admin/AdminManuscriptAccel
 import OAIPMHMonitor from "../components/admin/OAIPMHMonitor";
 import EmailProspector from "../components/admin/EmailProspector";
 import EmailCampaignManager from "../components/admin/EmailCampaignManager";
+import LinkedInProfileAgent from "../components/admin/LinkedInProfileAgent";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -157,6 +158,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="brand" className="text-amber-700 font-semibold">🎨 Brand Assets</TabsTrigger>
             <TabsTrigger value="email_prospector" className="text-teal-700 font-semibold">📧 Email Prospector</TabsTrigger>
             <TabsTrigger value="campaigns" className="text-indigo-700 font-semibold">🚀 Campaigns</TabsTrigger>
+            <TabsTrigger value="linkedin_agent" className="text-blue-700 font-semibold">🔗 LinkedIn Agent</TabsTrigger>
           </TabsList>
           
           <TabsContent value="admin_profile" className="mt-6">
@@ -328,6 +330,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="campaigns" className="mt-6">
             <EmailCampaignManager />
+          </TabsContent>
+
+          <TabsContent value="linkedin_agent" className="mt-6">
+            <LinkedInProfileAgent />
           </TabsContent>
         </Tabs>
       </div>
