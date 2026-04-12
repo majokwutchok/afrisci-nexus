@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { sendEmailCampaign } from "@/functions/sendEmailCampaign";
+import { sendProspectEmail } from "@/functions/sendProspectEmail";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -305,13 +306,13 @@ export default function EmailCampaignManager() {
       if (!prospect) continue;
       const { body, subject } = resolveForProspect(null, customBody, customSubject, prospect);
       try {
-        await base44.integrations.Core.SendEmail({
+        await sendProspectEmail({
           to: prospect.email,
           subject,
           body,
-          from_name: "AfriSci Nexus Discovery Editorial Team"
+          from_name: "AfriSci Nexus Discovery Editorial Team",
+          prospect_id: id
         });
-        await base44.entities.ProspectEmail.update(id, { campaign_status: "emailed" });
         sent++;
       } catch (_) { errors++; }
     }
