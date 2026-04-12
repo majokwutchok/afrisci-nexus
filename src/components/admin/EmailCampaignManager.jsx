@@ -211,6 +211,11 @@ export default function EmailCampaignManager() {
   const [sendingQuick, setSendingQuick] = useState(false);
   const [quickPreview, setQuickPreview] = useState(false);
   const [quickResult, setQuickResult] = useState(null);
+  // Per-prospect preview & edit
+  const [previewProspect, setPreviewProspect] = useState(null); // prospect object to preview
+  const [editingTemplate, setEditingTemplate] = useState(false);
+  const [customSubject, setCustomSubject] = useState("");
+  const [customBody, setCustomBody] = useState("");
 
   // Form state
   const [form, setForm] = useState({
@@ -240,6 +245,13 @@ export default function EmailCampaignManager() {
 
   useEffect(() => { loadCampaigns(); }, []);
   useEffect(() => { if (activeTab === "quick_send") loadProspects(); }, [activeTab, loadProspects]);
+
+  // Sync custom subject/body when template changes
+  useEffect(() => {
+    setCustomSubject(TEMPLATES[selectedTemplate].subject);
+    setCustomBody(TEMPLATES[selectedTemplate].body);
+    setEditingTemplate(false);
+  }, [selectedTemplate]);
 
   const loadProspectCount = async (country, type) => {
     const filter = { country, campaign_status: "new" };
@@ -271,24 +283,27 @@ export default function EmailCampaignManager() {
     loadCampaigns();
   };
 
+  const resolveForProspect = (template, body, subject, prospect) => ({
+    body: body
+      .replace(/\{\{name\}\}/g, prospect.contact_name || "Colleague")
+      .replace(/\{\{institution\}\}/g, prospect.institution || "your institution")
+      .replace(/\{\{country\}\}/g, prospect.country || ""),
+    subject: subject
+      .replace(/\{\{name\}\}/g, prospect.contact_name || "Colleague")
+      .replace(/\{\{institution\}\}/g, prospect.institution || "your institution")
+      .replace(/\{\{country\}\}/g, prospect.country || "")
+  });
+
   const handleQuickSend = async () => {
     if (!selectedProspectIds.length) return;
-    if (!confirm(`Send to ${selectedProspectIds.length} selected prospects? This cannot be undone.`)) return;
+    if (!confirm(`Send ${selectedProspectIds.length} personalized emails? Each will be addressed individually. This cannot be undone.`)) return;
     setSendingQuick(true);
     setQuickResult(null);
-    const template = TEMPLATES[selectedTemplate];
     let sent = 0, errors = 0;
     for (const id of selectedProspectIds) {
       const prospect = prospects.find(p => p.id === id);
       if (!prospect) continue;
-      const body = template.body
-        .replace(/\{\{name\}\}/g, prospect.contact_name || "Colleague")
-        .replace(/\{\{institution\}\}/g, prospect.institution || "your institution")
-        .replace(/\{\{country\}\}/g, prospect.country || "");
-      const subject = template.subject
-        .replace(/\{\{name\}\}/g, prospect.contact_name || "Colleague")
-        .replace(/\{\{institution\}\}/g, prospect.institution || "your institution")
-        .replace(/\{\{country\}\}/g, prospect.country || "");
+      const { body, subject } = resolveForProspect(null, customBody, customSubject, prospect);
       try {
         await base44.integrations.Core.SendEmail({
           to: prospect.email,
@@ -555,11 +570,11 @@ export default function EmailCampaignManager() {
               ) : (
                 <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
                   {prospects.map(p => (
-                    <label key={p.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${selectedProspectIds.includes(p.id) ? "border-teal-400 bg-teal-50" : "border-slate-200 hover:border-teal-200"}`}>
+                    <div key={p.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all ${selectedProspectIds.includes(p.id) ? "border-teal-400 bg-teal-50" : "border-slate-200 hover:border-teal-200"}`}>
                       <input type="checkbox" checked={selectedProspectIds.includes(p.id)}
                         onChange={() => setSelectedProspectIds(prev => prev.includes(p.id) ? prev.filter(x => x !== p.id) : [...prev, p.id])}
-                        className="accent-teal-600 w-4 h-4 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
+                        className="accent-teal-600 w-4 h-4 flex-shrink-0 cursor-pointer" />
+                      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setSelectedProspectIds(prev => prev.includes(p.id) ? prev.filter(x => x !== p.id) : [...prev, p.id])}>
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium text-sm text-slate-900">{p.contact_name || "Unnamed"}</span>
                           <span className="text-xs text-slate-400">{p.email}</span>
@@ -567,17 +582,48 @@ export default function EmailCampaignManager() {
                         </div>
                         <p className="text-xs text-slate-500 truncate">{p.institution}{p.department ? ` · ${p.department}` : ""} · {p.country}</p>
                       </div>
-                    </label>
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-slate-500 hover:text-teal-700 flex-shrink-0"
+                        onClick={e => { e.stopPropagation(); setPreviewProspect(p); }}>
+                        <Eye className="w-3.5 h-3.5 mr-1" /> Preview
+                      </Button>
+                    </div>
                   ))}
                 </div>
               )}
               {selectedProspectIds.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between flex-wrap gap-3">
-                  <span className="text-sm text-slate-700"><strong>{selectedProspectIds.length}</strong> selected · Template: <strong className="text-teal-700">{TEMPLATES[selectedTemplate].name}</strong></span>
-                  <Button onClick={handleQuickSend} disabled={sendingQuick}
-                    className="bg-gradient-to-r from-teal-600 to-blue-700 hover:from-teal-700 hover:to-blue-800 text-white px-8">
-                    {sendingQuick ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/> Sending...</> : <><Send className="w-4 h-4 mr-2"/> Send to {selectedProspectIds.length} Prospects</>}
-                  </Button>
+                <div className="mt-4 pt-4 border-t border-slate-200 space-y-3">
+                  {/* Edit template before send */}
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <span className="text-sm text-slate-700"><strong>{selectedProspectIds.length}</strong> selected · Each email addressed personally by name</span>
+                    <Button size="sm" variant="outline" className="text-xs" onClick={() => setEditingTemplate(!editingTemplate)}>
+                      <Edit3 className="w-3.5 h-3.5 mr-1" /> {editingTemplate ? "Hide Editor" : "✏️ Edit Before Send"}
+                    </Button>
+                  </div>
+                  {editingTemplate && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                      <p className="text-xs text-slate-500 font-medium">Editing template — changes apply to all selected recipients. Use <code className="bg-slate-200 px-1 rounded">{"{{name}}"}</code>, <code className="bg-slate-200 px-1 rounded">{"{{institution}}"}</code>, <code className="bg-slate-200 px-1 rounded">{"{{country}}"}</code> for personalization.</p>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Subject Line</label>
+                        <input value={customSubject} onChange={e => setCustomSubject(e.target.value)}
+                          className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Email Body (HTML)</label>
+                        <textarea value={customBody} onChange={e => setCustomBody(e.target.value)} rows={10}
+                          className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-teal-300" />
+                      </div>
+                      <Button size="sm" variant="outline" className="text-xs"
+                        onClick={() => { setCustomSubject(TEMPLATES[selectedTemplate].subject); setCustomBody(TEMPLATES[selectedTemplate].body); }}>
+                        Reset to Template
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex justify-end">
+                    <Button onClick={handleQuickSend} disabled={sendingQuick}
+                      className="bg-gradient-to-r from-teal-600 to-blue-700 hover:from-teal-700 hover:to-blue-800 text-white px-8">
+                      {sendingQuick ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/> Sending...</> : <><Send className="w-4 h-4 mr-2"/> Send {selectedProspectIds.length} Personalized Emails</>}
+                    </Button>
+                  </div>
                 </div>
               )}
               {quickResult && (
@@ -587,6 +633,32 @@ export default function EmailCampaignManager() {
               )}
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {/* Per-prospect preview modal */}
+      {previewProspect && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setPreviewProspect(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <div>
+                <h3 className="font-bold text-slate-900 text-sm">Preview for {previewProspect.contact_name || previewProspect.email}</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Subject: {resolveForProspect(null, customBody, customSubject, previewProspect).subject}</p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setPreviewProspect(null)}>✕</Button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <div className="bg-slate-100 p-3">
+                <div className="bg-white rounded-xl overflow-hidden shadow">
+                  <div className="bg-slate-200 px-4 py-2 flex items-center gap-2 text-xs text-slate-600">
+                    <div className="flex gap-1"><div className="w-2.5 h-2.5 rounded-full bg-red-400"/><div className="w-2.5 h-2.5 rounded-full bg-amber-400"/><div className="w-2.5 h-2.5 rounded-full bg-green-400"/></div>
+                    To: {previewProspect.email}
+                  </div>
+                  <div className="p-2" dangerouslySetInnerHTML={{ __html: resolveForProspect(null, customBody, customSubject, previewProspect).body }} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
