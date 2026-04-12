@@ -33,6 +33,7 @@ import EmailProspector from "../components/admin/EmailProspector";
 import EmailCampaignManager from "../components/admin/EmailCampaignManager";
 import LinkedInProfileAgent from "../components/admin/LinkedInProfileAgent";
 import PersonalizedOutreachEngine from "../components/admin/PersonalizedOutreachEngine";
+import InboundReplyMonitor from "../components/admin/InboundReplyMonitor";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -161,6 +162,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="campaigns" className="text-indigo-700 font-semibold">🚀 Campaigns</TabsTrigger>
             <TabsTrigger value="linkedin_agent" className="text-blue-700 font-semibold">🔗 LinkedIn Agent</TabsTrigger>
             <TabsTrigger value="outreach_engine" className="text-violet-700 font-semibold">✨ Outreach Engine</TabsTrigger>
+            <TabsTrigger value="inbound_replies" className="text-indigo-700 font-semibold">📬 Inbound Replies</TabsTrigger>
           </TabsList>
           
           <TabsContent value="admin_profile" className="mt-6">
@@ -340,6 +342,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="outreach_engine" className="mt-6">
             <PersonalizedOutreachEngine />
+          </TabsContent>
+
+          <TabsContent value="inbound_replies" className="mt-6">
+            <InboundReplyMonitor />
           </TabsContent>
         </Tabs>
       </div>
