@@ -50,6 +50,8 @@ const BRAND_FOOTER = `
   <br/><a href="#" style="color:#94a3b8;font-size:10px">Unsubscribe</a>
 </div>`;
 
+const SIGNATURE = `<p>Warm regards,<br><strong>Majok Wutchok</strong><br>Founder &amp; CEO, AfriSci Nexus Discovery<br><a href="mailto:editorial@afriscinexus.com" style="color:#0d9488">editorial@afriscinexus.com</a></p>`;
+
 const TEMPLATES = [
   {
     name: "Partnership Proposal — Universities & Research Institutions",
@@ -78,7 +80,7 @@ ${BRAND_HEADER("Institutional Partnership Invitation")}
     <a href="https://afriscinexus.com/InstitutionalPartnership" style="background:#0d9488;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Explore Partnership Options →</a>
   </div>
   <p style="font-style:italic;color:#64748b;font-size:13px">"AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."</p>
-  <p>Warm regards,<br><strong>The AfriSci Nexus Discovery Editorial Team</strong><br>editorial@afriscinexus.com</p>
+  ${SIGNATURE}
 </div>
 ${BRAND_FOOTER}
 </div>`
@@ -112,7 +114,7 @@ ${BRAND_HEADER("Call for Research Submissions — All Disciplines Welcome")}
     <a href="https://afriscinexus.com/Journals" style="background:#1e3a8a;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Browse Our 12 Journals →</a>
   </div>
   <p style="font-style:italic;color:#64748b;font-size:13px">"AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."</p>
-  <p>Best regards,<br><strong>AfriSci Nexus Discovery Editorial Team</strong><br>editorial@afriscinexus.com</p>
+  ${SIGNATURE}
 </div>
 ${BRAND_FOOTER}
 </div>`
@@ -143,7 +145,7 @@ ${BRAND_HEADER("Invitation to Join Our Peer Reviewer Network")}
     <a href="https://afriscinexus.com/Apply?role=reviewer" style="background:#7c3aed;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Apply as Reviewer →</a>
   </div>
   <p style="font-style:italic;color:#64748b;font-size:13px">"AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."</p>
-  <p>Best regards,<br><strong>AfriSci Nexus Discovery Editorial Team</strong><br>editorial@afriscinexus.com</p>
+  ${SIGNATURE}
 </div>
 ${BRAND_FOOTER}
 </div>`
@@ -167,7 +169,7 @@ ${BRAND_HEADER("Advancing African Research Through Open Access Publishing")}
     <a href="https://afriscinexus.com/Journals" style="background:#0d9488;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Explore Our 12 Journals →</a>
   </div>
   <p style="font-style:italic;color:#64748b;font-size:13px">"AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."</p>
-  <p>Warm regards,<br><strong>AfriSci Nexus Discovery Editorial Team</strong><br>editorial@afriscinexus.com</p>
+  ${SIGNATURE}
 </div>
 ${BRAND_FOOTER}
 </div>`
@@ -310,7 +312,7 @@ export default function EmailCampaignManager() {
           to: prospect.email,
           subject,
           body,
-          from_name: "AfriSci Nexus Discovery Editorial Team",
+          from_name: "Majok Wutchok, AfriSci Nexus Discovery",
           prospect_id: id
         });
         sent++;

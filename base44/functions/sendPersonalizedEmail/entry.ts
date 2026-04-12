@@ -57,7 +57,7 @@ REQUIREMENTS:
 4. Include naturally: "AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."
 5. CTA: one clear action (reply, visit a link, schedule a call)
 6. Tone: warm, collegial, peer-to-peer — NOT salesy
-7. Signature: "The AfriSci Nexus Discovery Editorial Team" with editorial@afriscinexus.com
+7. Signature: "Majok Wutchok, Founder & CEO" followed by "AfriSci Nexus Discovery" and editorial@afriscinexus.com
 8. HTML format with inline styles. Brand header: dark blue (#1e3a8a) to teal (#0d9488) gradient.
 9. Do NOT use placeholder brackets like [Name] — use the actual values provided.
 10. Footer: "AfriSci Nexus Discovery · 12 Peer-Reviewed Journals · afriscinexus.com"
@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
       to: outreach.prospect_email,
       subject: outreach.subject,
       body: outreach.body_html,
-      from_name: 'AfriSci Nexus Discovery Editorial Team'
+      from_name: 'Majok Wutchok, AfriSci Nexus Discovery'
     });
 
     await base44.asServiceRole.entities.PersonalizedOutreach.update(outreach_id, {
@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
           to: outreach.prospect_email,
           subject: outreach.subject,
           body: outreach.body_html,
-          from_name: 'AfriSci Nexus Discovery Editorial Team'
+          from_name: 'Majok Wutchok, AfriSci Nexus Discovery'
         });
         await base44.asServiceRole.entities.PersonalizedOutreach.update(outreach.id, { status: 'sent', sent_at: new Date().toISOString() });
         if (outreach.prospect_id) {
