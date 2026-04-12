@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Linkedin, Search, Link2, UserPlus, Loader2, CheckCircle,
-  AlertCircle, Globe, BookOpen, ExternalLink, RefreshCw, BarChart3
+  AlertCircle, Globe, BookOpen, ExternalLink, RefreshCw, BarChart3, Trash2
 } from "lucide-react";
 
 const AFRICAN_COUNTRIES = [
@@ -41,6 +41,7 @@ export default function LinkedInProfileAgent() {
   const [linkedProspects, setLinkedProspects] = useState([]);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [activeTab, setActiveTab] = useState("agent");
+  const [isClearing, setIsClearing] = useState(false);
 
   const loadStats = async () => {
     setIsLoadingStats(true);
@@ -56,6 +57,20 @@ export default function LinkedInProfileAgent() {
   };
 
   useEffect(() => { loadStats(); }, [country, institutionType]);
+
+  const handleClearFound = async () => {
+    if (!confirm(`Delete ALL prospects with LinkedIn profiles for ${country}${institutionType ? ` / ${institutionType}` : ''} so the agent can discover fresh contacts? This cannot be undone.`)) return;
+    setIsClearing(true);
+    const filter = { country };
+    if (institutionType) filter.institution_type = institutionType;
+    const all = await base44.entities.ProspectEmail.filter(filter, '-created_date', 2000);
+    const withLinkedIn = all.filter(p => p.linkedin_url);
+    for (const p of withLinkedIn) {
+      await base44.entities.ProspectEmail.delete(p.id);
+    }
+    setIsClearing(false);
+    loadStats();
+  };
 
   const handleRun = async () => {
     setIsRunning(true);
@@ -174,7 +189,7 @@ export default function LinkedInProfileAgent() {
                 </div>
               )}
 
-              <div className="mt-5 flex items-center gap-3">
+              <div className="mt-5 flex items-center gap-3 flex-wrap">
                 <Button onClick={handleRun} disabled={isRunning}
                   className={`px-8 ${mode === "discover" ? "bg-purple-600 hover:bg-purple-700" : "bg-blue-700 hover:bg-blue-800"} text-white`}>
                   {isRunning
@@ -184,6 +199,12 @@ export default function LinkedInProfileAgent() {
                 <Button variant="outline" size="sm" onClick={loadStats}>
                   <RefreshCw className="w-4 h-4 mr-1" /> Refresh Stats
                 </Button>
+                {stats?.withLinkedIn > 0 && (
+                  <Button variant="outline" size="sm" onClick={handleClearFound} disabled={isClearing}
+                    className="text-red-600 border-red-200 hover:bg-red-50">
+                    {isClearing ? <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> Clearing...</> : <><Trash2 className="w-3.5 h-3.5 mr-1" /> Clear {stats.withLinkedIn} Found Contacts</>}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

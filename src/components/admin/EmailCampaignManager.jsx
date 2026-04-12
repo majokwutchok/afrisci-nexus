@@ -305,6 +305,7 @@ export default function EmailCampaignManager() {
     if (!confirm(`Send ${selectedProspectIds.length} personalized emails? Each will be addressed individually. This cannot be undone.`)) return;
     setSendingQuick(true);
     setQuickResult(null);
+    const sentIds = [];
     let sent = 0, errors = 0;
     for (const id of selectedProspectIds) {
       const prospect = prospects.find(p => p.id === id);
@@ -318,8 +319,13 @@ export default function EmailCampaignManager() {
           from_name: "Majok Wutchok, AfriSci Nexus Discovery",
           prospect_id: id
         });
+        sentIds.push(id);
         sent++;
       } catch (_) { errors++; }
+    }
+    // Delete sent prospects so the agent can find fresh contacts
+    for (const id of sentIds) {
+      await base44.entities.ProspectEmail.delete(id).catch(() => {});
     }
     setSendingQuick(false);
     setQuickResult({ sent, errors });
@@ -332,8 +338,16 @@ export default function EmailCampaignManager() {
     setSending(campaign.id);
     const res = await sendEmailCampaign({ campaign_id: campaign.id }).catch(e => ({ error: e.message }));
     setSending(null);
-    if (res.error) alert("Error: " + res.error);
-    else alert(`✅ Sent to ${res.sent} recipients. ${res.errors} errors.`);
+    if (res.error) { alert("Error: " + res.error); }
+    else {
+      // Delete sent prospects so the LinkedIn agent can fetch fresh contacts
+      const filter = { campaign_status: 'emailed' };
+      if (campaign.country) filter.country = campaign.country;
+      if (campaign.institution_type) filter.institution_type = campaign.institution_type;
+      const sent = await base44.entities.ProspectEmail.filter(filter, '-created_date', 1000).catch(() => []);
+      for (const p of sent) { await base44.entities.ProspectEmail.delete(p.id).catch(() => {}); }
+      alert(`✅ Sent to ${res.sent} recipients. ${res.errors} errors. ${sent.length} prospect records cleared.`);
+    }
     loadCampaigns();
   };
 
