@@ -1,10 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-// Encode email as RFC 2822 + base64url for Gmail API
 function buildRawEmail({ to, subject, body, from_name }) {
-  const fromHeader = from_name ? `${from_name} <me>` : 'me';
   const message = [
-    `From: ${fromHeader}`,
+    `From: ${from_name || 'AfriSci Nexus Editorial Team'}`,
     `To: ${to}`,
     `Subject: ${subject}`,
     'MIME-Version: 1.0',
@@ -36,8 +34,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required fields: to, subject, body' }, { status: 400 });
     }
 
-    // Use admin's Google SSO token to send via Gmail API
-    const accessToken = await base44.asServiceRole.sso.getAccessToken(user.id);
+    // Use the authorized Gmail connector
+    const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
 
     const raw = buildRawEmail({ to, subject, body, from_name });
 
