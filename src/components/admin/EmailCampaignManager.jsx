@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { sendEmailCampaign } from "@/functions/sendEmailCampaign";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,101 +29,146 @@ const INSTITUTION_TYPES = [
   { value: "professional_association", label: "Professional Associations" },
 ];
 
+const JOURNALS_LIST = `Our 12 peer-reviewed journals under AfriSci Nexus Discovery cover every major discipline:
+• AfriSci STEM Journal • AfriSci Medicine &amp; Health Journal • AfriSci Agriculture &amp; Environment Journal
+• AfriSci Social Sciences Journal • AfriSci Law &amp; Policy Journal • AfriSci Arts &amp; Humanities Journal
+• AfriSci Business &amp; Economics Journal • AfriSci Education &amp; Pedagogy Journal
+• AfriSci Interdisciplinary Research Journal • AfriSci Public Health &amp; Nutrition Journal
+• AfriSci Engineering &amp; Innovation Journal • AfriSci Indigenous Knowledge &amp; Culture Journal`;
+
+const BRAND_HEADER = (subtitle) => `
+<div style="background:linear-gradient(135deg,#1e3a8a,#0d9488);padding:32px;border-radius:12px 12px 0 0;text-align:center">
+  <h1 style="color:white;margin:0;font-size:26px;letter-spacing:-0.5px">AfriSci Nexus Discovery</h1>
+  <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:13px">12 Peer-Reviewed Journals · Africa's Premier Open-Access Platform</p>
+  <p style="color:rgba(255,255,255,0.7);margin:4px 0 0;font-size:12px">${subtitle}</p>
+</div>`;
+
+const BRAND_FOOTER = `
+<div style="background:#f8fafc;padding:16px;border-radius:0 0 12px 12px;text-align:center;font-size:11px;color:#94a3b8;border:1px solid #e2e8f0;border-top:none">
+  AfriSci Nexus Discovery &nbsp;·&nbsp; 12 Peer-Reviewed Journals &nbsp;·&nbsp; <a href="https://afriscinexus.com" style="color:#0d9488">afriscinexus.com</a> &nbsp;·&nbsp; editorial@afriscinexus.com
+  <br/><a href="#" style="color:#94a3b8;font-size:10px">Unsubscribe</a>
+</div>`;
+
 const TEMPLATES = [
   {
-    name: "Partnership Proposal — Universities",
-    subject: "Partnership Opportunity: AfriSci Nexus Open Access Publishing",
+    name: "Partnership Proposal — Universities & Research Institutions",
+    goal: "partnership_proposal",
+    subject: "Publishing Partnership: AfriSci Nexus Discovery — 12 Open-Access Journals for {{institution}}",
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1e293b">
-<div style="background:linear-gradient(135deg,#1e3a8a,#0d9488);padding:32px;border-radius:12px 12px 0 0;text-align:center">
-  <h1 style="color:white;margin:0;font-size:24px">AfriSci Nexus</h1>
-  <p style="color:rgba(255,255,255,0.8);margin:8px 0 0">Africa's Premier Open Access Research Platform</p>
-</div>
+${BRAND_HEADER("Institutional Partnership Invitation")}
 <div style="background:white;padding:32px;border:1px solid #e2e8f0;border-top:none">
   <p>Dear {{name}},</p>
-  <p>We are reaching out to explore a <strong>publishing partnership</strong> between AfriSci Nexus and <strong>{{institution}}</strong>.</p>
-  <p>AfriSci Nexus is a rapidly growing open-access academic publishing platform dedicated to amplifying African research globally. We publish peer-reviewed journals across 9 disciplines and are actively seeking partnerships with leading institutions in <strong>{{country}}</strong>.</p>
-  <h3 style="color:#0d9488">Why Partner With Us?</h3>
-  <ul>
-    <li>🌍 <strong>Global Visibility</strong> — Your researchers' work reaches 190+ countries</li>
-    <li>⚡ <strong>Fast Publication</strong> — 4–6 week review cycle with AI assistance</li>
-    <li>💰 <strong>Fee Waivers</strong> — Available for authors from eligible institutions</li>
-    <li>📊 <strong>Impact Tracking</strong> — Real-time citation and download analytics</li>
-    <li>🏆 <strong>Indexed</strong> — Google Scholar, CrossRef, DOAJ, and African Journals Online</li>
+  <p>I am reaching out to explore a <strong>publishing partnership</strong> between <strong>AfriSci Nexus Discovery</strong> and <strong>{{institution}}</strong> in {{country}}.</p>
+  <p>AfriSci Nexus Discovery is Africa's premier multidisciplinary open-access publishing platform, home to <strong>12 individual peer-reviewed journals</strong> covering every major academic discipline — from STEM and Medicine to Social Sciences, Law, Arts, and Indigenous Knowledge.</p>
+  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:20px 0;font-size:13px">
+    <strong style="color:#166534">Our 12 Journals under AfriSci Nexus Discovery:</strong><br/><br/>
+    ${JOURNALS_LIST}
+  </div>
+  <h3 style="color:#0d9488;font-size:15px">Why Partner With AfriSci Nexus Discovery?</h3>
+  <ul style="line-height:1.8">
+    <li>🌍 <strong>Global Visibility</strong> — Your researchers' work reaches 190+ countries via 12 indexed journals</li>
+    <li>⚡ <strong>Fast Publication</strong> — 4–6 week AI-assisted peer review cycle</li>
+    <li>💰 <strong>Fee Waivers</strong> — Available for institutions from eligible African nations</li>
+    <li>📊 <strong>Real-Time Analytics</strong> — Citation, download and readership dashboards</li>
+    <li>🏆 <strong>Indexed</strong> — Google Scholar, CrossRef, DOAJ, African Journals Online</li>
+    <li>🤝 <strong>Co-Branding</strong> — Your institution's name featured on published articles</li>
   </ul>
-  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:24px 0">
-    <strong>Institutional Partnership Benefits Include:</strong><br>
-    Discounted publication fees, co-branding opportunities, dedicated editorial support, and a customized onboarding session for your faculty.
+  <div style="text-align:center;margin:28px 0">
+    <a href="https://afriscinexus.com/InstitutionalPartnership" style="background:#0d9488;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Explore Partnership Options →</a>
   </div>
-  <p>We would love to schedule a brief call to discuss how this partnership can benefit your faculty and students. Please reply to this email or visit <a href="https://afriscinexus.com/InstitutionalPartnership" style="color:#0d9488">our partnership page</a> to learn more.</p>
-  <div style="text-align:center;margin:32px 0">
-    <a href="https://afriscinexus.com/InstitutionalPartnership" style="background:#0d9488;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Apply for Partnership →</a>
-  </div>
-  <p>Warm regards,<br><strong>The AfriSci Nexus Editorial Team</strong><br>editorial@afriscinexus.com</p>
+  <p style="font-style:italic;color:#64748b;font-size:13px">"AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."</p>
+  <p>Warm regards,<br><strong>The AfriSci Nexus Discovery Editorial Team</strong><br>editorial@afriscinexus.com</p>
 </div>
-<div style="background:#f8fafc;padding:16px;border-radius:0 0 12px 12px;text-align:center;font-size:12px;color:#94a3b8;border:1px solid #e2e8f0;border-top:none">
-  AfriSci Nexus · Advancing African Research Globally · <a href="https://afriscinexus.com" style="color:#0d9488">afriscinexus.com</a>
-</div>
+${BRAND_FOOTER}
 </div>`
   },
   {
-    name: "Call for Submissions — Researchers",
-    subject: "Publish Your Research in AfriSci Nexus — Open Access, Peer-Reviewed",
+    name: "Call for Submissions — Researchers & Academics",
+    goal: "call_for_submissions",
+    subject: "Publish Your Research in AfriSci Nexus Discovery — 12 Open-Access Journals Await",
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1e293b">
-<div style="background:linear-gradient(135deg,#1e3a8a,#0d9488);padding:32px;border-radius:12px 12px 0 0;text-align:center">
-  <h1 style="color:white;margin:0;font-size:24px">AfriSci Nexus</h1>
-  <p style="color:rgba(255,255,255,0.8);margin:8px 0 0">Call for Research Submissions</p>
-</div>
+${BRAND_HEADER("Call for Research Submissions — All Disciplines Welcome")}
 <div style="background:white;padding:32px;border:1px solid #e2e8f0;border-top:none">
   <p>Dear {{name}},</p>
-  <p>We invite you and your colleagues at <strong>{{institution}}</strong> to submit your research to <strong>AfriSci Nexus</strong> — Africa's fastest-growing open-access academic publishing platform.</p>
-  <h3 style="color:#0d9488">We Publish Across 9 Disciplines:</h3>
-  <p>STEM · Medicine & Health · Agriculture · Social Sciences · Law & Policy · Arts & Humanities · Business · Education · Interdisciplinary</p>
-  <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:16px;margin:24px 0">
-    <strong>🎯 Why Publish With AfriSci Nexus?</strong><br><br>
-    ✅ Double-blind peer review by international experts<br>
-    ✅ Average 4–6 weeks from submission to decision<br>
-    ✅ Free for eligible authors from low-income countries<br>
-    ✅ DOI assigned to every published article<br>
-    ✅ Indexed in Google Scholar, CrossRef & DOAJ
+  <p>We warmly invite you and your colleagues at <strong>{{institution}}</strong> to submit your research to <strong>AfriSci Nexus Discovery</strong> — Africa's fastest-growing multidisciplinary open-access platform.</p>
+  <p>Whatever your discipline, we have a dedicated peer-reviewed journal for you:</p>
+  <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:16px;margin:20px 0;font-size:13px">
+    <strong style="color:#1e3a8a">AfriSci Nexus Discovery — Our 12 Journals:</strong><br/><br/>
+    ${JOURNALS_LIST}
   </div>
-  <div style="text-align:center;margin:32px 0">
+  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:20px 0">
+    <strong>🎯 Why Publish With Us?</strong><br/><br/>
+    ✅ Double-blind peer review by international experts<br/>
+    ✅ Average 4–6 weeks from submission to decision<br/>
+    ✅ Free for eligible authors from low-income countries<br/>
+    ✅ DOI assigned to every published article<br/>
+    ✅ Indexed in Google Scholar, CrossRef, DOAJ &amp; African Journals Online<br/>
+    ✅ AI-assisted manuscript formatting support
+  </div>
+  <div style="text-align:center;margin:28px 0">
     <a href="https://afriscinexus.com/Submit" style="background:#0d9488;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Submit Your Manuscript →</a>
+    &nbsp;
+    <a href="https://afriscinexus.com/Journals" style="background:#1e3a8a;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Browse Our 12 Journals →</a>
   </div>
-  <p>Questions? Contact us at <a href="mailto:editorial@afriscinexus.com" style="color:#0d9488">editorial@afriscinexus.com</a></p>
-  <p>Best regards,<br><strong>AfriSci Nexus Editorial Team</strong></p>
+  <p style="font-style:italic;color:#64748b;font-size:13px">"AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."</p>
+  <p>Best regards,<br><strong>AfriSci Nexus Discovery Editorial Team</strong><br>editorial@afriscinexus.com</p>
 </div>
-<div style="background:#f8fafc;padding:16px;border-radius:0 0 12px 12px;text-align:center;font-size:12px;color:#94a3b8;border:1px solid #e2e8f0;border-top:none">
-  AfriSci Nexus · <a href="https://afriscinexus.com" style="color:#0d9488">afriscinexus.com</a> · info@afriscinexus.com
-</div>
+${BRAND_FOOTER}
 </div>`
   },
   {
-    name: "Reviewer Recruitment",
-    subject: "Become a Peer Reviewer — AfriSci Nexus Academic Journals",
+    name: "Reviewer Recruitment — Subject Matter Experts",
+    goal: "reviewer_recruitment",
+    subject: "Join Our Expert Reviewer Network — AfriSci Nexus Discovery (12 Journals)",
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1e293b">
-<div style="background:linear-gradient(135deg,#7c3aed,#0d9488);padding:32px;border-radius:12px 12px 0 0;text-align:center">
-  <h1 style="color:white;margin:0;font-size:24px">AfriSci Nexus</h1>
-  <p style="color:rgba(255,255,255,0.8);margin:8px 0 0">Join Our Expert Reviewer Network</p>
-</div>
+${BRAND_HEADER("Invitation to Join Our Peer Reviewer Network")}
 <div style="background:white;padding:32px;border:1px solid #e2e8f0;border-top:none">
   <p>Dear {{name}},</p>
-  <p>As a distinguished professional at <strong>{{institution}}</strong>, we believe your expertise would be a tremendous asset to the AfriSci Nexus peer review network.</p>
-  <p>We are actively recruiting expert reviewers across all disciplines to help maintain the highest standards of African academic publishing.</p>
-  <h3 style="color:#7c3aed">Benefits of Joining Our Reviewer Network:</h3>
-  <ul>
-    <li>🏆 <strong>Recognition</strong> — Certificates and awards for outstanding reviewers</li>
-    <li>📖 <strong>Free Access</strong> — Complimentary access to all AfriSci Nexus publications</li>
-    <li>🌐 <strong>Global Network</strong> — Connect with 500+ researchers across Africa</li>
-    <li>⚡ <strong>Flexible</strong> — Review at your own pace, set your availability</li>
+  <p>As a distinguished professional at <strong>{{institution}}</strong> in {{country}}, we believe your expertise would be an outstanding asset to the <strong>AfriSci Nexus Discovery</strong> peer review network.</p>
+  <p>We maintain <strong>12 individual peer-reviewed journals</strong> and are actively recruiting domain experts across every discipline to uphold our standards of excellence in African academic publishing.</p>
+  <div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:16px;margin:20px 0;font-size:13px">
+    <strong style="color:#6d28d9">Find your journal among our 12:</strong><br/><br/>
+    ${JOURNALS_LIST}
+  </div>
+  <h3 style="color:#7c3aed;font-size:15px">Benefits of Joining Our Reviewer Network:</h3>
+  <ul style="line-height:1.8">
+    <li>🏆 <strong>Recognition</strong> — Certificates and annual awards for outstanding reviewers</li>
+    <li>📖 <strong>Free Access</strong> — Complimentary access to all 12 AfriSci Nexus Discovery journals</li>
+    <li>🌐 <strong>Global Network</strong> — Connect with 500+ researchers across Africa and beyond</li>
+    <li>⚡ <strong>Flexible Workload</strong> — Review at your own pace, manage your availability</li>
+    <li>📜 <strong>CV Credit</strong> — Formal reviewer credits for your academic record</li>
   </ul>
-  <div style="text-align:center;margin:32px 0">
+  <div style="text-align:center;margin:28px 0">
     <a href="https://afriscinexus.com/Apply?role=reviewer" style="background:#7c3aed;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Apply as Reviewer →</a>
   </div>
-  <p>Best regards,<br><strong>AfriSci Nexus Editorial Team</strong></p>
+  <p style="font-style:italic;color:#64748b;font-size:13px">"AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."</p>
+  <p>Best regards,<br><strong>AfriSci Nexus Discovery Editorial Team</strong><br>editorial@afriscinexus.com</p>
 </div>
-<div style="background:#f8fafc;padding:16px;border-radius:0 0 12px 12px;text-align:center;font-size:12px;color:#94a3b8;border:1px solid #e2e8f0;border-top:none">
-  AfriSci Nexus · <a href="https://afriscinexus.com" style="color:#0d9488">afriscinexus.com</a>
+${BRAND_FOOTER}
+</div>`
+  },
+  {
+    name: "General Introduction — All Institutions",
+    goal: "general_outreach",
+    subject: "Introducing AfriSci Nexus Discovery — 12 Open-Access Journals for African Research",
+    body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1e293b">
+${BRAND_HEADER("Advancing African Research Through Open Access Publishing")}
+<div style="background:white;padding:32px;border:1px solid #e2e8f0;border-top:none">
+  <p>Dear {{name}},</p>
+  <p>I hope this message finds you well. I am writing to introduce <strong>AfriSci Nexus Discovery</strong> — Africa's premier multidisciplinary open-access publishing platform, home to <strong>12 individual peer-reviewed journals</strong>.</p>
+  <p>Our platform was purpose-built to amplify African research on the global stage, offering scholars at institutions like <strong>{{institution}}</strong> a high-quality, internationally indexed venue for their work — at no cost for eligible authors.</p>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:20px 0;font-size:13px">
+    <strong>Our 12 Journals under AfriSci Nexus Discovery:</strong><br/><br/>
+    ${JOURNALS_LIST}
+  </div>
+  <p>Whether your institution is engaged in medicine, engineering, social policy, education, or indigenous knowledge — we have a journal dedicated to your field.</p>
+  <div style="text-align:center;margin:28px 0">
+    <a href="https://afriscinexus.com/Journals" style="background:#0d9488;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Explore Our 12 Journals →</a>
+  </div>
+  <p style="font-style:italic;color:#64748b;font-size:13px">"AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."</p>
+  <p>Warm regards,<br><strong>AfriSci Nexus Discovery Editorial Team</strong><br>editorial@afriscinexus.com</p>
 </div>
+${BRAND_FOOTER}
 </div>`
   }
 ];
@@ -151,16 +196,26 @@ function StatPill({ icon: Icon, value, label, color }) {
 export default function EmailCampaignManager() {
   const [campaigns, setCampaigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("campaigns");
+  const [activeTab, setActiveTab] = useState("quick_send");
   const [view, setView] = useState("list"); // list | create | edit | preview
   const [selectedCampaign, setSelectedCampaign] = useState(null);
-  const [sending, setSending] = useState(null); // campaign_id being sent
+  const [sending, setSending] = useState(null);
   const [prospectCounts, setProspectCounts] = useState({});
+
+  // Quick Send state
+  const [prospects, setProspects] = useState([]);
+  const [isLoadingProspects, setIsLoadingProspects] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(0);
+  const [selectedProspectIds, setSelectedProspectIds] = useState([]);
+  const [quickSendFilter, setQuickSendFilter] = useState({ country: "", institution_type: "" });
+  const [sendingQuick, setSendingQuick] = useState(false);
+  const [quickPreview, setQuickPreview] = useState(false);
+  const [quickResult, setQuickResult] = useState(null);
 
   // Form state
   const [form, setForm] = useState({
     name: "", subject: "", body_html: "", country: "Nigeria",
-    institution_type: "", from_name: "AfriSci Nexus Editorial Team",
+    institution_type: "", from_name: "AfriSci Nexus Discovery Editorial Team",
     scheduled_at: ""
   });
   const [previewHtml, setPreviewHtml] = useState("");
@@ -172,7 +227,19 @@ export default function EmailCampaignManager() {
     setIsLoading(false);
   };
 
+  const loadProspects = useCallback(async () => {
+    setIsLoadingProspects(true);
+    const filter = { campaign_status: "new" };
+    if (quickSendFilter.country) filter.country = quickSendFilter.country;
+    if (quickSendFilter.institution_type) filter.institution_type = quickSendFilter.institution_type;
+    const data = await base44.entities.ProspectEmail.filter(filter, '-created_date', 500);
+    setProspects(data);
+    setSelectedProspectIds([]);
+    setIsLoadingProspects(false);
+  }, [quickSendFilter]);
+
   useEffect(() => { loadCampaigns(); }, []);
+  useEffect(() => { if (activeTab === "quick_send") loadProspects(); }, [activeTab, loadProspects]);
 
   const loadProspectCount = async (country, type) => {
     const filter = { country, campaign_status: "new" };
@@ -204,6 +271,41 @@ export default function EmailCampaignManager() {
     loadCampaigns();
   };
 
+  const handleQuickSend = async () => {
+    if (!selectedProspectIds.length) return;
+    if (!confirm(`Send to ${selectedProspectIds.length} selected prospects? This cannot be undone.`)) return;
+    setSendingQuick(true);
+    setQuickResult(null);
+    const template = TEMPLATES[selectedTemplate];
+    let sent = 0, errors = 0;
+    for (const id of selectedProspectIds) {
+      const prospect = prospects.find(p => p.id === id);
+      if (!prospect) continue;
+      const body = template.body
+        .replace(/\{\{name\}\}/g, prospect.contact_name || "Colleague")
+        .replace(/\{\{institution\}\}/g, prospect.institution || "your institution")
+        .replace(/\{\{country\}\}/g, prospect.country || "");
+      const subject = template.subject
+        .replace(/\{\{name\}\}/g, prospect.contact_name || "Colleague")
+        .replace(/\{\{institution\}\}/g, prospect.institution || "your institution")
+        .replace(/\{\{country\}\}/g, prospect.country || "");
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: prospect.email,
+          subject,
+          body,
+          from_name: "AfriSci Nexus Discovery Editorial Team"
+        });
+        await base44.entities.ProspectEmail.update(id, { campaign_status: "emailed" });
+        sent++;
+      } catch (_) { errors++; }
+    }
+    setSendingQuick(false);
+    setQuickResult({ sent, errors });
+    setSelectedProspectIds([]);
+    loadProspects();
+  };
+
   const handleSend = async (campaign) => {
     if (!confirm(`Send to all NEW prospects in ${campaign.country}? This cannot be undone.`)) return;
     setSending(campaign.id);
@@ -221,13 +323,13 @@ export default function EmailCampaignManager() {
   };
 
   const startCreate = () => {
-    setForm({ name: "", subject: "", body_html: "", country: "Nigeria", institution_type: "", from_name: "AfriSci Nexus Editorial Team", scheduled_at: "" });
+    setForm({ name: "", subject: "", body_html: "", country: "Nigeria", institution_type: "", from_name: "AfriSci Nexus Discovery Editorial Team", scheduled_at: "" });
     setSelectedCampaign(null);
     setView("create");
   };
 
   const startEdit = (campaign) => {
-    setForm({ name: campaign.name, subject: campaign.subject, body_html: campaign.body_html || "", country: campaign.country || "Nigeria", institution_type: campaign.institution_type || "", from_name: campaign.from_name || "AfriSci Nexus Editorial Team", scheduled_at: campaign.scheduled_at || "" });
+    setForm({ name: campaign.name, subject: campaign.subject, body_html: campaign.body_html || "", country: campaign.country || "Nigeria", institution_type: campaign.institution_type || "", from_name: campaign.from_name || "AfriSci Nexus Discovery Editorial Team", scheduled_at: campaign.scheduled_at || "" });
     setSelectedCampaign(campaign);
     setView("edit");
   };
@@ -326,9 +428,9 @@ export default function EmailCampaignManager() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
-  }
+        </div>
+      );
+    }
 
   if (view === "preview") {
     return (
@@ -359,7 +461,7 @@ export default function EmailCampaignManager() {
           <Send className="w-7 h-7 text-teal-600" />
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Email Campaign Manager</h2>
-            <p className="text-sm text-slate-500">Build, schedule and track bulk outreach campaigns across Africa</p>
+            <p className="text-sm text-slate-500">AfriSci Nexus Discovery — 12 journals · Bulk outreach across Africa</p>
           </div>
         </div>
         <Button onClick={startCreate} className="bg-teal-600 hover:bg-teal-700 text-white">
@@ -375,26 +477,141 @@ export default function EmailCampaignManager() {
         <StatPill icon={MousePointer} value={totalClicks.toLocaleString()} label="Total Clicks" color="bg-purple-50 text-purple-800" />
       </div>
 
-      {/* Templates Quick Access */}
-      <Card>
-        <CardHeader><CardTitle className="text-base flex items-center gap-2"><FileText className="w-5 h-5 text-teal-600" /> Partnership Email Templates</CardTitle></CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-3 gap-3">
-            {TEMPLATES.map(t => (
-              <div key={t.name} className="p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:shadow-sm transition-all">
-                <p className="font-semibold text-sm text-slate-900 mb-1">{t.name}</p>
-                <p className="text-xs text-slate-500 line-clamp-2 mb-3">{t.subject}</p>
-                <Button size="sm" variant="outline" className="w-full text-xs" onClick={startCreate}>
-                  Use Template <ChevronRight className="w-3 h-3 ml-1" />
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-slate-200">
+        {[["quick_send","⚡ Quick Send"],["campaigns","📋 Campaigns"],["templates","📄 Templates"]].map(([key, label]) => (
+          <button key={key} onClick={() => setActiveTab(key)}
+            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === key ? "border-teal-600 text-teal-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── QUICK SEND TAB ── */}
+      {activeTab === "quick_send" && (
+        <div className="space-y-5">
+          <div className="bg-gradient-to-r from-teal-50 to-blue-50 border border-teal-200 rounded-xl p-4 text-sm text-teal-800">
+            <strong>⚡ Quick Send:</strong> Select a branded template, filter your fetched prospect list, select recipients, and send in one click. All templates feature AfriSci Nexus Discovery branding with all 12 journals.
+          </div>
+
+          <Card>
+            <CardHeader><CardTitle className="text-base">1️⃣ Choose a Template</CardTitle></CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+                {TEMPLATES.map((t, i) => (
+                  <button key={t.name} onClick={() => { setSelectedTemplate(i); setQuickPreview(false); }}
+                    className={`text-left p-4 rounded-xl border-2 transition-all ${selectedTemplate === i ? "border-teal-500 bg-teal-50" : "border-slate-200 hover:border-teal-300"}`}>
+                    <p className="font-semibold text-sm text-slate-900 mb-1">{t.name}</p>
+                    <p className="text-xs text-slate-500 line-clamp-2">{t.subject.replace("{{institution}}", "Institution")}</p>
+                    {selectedTemplate === i && <span className="inline-block mt-2 text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">✓ Selected</span>}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-3">
+                <Button size="sm" variant="outline" onClick={() => setQuickPreview(!quickPreview)}>
+                  <Eye className="w-3.5 h-3.5 mr-1" /> {quickPreview ? "Hide Preview" : "Preview Template"}
                 </Button>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              {quickPreview && (
+                <div className="mt-4 bg-slate-100 rounded-xl p-3">
+                  <div className="max-w-2xl mx-auto bg-white rounded-xl overflow-hidden shadow">
+                    <div className="bg-slate-200 px-4 py-2 flex items-center gap-2 text-xs text-slate-600">
+                      <div className="flex gap-1"><div className="w-2.5 h-2.5 rounded-full bg-red-400"/><div className="w-2.5 h-2.5 rounded-full bg-amber-400"/><div className="w-2.5 h-2.5 rounded-full bg-green-400"/></div>
+                      Preview — Sample data substituted
+                    </div>
+                    <div className="max-h-96 overflow-y-auto p-2" dangerouslySetInnerHTML={{ __html: TEMPLATES[selectedTemplate].body.replace(/\{\{name\}\}/g, "Dr. Amara Nwosu").replace(/\{\{institution\}\}/g, "University of Lagos").replace(/\{\{country\}\}/g, "Nigeria") }} />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-      {/* Campaign List */}
-      <Card>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <CardTitle className="text-base">2️⃣ Select Prospects
+                  <span className="ml-2 text-sm font-normal text-slate-500">({prospects.length} new prospects loaded)</span>
+                </CardTitle>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <select value={quickSendFilter.country} onChange={e => setQuickSendFilter(f => ({ ...f, country: e.target.value }))}
+                    className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-teal-300">
+                    <option value="">All Countries</option>
+                    {AFRICAN_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <select value={quickSendFilter.institution_type} onChange={e => setQuickSendFilter(f => ({ ...f, institution_type: e.target.value }))}
+                    className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-teal-300">
+                    {INSTITUTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                  <Button size="sm" variant="outline" className="text-xs" onClick={() => setSelectedProspectIds(prospects.map(p => p.id))}>Select All ({prospects.length})</Button>
+                  <Button size="sm" variant="outline" className="text-xs" onClick={() => setSelectedProspectIds([])}>Clear</Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoadingProspects ? (
+                <div className="flex items-center justify-center py-10 text-slate-500"><Loader2 className="w-5 h-5 animate-spin mr-2"/> Loading...</div>
+              ) : prospects.length === 0 ? (
+                <div className="text-center py-10 text-slate-500 text-sm">No new prospects found. Use the Email Prospector tab to fetch contacts first.</div>
+              ) : (
+                <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
+                  {prospects.map(p => (
+                    <label key={p.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${selectedProspectIds.includes(p.id) ? "border-teal-400 bg-teal-50" : "border-slate-200 hover:border-teal-200"}`}>
+                      <input type="checkbox" checked={selectedProspectIds.includes(p.id)}
+                        onChange={() => setSelectedProspectIds(prev => prev.includes(p.id) ? prev.filter(x => x !== p.id) : [...prev, p.id])}
+                        className="accent-teal-600 w-4 h-4 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-sm text-slate-900">{p.contact_name || "Unnamed"}</span>
+                          <span className="text-xs text-slate-400">{p.email}</span>
+                          {p.linkedin_url && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">LinkedIn</span>}
+                        </div>
+                        <p className="text-xs text-slate-500 truncate">{p.institution}{p.department ? ` · ${p.department}` : ""} · {p.country}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+              {selectedProspectIds.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between flex-wrap gap-3">
+                  <span className="text-sm text-slate-700"><strong>{selectedProspectIds.length}</strong> selected · Template: <strong className="text-teal-700">{TEMPLATES[selectedTemplate].name}</strong></span>
+                  <Button onClick={handleQuickSend} disabled={sendingQuick}
+                    className="bg-gradient-to-r from-teal-600 to-blue-700 hover:from-teal-700 hover:to-blue-800 text-white px-8">
+                    {sendingQuick ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/> Sending...</> : <><Send className="w-4 h-4 mr-2"/> Send to {selectedProspectIds.length} Prospects</>}
+                  </Button>
+                </div>
+              )}
+              {quickResult && (
+                <div className="mt-4 bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5" /> Sent <strong>{quickResult.sent}</strong> emails successfully. {quickResult.errors > 0 && <span className="text-red-600">{quickResult.errors} errors.</span>}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ── TEMPLATES TAB ── */}
+      {activeTab === "templates" && (
+        <Card>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><FileText className="w-5 h-5 text-teal-600" /> AfriSci Nexus Discovery — 4 Branded Templates</CardTitle></CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-4">
+              {TEMPLATES.map((t, i) => (
+                <div key={t.name} className="p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:shadow-sm transition-all">
+                  <p className="font-semibold text-sm text-slate-900 mb-1">{t.name}</p>
+                  <p className="text-xs text-slate-500 mb-3 line-clamp-2">{t.subject.replace("{{institution}}", "Institution")}</p>
+                  <Button size="sm" variant="outline" className="text-xs" onClick={() => { setSelectedTemplate(i); setActiveTab("quick_send"); }}>
+                    Use in Quick Send <ChevronRight className="w-3 h-3 ml-1" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── CAMPAIGNS TAB ── */}
+      {activeTab === "campaigns" && <Card>
         <CardHeader><CardTitle className="text-base">All Campaigns</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? (
@@ -431,7 +648,6 @@ export default function EmailCampaignManager() {
                           <span className="flex items-center gap-1 text-purple-600"><MousePointer className="w-3.5 h-3.5" /> {campaign.click_count || 0} clicks ({clickRate}%)</span>
                           {campaign.scheduled_at && <span className="flex items-center gap-1 text-blue-600"><Clock className="w-3.5 h-3.5" /> {new Date(campaign.scheduled_at).toLocaleString()}</span>}
                         </div>
-                        {/* Open rate bar */}
                         {campaign.sent_count > 0 && (
                           <div className="mt-3 flex items-center gap-2">
                             <div className="flex-1 bg-slate-100 rounded-full h-1.5">
@@ -467,7 +683,7 @@ export default function EmailCampaignManager() {
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card>}
     </div>
   );
 }

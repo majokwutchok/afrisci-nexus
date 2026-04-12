@@ -1,5 +1,20 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+const JOURNALS = [
+  "AfriSci STEM Journal",
+  "AfriSci Medicine & Health Journal",
+  "AfriSci Agriculture & Environment Journal",
+  "AfriSci Social Sciences Journal",
+  "AfriSci Law & Policy Journal",
+  "AfriSci Arts & Humanities Journal",
+  "AfriSci Business & Economics Journal",
+  "AfriSci Education & Pedagogy Journal",
+  "AfriSci Interdisciplinary Research Journal",
+  "AfriSci Public Health & Nutrition Journal",
+  "AfriSci Engineering & Innovation Journal",
+  "AfriSci Indigenous Knowledge & Culture Journal"
+];
+
 // Builds a rich context prompt for one prospect
 function buildPrompt(prospect, goal, extraContext) {
   const signals = [];
@@ -11,15 +26,18 @@ function buildPrompt(prospect, goal, extraContext) {
   if (prospect.notes) signals.push(`Additional context: ${prospect.notes}`);
 
   const goalDescriptions = {
-    partnership_proposal: "propose an institutional publishing partnership with AfriSci Nexus — pitch the benefits of their researchers getting global visibility and discounted open-access publication fees",
-    call_for_submissions: "invite the recipient to submit their research to AfriSci Nexus journals — highlight how their specific research area fits our journals",
-    reviewer_recruitment: "recruit this academic as a peer reviewer for AfriSci Nexus — reference their expertise as shown by their headline and department",
-    general_outreach: "introduce AfriSci Nexus and explore potential collaboration opportunities based on their background"
+    partnership_proposal: "propose an institutional publishing partnership with AfriSci Nexus Discovery — pitch the benefits of their researchers getting global visibility, discounted open-access publication fees across 12 peer-reviewed journals, and co-branding opportunities. Name the most relevant journal(s) for their institution.",
+    call_for_submissions: "invite the recipient to submit their research to AfriSci Nexus Discovery — highlight which of our 12 journals best matches their specific research area or department. Be specific and direct.",
+    reviewer_recruitment: "recruit this academic as a peer reviewer for AfriSci Nexus Discovery — reference their specific expertise from their headline/department and name which of our 12 journals they should review for.",
+    general_outreach: "introduce AfriSci Nexus Discovery (Africa's premier multidisciplinary open-access platform with 12 individual peer-reviewed journals) and explore potential collaboration based on their background."
   };
 
-  return `You are a senior partnerships manager at AfriSci Nexus, Africa's premier open-access academic publishing platform. 
+  return `You are the Senior Partnerships Director at AfriSci Nexus Discovery — Africa's premier multidisciplinary open-access academic publishing platform, home to 12 individual peer-reviewed journals.
 
-Write a highly personalized, warm, professional email to the following academic/professional. The email must feel hand-written — NOT like a mass mail-merge blast.
+OUR 12 JOURNALS under AfriSci Nexus Discovery:
+${JOURNALS.map((j, i) => `${i + 1}. ${j}`).join('\n')}
+
+Write a highly personalized, warm, professional email to the following academic/professional. The email must feel hand-written — reference a SPECIFIC journal that matches their field. NOT a mass template blast.
 
 RECIPIENT INFO:
 - Name: ${prospect.contact_name || "Dear Colleague"}
@@ -33,18 +51,20 @@ ${extraContext ? `\nADDITIONAL CONTEXT FROM WEB:\n${extraContext}` : ''}
 GOAL: ${goalDescriptions[goal] || goalDescriptions.partnership_proposal}
 
 REQUIREMENTS:
-1. Subject line: compelling, specific to their background, max 10 words
-2. Opening: reference something SPECIFIC about their role, department, or LinkedIn headline — make it clear this is not a template
-3. Body: 3–4 short paragraphs. Mention their institution and country specifically. Reference their likely research interests based on their headline/department.
-4. CTA: one clear action (reply, visit a link, schedule a call)
-5. Tone: warm, collegial, peer-to-peer — NOT salesy
-6. Signature: from "The AfriSci Nexus Editorial Team"
-7. HTML format with inline styles (no external CSS). Use clean, readable typography.
-8. Do NOT use placeholder brackets like [Name] — use the actual values provided
+1. Subject line: compelling, specific to their field + mentions AfriSci Nexus Discovery, max 12 words
+2. Opening: reference something SPECIFIC about their role, department, or LinkedIn headline
+3. Body: 3–4 short paragraphs. Name the SPECIFIC AfriSci Nexus Discovery journal most relevant to their field. Mention their institution and country. Reference their likely research interests.
+4. Include naturally: "AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."
+5. CTA: one clear action (reply, visit a link, schedule a call)
+6. Tone: warm, collegial, peer-to-peer — NOT salesy
+7. Signature: "The AfriSci Nexus Discovery Editorial Team" with editorial@afriscinexus.com
+8. HTML format with inline styles. Brand header: dark blue (#1e3a8a) to teal (#0d9488) gradient.
+9. Do NOT use placeholder brackets like [Name] — use the actual values provided.
+10. Footer: "AfriSci Nexus Discovery · 12 Peer-Reviewed Journals · afriscinexus.com"
 
 Also provide:
-- A list of personalization_signals you used (max 5 bullet points)  
-- A short ai_reasoning (1–2 sentences) explaining your personalization approach
+- personalization_signals: list of signals used (max 5)
+- ai_reasoning: 1–2 sentences on your personalization approach
 
 Return JSON only.`;
 }
@@ -56,7 +76,8 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Admin access required' }, { status: 403 });
   }
 
-  const { action, prospect_ids, goal = 'partnership_proposal', outreach_id } = await req.json();
+  const body = await req.json();
+  const { action, prospect_ids, goal = 'partnership_proposal', outreach_id } = body;
 
   // ── ACTION: generate drafts for a batch of prospects ──
   if (action === 'generate') {
@@ -129,7 +150,7 @@ Deno.serve(async (req) => {
       to: outreach.prospect_email,
       subject: outreach.subject,
       body: outreach.body_html,
-      from_name: 'AfriSci Nexus Editorial Team'
+      from_name: 'AfriSci Nexus Discovery Editorial Team'
     });
 
     await base44.asServiceRole.entities.PersonalizedOutreach.update(outreach_id, {
@@ -137,7 +158,6 @@ Deno.serve(async (req) => {
       sent_at: new Date().toISOString()
     });
 
-    // Update the prospect's campaign_status
     if (outreach.prospect_id) {
       await base44.asServiceRole.entities.ProspectEmail.update(outreach.prospect_id, { campaign_status: 'emailed' });
     }
@@ -147,9 +167,7 @@ Deno.serve(async (req) => {
 
   // ── ACTION: send all approved drafts in a batch ──
   if (action === 'send_all_approved') {
-    const { country, goal: filterGoal } = await req.json().catch(() => ({}));
     const filter = { status: 'approved' };
-    if (filterGoal) filter.campaign_goal = filterGoal;
     const approved = await base44.asServiceRole.entities.PersonalizedOutreach.filter(filter);
 
     let sent = 0, errors = 0;
@@ -159,7 +177,7 @@ Deno.serve(async (req) => {
           to: outreach.prospect_email,
           subject: outreach.subject,
           body: outreach.body_html,
-          from_name: 'AfriSci Nexus Editorial Team'
+          from_name: 'AfriSci Nexus Discovery Editorial Team'
         });
         await base44.asServiceRole.entities.PersonalizedOutreach.update(outreach.id, { status: 'sent', sent_at: new Date().toISOString() });
         if (outreach.prospect_id) {
