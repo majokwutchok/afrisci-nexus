@@ -210,7 +210,7 @@ export default function EmailCampaignManager() {
   const [isLoadingProspects, setIsLoadingProspects] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(0);
   const [selectedProspectIds, setSelectedProspectIds] = useState([]);
-  const [quickSendFilter, setQuickSendFilter] = useState({ country: "", institution_type: "" });
+  const [quickSendFilter, setQuickSendFilter] = useState({ country: "", institution_type: "", engagement_level: "", sort_by: "created" });
   const [sendingQuick, setSendingQuick] = useState(false);
   const [quickPreview, setQuickPreview] = useState(false);
   const [quickResult, setQuickResult] = useState(null);
@@ -237,10 +237,13 @@ export default function EmailCampaignManager() {
 
   const loadProspects = useCallback(async () => {
     setIsLoadingProspects(true);
-    const filter = { campaign_status: "new" };
+    const filter = {};
     if (quickSendFilter.country) filter.country = quickSendFilter.country;
     if (quickSendFilter.institution_type) filter.institution_type = quickSendFilter.institution_type;
-    const data = await base44.entities.ProspectEmail.filter(filter, '-created_date', 500);
+    if (quickSendFilter.engagement_level) filter.engagement_level = quickSendFilter.engagement_level;
+    const sortMap = { created: '-created_date', score: '-lead_score', opened: '-last_opened_at', clicked: '-last_clicked_at' };
+    const sort = sortMap[quickSendFilter.sort_by] || '-created_date';
+    const data = await base44.entities.ProspectEmail.filter(filter, sort, 500);
     setProspects(data);
     setSelectedProspectIds([]);
     setIsLoadingProspects(false);
@@ -560,6 +563,20 @@ export default function EmailCampaignManager() {
                     className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-teal-300">
                     {INSTITUTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
+                  <select value={quickSendFilter.engagement_level} onChange={e => setQuickSendFilter(f => ({ ...f, engagement_level: e.target.value }))}
+                    className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-teal-300">
+                    <option value="">All Engagement</option>
+                    <option value="hot">🔥 Hot</option>
+                    <option value="warm">🌤 Warm</option>
+                    <option value="cold">❄️ Cold</option>
+                  </select>
+                  <select value={quickSendFilter.sort_by} onChange={e => setQuickSendFilter(f => ({ ...f, sort_by: e.target.value }))}
+                    className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-teal-300">
+                    <option value="created">Sort: Newest</option>
+                    <option value="score">Sort: Lead Score ↓</option>
+                    <option value="opened">Sort: Last Opened</option>
+                    <option value="clicked">Sort: Last Clicked</option>
+                  </select>
                   <Button size="sm" variant="outline" className="text-xs" onClick={() => setSelectedProspectIds(prospects.map(p => p.id))}>Select All ({prospects.length})</Button>
                   <Button size="sm" variant="outline" className="text-xs" onClick={() => setSelectedProspectIds([])}>Clear</Button>
                 </div>
@@ -581,6 +598,12 @@ export default function EmailCampaignManager() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium text-sm text-slate-900">{p.contact_name || "Unnamed"}</span>
                           <span className="text-xs text-slate-400">{p.email}</span>
+                          {p.engagement_level === 'hot' && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-semibold">🔥 Hot</span>}
+                          {p.engagement_level === 'warm' && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-semibold">🌤 Warm</span>}
+                          {p.lead_score > 0 && <span className="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">Score: {p.lead_score}</span>}
+                          {p.email_open_count > 0 && <span className="text-xs bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded">👁 {p.email_open_count}</span>}
+                          {p.email_click_count > 0 && <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">🖱 {p.email_click_count}</span>}
+                          {p.follow_up_count > 0 && <span className="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">↩ {p.follow_up_count} follow-up</span>}
                           {p.linkedin_url && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">LinkedIn</span>}
                         </div>
                         <p className="text-xs text-slate-500 truncate">{p.institution}{p.department ? ` · ${p.department}` : ""} · {p.country}</p>

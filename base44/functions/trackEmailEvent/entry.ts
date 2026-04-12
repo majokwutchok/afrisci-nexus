@@ -32,6 +32,27 @@ Deno.serve(async (req) => {
           [field]: (campaigns[0][field] || 0) + 1
         });
       }
+
+      // Update prospect lead score
+      const decodedEmail = decodeURIComponent(email);
+      const prospects = await base44.asServiceRole.entities.ProspectEmail.filter({ email: decodedEmail });
+      if (prospects[0]) {
+        const p = prospects[0];
+        const isClick = event === 'click';
+        const newOpenCount = isClick ? (p.email_open_count || 0) : (p.email_open_count || 0) + 1;
+        const newClickCount = isClick ? (p.email_click_count || 0) + 1 : (p.email_click_count || 0);
+        const newScore = (newOpenCount * 10) + (newClickCount * 25) + (p.campaign_status === 'responded' ? 50 : 0);
+        const engagementLevel = newScore >= 50 ? 'hot' : newScore >= 20 ? 'warm' : 'cold';
+        const updates = {
+          lead_score: newScore,
+          engagement_level: engagementLevel,
+          email_open_count: newOpenCount,
+          email_click_count: newClickCount
+        };
+        if (isClick) updates.last_clicked_at = new Date().toISOString();
+        else updates.last_opened_at = new Date().toISOString();
+        await base44.asServiceRole.entities.ProspectEmail.update(p.id, updates);
+      }
     }).catch(() => {});
   }
 

@@ -76,6 +76,48 @@
     },
     "notes": {
       "type": "string"
+    },
+    "lead_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Engagement score: +10 per open, +25 per click, +50 if responded"
+    },
+    "engagement_level": {
+      "type": "string",
+      "enum": [
+        "cold",
+        "warm",
+        "hot"
+      ],
+      "default": "cold",
+      "description": "Derived engagement tier based on lead_score"
+    },
+    "email_open_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of email opens tracked"
+    },
+    "email_click_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of email link clicks tracked"
+    },
+    "last_opened_at": {
+      "type": "string",
+      "description": "ISO timestamp of last email open"
+    },
+    "last_clicked_at": {
+      "type": "string",
+      "description": "ISO timestamp of last email link click"
+    },
+    "follow_up_sent_at": {
+      "type": "string",
+      "description": "ISO timestamp when follow-up email was sent"
+    },
+    "follow_up_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of follow-up emails sent"
     }
   },
   "required": [
