@@ -334,81 +334,94 @@ function CardSquare() {
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────
 export default function ExecutiveBusinessCard() {
   const [activeCard, setActiveCard] = useState("front");
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState(null); // null | "all" | cardId
 
-  const downloadCard = async (cardId, filename) => {
-    setDownloading(true);
+  // Capture a specific card element to canvas (must be in DOM and visible)
+  const captureCard = async (cardId) => {
+    const { default: html2canvas } = await import("html2canvas");
+    // Temporarily make the render container visible for capture
+    const container = document.getElementById("bcard-render-all");
+    const prevVis = container.style.visibility;
+    const prevPos = container.style.position;
+    container.style.visibility = "visible";
+    container.style.position = "absolute";
+    container.style.left = "-9999px";
+    container.style.top = "0";
+    const el = document.getElementById(cardId);
+    const canvas = await html2canvas(el, {
+      scale: 3,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null,
+      logging: false,
+    });
+    container.style.visibility = prevVis;
+    container.style.position = prevPos;
+    return canvas;
+  };
+
+  const triggerDownload = (canvas, filename, mimeType = "image/png", quality = 1.0) => {
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = canvas.toDataURL(mimeType, quality);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadCard = async (cardId, baseName, format) => {
+    setDownloading(cardId + format);
     try {
-      const { default: html2canvas } = await import("html2canvas");
-      const element = document.getElementById(cardId);
-      if (!element) return;
-      const canvas = await html2canvas(element, {
-        scale: 3,
-        useCORS: true,
-        backgroundColor: null,
-        logging: false,
-      });
-      const link = document.createElement("a");
-      link.download = filename;
-      link.href = canvas.toDataURL("image/png", 1.0);
-      link.click();
-    } catch (e) {
-      console.error(e);
-    }
-    setDownloading(false);
+      const canvas = await captureCard(cardId);
+      const { mime, ext, quality } = FORMAT_OPTIONS[format];
+      triggerDownload(canvas, `${baseName}.${ext}`, mime, quality);
+    } catch (e) { console.error(e); }
+    setDownloading(null);
   };
 
   const downloadAll = async () => {
-    setDownloading(true);
+    setDownloading("all");
     try {
-      const { default: html2canvas } = await import("html2canvas");
       const cards = [
-        { id: "bcard-front", name: "AfriSciNexus_BusinessCard_Front.png" },
-        { id: "bcard-back", name: "AfriSciNexus_BusinessCard_Back.png" },
-        { id: "bcard-square", name: "AfriSciNexus_BusinessCard_Social.png" },
+        { id: "bcard-front", base: "AfriSciNexus_Card_Front" },
+        { id: "bcard-back", base: "AfriSciNexus_Card_Back" },
+        { id: "bcard-square", base: "AfriSciNexus_Card_Square" },
       ];
       for (const c of cards) {
-        const el = document.getElementById(c.id);
-        if (!el) continue;
-        const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: null, logging: false });
-        const link = document.createElement("a");
-        link.download = c.name;
-        link.href = canvas.toDataURL("image/png", 1.0);
-        link.click();
-        await new Promise(r => setTimeout(r, 500));
+        const canvas = await captureCard(c.id);
+        for (const [, { mime, ext, quality }] of Object.entries(FORMAT_OPTIONS)) {
+          triggerDownload(canvas, `${c.base}.${ext}`, mime, quality);
+          await new Promise(r => setTimeout(r, 300));
+        }
+        await new Promise(r => setTimeout(r, 400));
       }
     } catch (e) { console.error(e); }
-    setDownloading(false);
+    setDownloading(null);
   };
 
-  const printCard = () => {
-    const el = document.getElementById(
-      activeCard === "front" ? "bcard-front" : activeCard === "back" ? "bcard-back" : "bcard-square"
-    );
-    if (!el) return;
-    const w = window.open("", "_blank");
-    w.document.write(`
-      <html><head><title>Print Business Card</title>
-      <style>
-        @page { margin: 0; size: ${activeCard === "square" ? "8.5cm 8.5cm" : "8.5cm 5.5cm"}; }
-        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; }
-        img { max-width: 100%; height: auto; }
-      </style></head><body>
-      <img src="${el.toDataURL ? el.toDataURL() : ""}" onload="window.print();window.close();" />
-      </body></html>
-    `);
-    // fallback - capture and print
-    import("html2canvas").then(({ default: html2canvas }) => {
-      html2canvas(el, { scale: 3, useCORS: true, backgroundColor: null }).then(canvas => {
-        w.document.body.innerHTML = `<img src="${canvas.toDataURL()}" onload="window.print();window.close();" style="max-width:100%;height:auto;" />`;
-      });
-    });
+  const printCard = async () => {
+    const idMap = { front: "bcard-front", back: "bcard-back", square: "bcard-square" };
+    try {
+      const canvas = await captureCard(idMap[activeCard]);
+      const w = window.open("", "_blank");
+      const size = activeCard === "square" ? "8.5cm 8.5cm" : "8.5cm 5.5cm";
+      w.document.write(`<html><head><title>Print</title>
+        <style>@page{margin:0;size:${size}}body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh}img{max-width:100%;height:auto}</style>
+        </head><body><img src="${canvas.toDataURL("image/png")}" onload="window.print();window.close();"/></body></html>`);
+      w.document.close();
+    } catch (e) { console.error(e); }
   };
 
-  const CARD_TYPES = [
-    { id: "front", label: "📇 Front (Landscape)", desc: "Standard 3.5\" × 2\" business card front" },
-    { id: "back", label: "🗂 Back (Journals)", desc: "Standard 3.5\" × 2\" — 12 journals listing" },
-    { id: "square", label: "📐 Square (Social)", desc: "Square format for LinkedIn / digital use" },
+  const FORMAT_OPTIONS = {
+    png: { mime: "image/png", ext: "png", quality: 1.0, label: "PNG (Lossless)", color: "bg-blue-100 text-blue-800 border-blue-200" },
+    jpg: { mime: "image/jpeg", ext: "jpg", quality: 0.95, label: "JPG (Print)", color: "bg-green-100 text-green-800 border-green-200" },
+    webp: { mime: "image/webp", ext: "webp", quality: 0.95, label: "WebP (Web)", color: "bg-purple-100 text-purple-800 border-purple-200" },
+  };
+
+  const CARDS = [
+    { id: "bcard-front", key: "front", label: "Front Card", base: "AfriSciNexus_Card_Front", icon: "📇", desc: "3.5\" × 2\" landscape — contact details" },
+    { id: "bcard-back", key: "back", label: "Back Card", base: "AfriSciNexus_Card_Back", icon: "🗂", desc: "3.5\" × 2\" landscape — 12 journals" },
+    { id: "bcard-square", key: "square", label: "Square / Social", base: "AfriSciNexus_Card_Square", icon: "📐", desc: "Square — LinkedIn / digital use" },
   ];
 
   return (
@@ -430,82 +443,89 @@ export default function ExecutiveBusinessCard() {
           </Button>
           <Button
             onClick={downloadAll}
-            disabled={downloading}
+            disabled={!!downloading}
             className="bg-gradient-to-r from-blue-900 to-teal-600 hover:from-blue-800 hover:to-teal-500 text-white gap-2"
           >
             <Download className="w-4 h-4" />
-            {downloading ? "Downloading..." : "Download All Formats"}
+            {downloading === "all" ? "Downloading all..." : "Download All (PNG + JPG + WebP)"}
           </Button>
         </div>
       </div>
 
       {/* Info banner */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-        <strong>🖨 Print-Ready:</strong> All formats export at 3× resolution (300+ DPI equivalent). Standard business card: <strong>3.5" × 2"</strong> (88.9 × 50.8 mm). Square card: <strong>2.5" × 2.5"</strong> ideal for digital & social media use.
+        <strong>🖨 Print-Ready:</strong> All formats export at 3× resolution (300+ DPI equivalent). Standard business card: <strong>3.5" × 2"</strong> (88.9 × 50.8 mm). Square: <strong>2.5" × 2.5"</strong> ideal for LinkedIn & digital use. Available as <strong>PNG, JPG, WebP</strong>.
       </div>
 
       {/* Tab selector */}
       <div className="flex gap-2 flex-wrap">
-        {CARD_TYPES.map(ct => (
+        {CARDS.map(ct => (
           <button
-            key={ct.id}
-            onClick={() => setActiveCard(ct.id)}
+            key={ct.key}
+            onClick={() => setActiveCard(ct.key)}
             className={`px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all text-left ${
-              activeCard === ct.id
+              activeCard === ct.key
                 ? "border-teal-500 bg-teal-50 text-teal-700"
                 : "border-slate-200 text-slate-600 hover:border-teal-300"
             }`}
           >
-            <div>{ct.label}</div>
+            <div>{ct.icon} {ct.label}</div>
             <div className="text-xs text-slate-400 mt-0.5">{ct.desc}</div>
           </button>
         ))}
       </div>
 
-      {/* Card preview */}
-      <div className="bg-slate-100 rounded-2xl p-8 overflow-x-auto">
-        <div className="flex flex-col items-center gap-6">
-          {/* All 3 cards rendered (but only selected shown prominently, others hidden off-screen for export) */}
-          <div style={{ display: activeCard === "front" ? "block" : "none" }}>
-            <CardFront />
-          </div>
-          <div style={{ display: activeCard === "back" ? "block" : "none" }}>
-            <CardBack />
-          </div>
-          <div style={{ display: activeCard === "square" ? "block" : "none" }}>
-            <CardSquare />
-          </div>
-
-          {/* Always render all in hidden div for download */}
-          <div style={{ position: "fixed", left: -9999, top: -9999, pointerEvents: "none", opacity: 0, zIndex: -1 }}>
-            {activeCard !== "front" && <CardFront />}
-            {activeCard !== "back" && <CardBack />}
-            {activeCard !== "square" && <CardSquare />}
+      {/* Card preview (scaled down for display) */}
+      <div className="bg-slate-800 rounded-2xl p-8 overflow-x-auto">
+        <div className="flex justify-center">
+          <div style={{ transform: activeCard === "square" ? "scale(0.48)" : "scale(0.55)", transformOrigin: "top center",
+            height: activeCard === "square" ? 384 : 330, display: "flex", alignItems: "flex-start" }}>
+            {activeCard === "front" && <CardFront />}
+            {activeCard === "back" && <CardBack />}
+            {activeCard === "square" && <CardSquare />}
           </div>
         </div>
       </div>
 
-      {/* Per-format download buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[
-          { id: "bcard-front", label: "Front Card", file: "AfriSciNexus_Card_Front.png", icon: "📇" },
-          { id: "bcard-back", label: "Back Card (Journals)", file: "AfriSciNexus_Card_Back.png", icon: "🗂" },
-          { id: "bcard-square", label: "Square / Social", file: "AfriSciNexus_Card_Square.png", icon: "📐" },
-        ].map(f => (
-          <button
-            key={f.id}
-            onClick={() => downloadCard(f.id, f.file)}
-            disabled={downloading}
-            className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-teal-400 hover:shadow-md transition-all text-left"
-          >
-            <span className="text-2xl">{f.icon}</span>
-            <div className="flex-1">
-              <div className="font-semibold text-slate-900 text-sm">{f.label}</div>
-              <div className="text-xs text-slate-400">{f.file}</div>
+      {/* All 3 cards always rendered off-screen at full size for capture */}
+      <div
+        id="bcard-render-all"
+        style={{ position: "fixed", left: -9999, top: 0, visibility: "hidden", zIndex: -1, pointerEvents: "none" }}
+      >
+        <CardFront />
+        <CardBack />
+        <CardSquare />
+      </div>
+
+      {/* Per-card download section */}
+      <div className="space-y-4">
+        <h3 className="font-bold text-slate-800 text-base">Download by Format</h3>
+        <div className="grid gap-4">
+          {CARDS.map(card => (
+            <div key={card.id} className="bg-white border border-slate-200 rounded-xl p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-2xl">{card.icon}</span>
+                <div>
+                  <div className="font-bold text-slate-900">{card.label}</div>
+                  <div className="text-xs text-slate-400">{card.desc}</div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(FORMAT_OPTIONS).map(([fmt, opt]) => (
+                  <button
+                    key={fmt}
+                    onClick={() => downloadCard(card.id, card.base, fmt)}
+                    disabled={!!downloading}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-semibold transition-all hover:shadow-md disabled:opacity-50 ${opt.color}`}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    {downloading === card.id + fmt ? "..." : opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <Download className="w-4 h-4 text-teal-600" />
-          </button>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Contact summary */}
