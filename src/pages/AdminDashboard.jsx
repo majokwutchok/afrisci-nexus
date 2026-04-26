@@ -34,6 +34,7 @@ import EmailCampaignManager from "../components/admin/EmailCampaignManager";
 import LinkedInProfileAgent from "../components/admin/LinkedInProfileAgent";
 import PersonalizedOutreachEngine from "../components/admin/PersonalizedOutreachEngine";
 import InboundReplyMonitor from "../components/admin/InboundReplyMonitor";
+import ExecutiveBusinessCard from "../components/admin/ExecutiveBusinessCard";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -158,6 +159,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="compliance" className="text-purple-700 font-semibold">📋 Publisher Compliance</TabsTrigger>
             <TabsTrigger value="marketing_docs" className="text-indigo-700 font-semibold">📄 Marketing Docs</TabsTrigger>
             <TabsTrigger value="brand" className="text-amber-700 font-semibold">🎨 Brand Assets</TabsTrigger>
+            <TabsTrigger value="business_card" className="text-blue-700 font-semibold">📇 Business Card</TabsTrigger>
             <TabsTrigger value="email_prospector" className="text-teal-700 font-semibold">📧 Email Prospector</TabsTrigger>
             <TabsTrigger value="campaigns" className="text-indigo-700 font-semibold">🚀 Campaigns</TabsTrigger>
             <TabsTrigger value="linkedin_agent" className="text-blue-700 font-semibold">🔗 LinkedIn Agent</TabsTrigger>
@@ -326,6 +328,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="brand" className="mt-6">
             <BrandAssets />
+          </TabsContent>
+
+          <TabsContent value="business_card" className="mt-6">
+            <ExecutiveBusinessCard />
           </TabsContent>
 
           <TabsContent value="email_prospector" className="mt-6">
