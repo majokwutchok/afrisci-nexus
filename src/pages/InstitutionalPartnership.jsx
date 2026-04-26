@@ -91,8 +91,8 @@ const reasons = [
   {
     icon: Shield,
     color: "bg-purple-100 text-purple-700",
-    title: "Homegrown & Trustworthy",
-    body: "AfriSci Nexus is built in Africa, for Africa. No predatory fees, no foreign editorial gatekeeping. African research evaluated by African and global scholars on equal terms.",
+    title: "Trusted & Independent",
+    body: "AfriSci Nexus Discovery is headquartered in Perth, Western Australia — an independent platform free from predatory fees and editorial gatekeeping. African research evaluated by African and global scholars on equal terms.",
   },
   {
     icon: Zap,

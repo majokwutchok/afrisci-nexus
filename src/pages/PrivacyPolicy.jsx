@@ -172,13 +172,12 @@ We are committed to ensuring that any cross-border data transfers are conducted 
 **Data Protection Officer**
 privacy@afriscinexus.org
 
-**Registered Address**
-AfriSci Nexus Publishing Ltd
-c/o African Development Centre
-Nairobi, Kenya
+**Head Office**
+AfriSci Nexus Discovery
+Perth, Western Australia, Australia
 
 **General Enquiries**
-editorial@afriscinexus.org | +254 20 000 0000
+editorial@afriscinexus.com
 
 For complaints that cannot be resolved directly, you retain the right to contact your national supervisory authority.`
   }

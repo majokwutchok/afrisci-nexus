@@ -46,6 +46,9 @@ export default function Footer() {
             <p className="text-sm text-slate-400 mt-3 leading-relaxed">
               Advancing African scientific research through open-access publishing.
             </p>
+            <p className="text-xs text-slate-500 mt-2">
+              📍 Head Office: Perth, Western Australia, Australia
+            </p>
             <div className="flex space-x-3 mt-4">
               <a href="#" className="text-slate-500 hover:text-teal-400 transition-colors"><Twitter className="w-5 h-5" /></a>
               <a href="#" className="text-slate-500 hover:text-teal-400 transition-colors"><Linkedin className="w-5 h-5" /></a>

@@ -178,10 +178,10 @@ Nothing in these Terms limits liability for death or personal injury caused by o
     id: "governing-law",
     icon: Scale,
     title: "10. Governing Law & Dispute Resolution",
-    content: `These Terms are governed by the laws of Kenya, without regard to its conflict of law provisions.
+    content: `These Terms are governed by the laws of Western Australia, Australia, without regard to its conflict of law provisions.
 
 **Dispute Resolution**
-We encourage you to contact us first at legal@afriscinexus.org to resolve any dispute informally. If a resolution cannot be reached within 30 days, disputes shall be submitted to binding arbitration under the Nairobi Centre for International Arbitration (NCIA) Rules, with the arbitration conducted in Nairobi, Kenya in the English language.
+We encourage you to contact us first at legal@afriscinexus.org to resolve any dispute informally. If a resolution cannot be reached within 30 days, disputes shall be submitted to binding arbitration under the rules of the Australian Centre for International Commercial Arbitration (ACICA), with the arbitration conducted in Perth, Western Australia in the English language.
 
 **Class Action Waiver**
 You agree to resolve disputes with AfriSci Nexus on an individual basis and waive the right to participate in any class or representative action.
@@ -215,10 +215,9 @@ billing@afriscinexus.org
 **Data Protection**
 privacy@afriscinexus.org
 
-**Postal Address**
-AfriSci Nexus Publishing Ltd
-c/o African Development Centre
-Nairobi, Kenya`
+**Head Office**
+AfriSci Nexus Discovery
+Perth, Western Australia, Australia`
   }
 ];
 
