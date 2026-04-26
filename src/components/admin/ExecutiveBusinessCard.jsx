@@ -43,10 +43,10 @@ function CardFront() {
       <div style={{ position: "absolute", top: "40%", left: "55%", width: 180, height: 180, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
 
       {/* Gold accent bar left */}
-      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 6, background: "linear-gradient(180deg,#F59E0B,#D97706,#F59E0B)" }} />
+      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8, background: "linear-gradient(180deg,#F59E0B,#D97706,#F59E0B)" }} />
 
       {/* Top section: Logo + tagline */}
-      <div style={{ position: "absolute", top: 44, left: 40, display: "flex", alignItems: "center", gap: 16 }}>
+      <div style={{ position: "absolute", top: 44, left: 44, display: "flex", alignItems: "center", gap: 16 }}>
         <div style={{
           width: 72, height: 72, borderRadius: 18,
           background: "linear-gradient(135deg,#0D9488,#F59E0B)",
@@ -56,14 +56,14 @@ function CardFront() {
           <img src={LOGO_ICON_URL} alt="" style={{ width: 52, height: 52, objectFit: "contain" }} />
         </div>
         <div>
-          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.5 }}>
+          <div style={{ fontSize: 32, fontWeight: 900, letterSpacing: -0.5 }}>
             <span style={{ background: "linear-gradient(90deg,#fff,#7FFFD4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AfriSci</span>
             {" "}
             <span style={{ background: "linear-gradient(90deg,#F59E0B,#FBBF24)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Nexus</span>
             {" "}
-            <span style={{ color: "#cbd5e1", fontSize: 22, fontWeight: 700 }}>Discovery</span>
+            <span style={{ color: "#e2e8f0", fontSize: 26, fontWeight: 800 }}>Discovery</span>
           </div>
-          <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#94a3b8", marginTop: 2 }}>
+          <div style={{ fontSize: 13, letterSpacing: 3, textTransform: "uppercase", color: "#cbd5e1", marginTop: 3, fontWeight: 700 }}>
             African Scientific Excellence · Open Access
           </div>
         </div>
@@ -73,26 +73,27 @@ function CardFront() {
       <div style={{
         position: "absolute", top: 44, right: 44,
         background: "linear-gradient(135deg,#F59E0B,#D97706)",
-        borderRadius: 50, padding: "8px 20px",
-        fontSize: 13, fontWeight: 800, color: "#fff",
-        boxShadow: "0 4px 16px rgba(245,158,11,0.4)"
+        borderRadius: 50, padding: "10px 24px",
+        fontSize: 15, fontWeight: 900, color: "#fff",
+        boxShadow: "0 4px 16px rgba(245,158,11,0.5)",
+        letterSpacing: 0.5
       }}>
         12 Peer-Reviewed Journals
       </div>
 
       {/* Divider */}
-      <div style={{ position: "absolute", top: 136, left: 40, right: 44, height: 1, background: "linear-gradient(90deg,#F59E0B,rgba(255,255,255,0.1))" }} />
+      <div style={{ position: "absolute", top: 140, left: 44, right: 44, height: 2, background: "linear-gradient(90deg,#F59E0B,rgba(255,255,255,0.2))" }} />
 
       {/* Person details */}
-      <div style={{ position: "absolute", top: 164, left: 40 }}>
-        <div style={{ fontSize: 34, fontWeight: 900, letterSpacing: -0.5, color: "#fff" }}>Majok Wutchok</div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: "#F59E0B", marginTop: 4, letterSpacing: 1.5, textTransform: "uppercase" }}>
+      <div style={{ position: "absolute", top: 168, left: 44 }}>
+        <div style={{ fontSize: 42, fontWeight: 900, letterSpacing: -1, color: "#ffffff", textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>Majok Wutchok</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "#FCD34D", marginTop: 6, letterSpacing: 2.5, textTransform: "uppercase" }}>
           Founder &amp; CEO
         </div>
       </div>
 
       {/* Contact info */}
-      <div style={{ position: "absolute", top: 270, left: 40, display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ position: "absolute", top: 278, left: 44, display: "flex", flexDirection: "column", gap: 11 }}>
         {[
           { icon: "📱", text: "+61 425 448 727" },
           { icon: "✉️", text: "majok@afriscinexus.com" },
@@ -101,15 +102,15 @@ function CardFront() {
           { icon: "🌐", text: "www.afriscinexus.com" },
           { icon: "📍", text: "Perth, Western Australia, Australia" },
         ].map((item, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "#cbd5e1" }}>
-            <span style={{ fontSize: 14 }}>{item.icon}</span>
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 15, color: "#f1f5f9", fontWeight: 600 }}>
+            <span style={{ fontSize: 16 }}>{item.icon}</span>
             <span>{item.text}</span>
           </div>
         ))}
       </div>
 
       {/* Stats block - right side */}
-      <div style={{ position: "absolute", top: 164, right: 44, display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ position: "absolute", top: 168, right: 44, display: "flex", flexDirection: "column", gap: 12 }}>
         {[
           { num: "54", label: "African Countries" },
           { num: "10K+", label: "Published Articles" },
@@ -117,25 +118,25 @@ function CardFront() {
           { num: "2M+", label: "Annual Downloads" },
         ].map((s, i) => (
           <div key={i} style={{
-            background: "rgba(255,255,255,0.07)",
+            background: "rgba(255,255,255,0.1)",
             borderRadius: 12,
             padding: "10px 20px",
             textAlign: "center",
-            border: "1px solid rgba(255,255,255,0.1)",
-            minWidth: 140,
+            border: "1px solid rgba(255,255,255,0.2)",
+            minWidth: 148,
           }}>
-            <div style={{ fontSize: 22, fontWeight: 900, color: "#F59E0B" }}>{s.num}</div>
-            <div style={{ fontSize: 10, color: "#94a3b8", letterSpacing: 1, textTransform: "uppercase" }}>{s.label}</div>
+            <div style={{ fontSize: 26, fontWeight: 900, color: "#FCD34D" }}>{s.num}</div>
+            <div style={{ fontSize: 12, color: "#e2e8f0", letterSpacing: 1, textTransform: "uppercase", fontWeight: 700 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Bottom bar */}
       <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0, height: 48,
-        background: "rgba(0,0,0,0.3)",
+        position: "absolute", bottom: 0, left: 0, right: 0, height: 50,
+        background: "rgba(0,0,0,0.4)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        gap: 32, fontSize: 11, color: "#64748b", letterSpacing: 1.5
+        gap: 28, fontSize: 13, color: "#cbd5e1", letterSpacing: 2, fontWeight: 700
       }}>
         <span>OPEN ACCESS</span>
         <span style={{ color: "#F59E0B" }}>✦</span>
@@ -177,42 +178,42 @@ function CardBack() {
       <div style={{ position: "absolute", bottom: -80, right: 80, width: 300, height: 300, borderRadius: "50%", background: "rgba(245,158,11,0.08)" }} />
 
       {/* Header */}
-      <div style={{ position: "absolute", top: 36, left: 0, right: 0, textAlign: "center" }}>
-        <div style={{ fontSize: 13, letterSpacing: 4, textTransform: "uppercase", color: "#F59E0B", fontWeight: 700 }}>
+      <div style={{ position: "absolute", top: 32, left: 0, right: 0, textAlign: "center" }}>
+        <div style={{ fontSize: 17, letterSpacing: 4, textTransform: "uppercase", color: "#FCD34D", fontWeight: 900 }}>
           Our 12 Peer-Reviewed Journals
         </div>
-        <div style={{ fontSize: 11, color: "#64748b", marginTop: 4, letterSpacing: 2 }}>
+        <div style={{ fontSize: 13, color: "#cbd5e1", marginTop: 5, letterSpacing: 2, fontWeight: 700 }}>
           Open Access · Double-Blind Review · DOI Registered
         </div>
       </div>
 
       {/* Divider */}
-      <div style={{ position: "absolute", top: 88, left: 40, right: 40, height: 1, background: "linear-gradient(90deg,rgba(245,158,11,0.3),rgba(255,255,255,0.15),rgba(245,158,11,0.3))" }} />
+      <div style={{ position: "absolute", top: 90, left: 40, right: 40, height: 2, background: "linear-gradient(90deg,rgba(245,158,11,0.5),rgba(255,255,255,0.3),rgba(245,158,11,0.5))" }} />
 
       {/* Journals grid — 2 columns × 6 */}
       <div style={{
-        position: "absolute", top: 106, left: 36, right: 36,
-        display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px"
+        position: "absolute", top: 108, left: 36, right: 36,
+        display: "grid", gridTemplateColumns: "1fr 1fr", gap: "9px 22px"
       }}>
         {JOURNALS.map((j, i) => (
           <div key={i} style={{
             display: "flex", alignItems: "center", gap: 10,
-            background: "rgba(255,255,255,0.05)",
-            border: `1px solid ${j.color}33`,
-            borderLeft: `3px solid ${j.color}`,
+            background: "rgba(255,255,255,0.08)",
+            border: `1px solid ${j.color}55`,
+            borderLeft: `4px solid ${j.color}`,
             borderRadius: 8, padding: "9px 14px",
           }}>
             <div style={{
-              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-              background: `${j.color}22`,
+              width: 34, height: 34, borderRadius: 8, flexShrink: 0,
+              background: `${j.color}33`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 8, fontWeight: 900, color: j.color, letterSpacing: 0.3
+              fontSize: 9, fontWeight: 900, color: "#fff", letterSpacing: 0.3
             }}>
               {j.abbr.split("-")[0]}
             </div>
             <div>
-              <div style={{ fontSize: 11.5, fontWeight: 700, color: "#e2e8f0", lineHeight: 1.3 }}>{j.name}</div>
-              <div style={{ fontSize: 9.5, color: j.color, letterSpacing: 1, textTransform: "uppercase", marginTop: 1 }}>{j.abbr}</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#f8fafc", lineHeight: 1.3 }}>{j.name}</div>
+              <div style={{ fontSize: 11, color: "#FCD34D", letterSpacing: 1, textTransform: "uppercase", marginTop: 2, fontWeight: 700 }}>{j.abbr}</div>
             </div>
           </div>
         ))}
@@ -220,22 +221,22 @@ function CardBack() {
 
       {/* Bottom bar */}
       <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0, height: 48,
-        background: "rgba(0,0,0,0.35)",
+        position: "absolute", bottom: 0, left: 0, right: 0, height: 50,
+        background: "rgba(0,0,0,0.45)",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 44px",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
-            width: 28, height: 28, borderRadius: 7,
+            width: 30, height: 30, borderRadius: 8,
             background: "linear-gradient(135deg,#0D9488,#F59E0B)",
             display: "flex", alignItems: "center", justifyContent: "center"
           }}>
-            <img src={LOGO_ICON_URL} alt="" style={{ width: 20, height: 20, objectFit: "contain" }} />
+            <img src={LOGO_ICON_URL} alt="" style={{ width: 22, height: 22, objectFit: "contain" }} />
           </div>
-          <span style={{ fontSize: 13, fontWeight: 800, color: "#94a3b8" }}>AfriSci Nexus Discovery</span>
+          <span style={{ fontSize: 15, fontWeight: 900, color: "#e2e8f0" }}>AfriSci Nexus Discovery</span>
         </div>
-        <span style={{ fontSize: 11, color: "#475569", letterSpacing: 1 }}>www.afriscinexus.com · Perth, Western Australia</span>
+        <span style={{ fontSize: 13, color: "#cbd5e1", letterSpacing: 1, fontWeight: 700 }}>www.afriscinexus.com · Perth, Western Australia</span>
       </div>
     </div>
   );
@@ -276,28 +277,28 @@ function CardSquare() {
           <img src={LOGO_ICON_URL} alt="" style={{ width: 66, height: 66, objectFit: "contain" }} />
         </div>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 32, fontWeight: 900 }}>
+          <div style={{ fontSize: 36, fontWeight: 900 }}>
             <span style={{ background: "linear-gradient(90deg,#fff,#7FFFD4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AfriSci</span>
             {" "}
             <span style={{ background: "linear-gradient(90deg,#F59E0B,#FBBF24)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Nexus</span>
             {" "}
-            <span style={{ color: "#94a3b8", fontSize: 26 }}>Discovery</span>
+            <span style={{ color: "#e2e8f0", fontSize: 30, fontWeight: 800 }}>Discovery</span>
           </div>
-          <div style={{ fontSize: 10, letterSpacing: 3, color: "#64748b", textTransform: "uppercase", marginTop: 4 }}>African Scientific Excellence</div>
+          <div style={{ fontSize: 13, letterSpacing: 3, color: "#cbd5e1", textTransform: "uppercase", marginTop: 6, fontWeight: 700 }}>African Scientific Excellence</div>
         </div>
       </div>
 
       {/* Divider */}
-      <div style={{ position: "absolute", top: 258, left: 60, right: 60, height: 1, background: "linear-gradient(90deg,rgba(245,158,11,0.4),rgba(255,255,255,0.2),rgba(245,158,11,0.4))" }} />
+      <div style={{ position: "absolute", top: 264, left: 60, right: 60, height: 2, background: "linear-gradient(90deg,rgba(245,158,11,0.6),rgba(255,255,255,0.3),rgba(245,158,11,0.6))" }} />
 
       {/* Name */}
-      <div style={{ position: "absolute", top: 280, left: 0, right: 0, textAlign: "center" }}>
-        <div style={{ fontSize: 38, fontWeight: 900, color: "#fff" }}>Majok Wutchok</div>
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#F59E0B", letterSpacing: 2, textTransform: "uppercase", marginTop: 6 }}>Founder &amp; CEO</div>
+      <div style={{ position: "absolute", top: 286, left: 0, right: 0, textAlign: "center" }}>
+        <div style={{ fontSize: 46, fontWeight: 900, color: "#ffffff", textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}>Majok Wutchok</div>
+        <div style={{ fontSize: 17, fontWeight: 900, color: "#FCD34D", letterSpacing: 2.5, textTransform: "uppercase", marginTop: 8 }}>Founder &amp; CEO</div>
       </div>
 
       {/* Contacts */}
-      <div style={{ position: "absolute", top: 390, left: 0, right: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+      <div style={{ position: "absolute", top: 404, left: 0, right: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 9 }}>
         {[
           "📱 +61 425 448 727",
           "✉️ majok@afriscinexus.com",
@@ -305,17 +306,17 @@ function CardSquare() {
           "🌐 www.afriscinexus.com",
           "📍 Perth, Western Australia",
         ].map((c, i) => (
-          <div key={i} style={{ fontSize: 13.5, color: "#cbd5e1" }}>{c}</div>
+          <div key={i} style={{ fontSize: 15.5, color: "#f1f5f9", fontWeight: 700 }}>{c}</div>
         ))}
       </div>
 
       {/* 12 Journals pill grid */}
-      <div style={{ position: "absolute", top: 568, left: 36, right: 36, display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center" }}>
+      <div style={{ position: "absolute", top: 580, left: 36, right: 36, display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center" }}>
         {JOURNALS.map((j, i) => (
           <div key={i} style={{
-            background: `${j.color}22`, border: `1px solid ${j.color}55`,
-            borderRadius: 50, padding: "3px 10px",
-            fontSize: 9, fontWeight: 700, color: j.color, letterSpacing: 0.5
+            background: `${j.color}33`, border: `1px solid ${j.color}88`,
+            borderRadius: 50, padding: "4px 12px",
+            fontSize: 10.5, fontWeight: 800, color: "#fff", letterSpacing: 0.5
           }}>
             {j.abbr}
           </div>
@@ -323,8 +324,8 @@ function CardSquare() {
       </div>
 
       {/* Bottom */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 44, background: "rgba(0,0,0,0.35)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontSize: 10, color: "#475569", letterSpacing: 2 }}>12 PEER-REVIEWED JOURNALS · OPEN ACCESS · DOI REGISTERED</span>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 46, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontSize: 13, color: "#e2e8f0", letterSpacing: 2, fontWeight: 800 }}>12 PEER-REVIEWED JOURNALS · OPEN ACCESS · DOI REGISTERED</span>
       </div>
     </div>
   );
