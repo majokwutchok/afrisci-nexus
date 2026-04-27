@@ -21,8 +21,130 @@ import {
 } from 'lucide-react';
 import AISummary from '../components/publication/AISummary';
 import { format } from 'date-fns';
+import { jsPDF } from 'jspdf';
+import { stampAfriSciNexus } from '@/utils/pdfStamp';
 
-const PublicationCard = ({ manuscript, journal }) => (
+function buildAbstractPDF(manuscript, journal) {
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const margin = 20;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const contentWidth = pageWidth - margin * 2;
+  let y = 22;
+
+  doc.setFont("times", "bold"); doc.setFontSize(16);
+  const titleLines = doc.splitTextToSize(manuscript.title || "", contentWidth);
+  doc.text(titleLines, margin, y); y += titleLines.length * 8 + 4;
+
+  if (manuscript.authors?.length) {
+    doc.setFont("times", "italic"); doc.setFontSize(11);
+    const auth = manuscript.authors.map(a => `${a.name}${a.affiliation ? ` (${a.affiliation})` : ""}`).join(", ");
+    const authLines = doc.splitTextToSize(auth, contentWidth);
+    doc.text(authLines, margin, y); y += authLines.length * 6 + 4;
+  }
+
+  if (journal?.title) {
+    doc.setFont("times", "normal"); doc.setFontSize(10);
+    doc.text(`Journal: ${journal.title}`, margin, y); y += 6;
+  }
+  if (manuscript.doi) {
+    doc.setTextColor(0, 0, 180);
+    doc.text(`DOI: https://doi.org/${manuscript.doi}`, margin, y); doc.setTextColor(0, 0, 0); y += 6;
+  }
+  if (manuscript.publication_date) {
+    doc.text(`Published: ${new Date(manuscript.publication_date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}`, margin, y); y += 7;
+  }
+
+  doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
+  doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Abstract", margin, y); y += 6;
+  doc.setFont("times", "normal"); doc.setFontSize(11);
+  const absLines = doc.splitTextToSize(manuscript.abstract || "", contentWidth);
+  absLines.forEach(l => { if (y > 270) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
+  y += 4;
+
+  if (manuscript.keywords?.length) {
+    doc.setFont("times", "bold"); doc.text("Keywords: ", margin, y);
+    doc.setFont("times", "italic"); doc.text(manuscript.keywords.join(", "), margin + 22, y); y += 8;
+  }
+
+  doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(100, 100, 100);
+  doc.text("For the full article, visit: www.afriscidiscovery.com or use the DOI link above.", margin, y + 6);
+  doc.setTextColor(0, 0, 0);
+
+  stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
+  return doc;
+}
+
+function buildFullPDF(manuscript, journal) {
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const margin = 20;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const contentWidth = pageWidth - margin * 2;
+  let y = 22;
+
+  doc.setFont("times", "bold"); doc.setFontSize(16);
+  const titleLines = doc.splitTextToSize(manuscript.title || "", contentWidth);
+  doc.text(titleLines, margin, y); y += titleLines.length * 8 + 4;
+
+  if (manuscript.authors?.length) {
+    doc.setFont("times", "italic"); doc.setFontSize(11);
+    const auth = manuscript.authors.map(a => `${a.name}${a.affiliation ? ` (${a.affiliation})` : ""}`).join(", ");
+    const authLines = doc.splitTextToSize(auth, contentWidth);
+    doc.text(authLines, margin, y); y += authLines.length * 6 + 4;
+  }
+
+  if (manuscript.doi) {
+    doc.setFont("times", "normal"); doc.setFontSize(10); doc.setTextColor(0, 0, 180);
+    doc.text(`DOI: https://doi.org/${manuscript.doi}`, margin, y); doc.setTextColor(0, 0, 0); y += 7;
+  }
+  if (manuscript.publication_date) {
+    doc.setFontSize(10);
+    doc.text(`Published: ${new Date(manuscript.publication_date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}`, margin, y); y += 7;
+  }
+
+  doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
+  doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Abstract", margin, y); y += 6;
+  doc.setFont("times", "normal"); doc.setFontSize(11);
+  const absLines = doc.splitTextToSize(manuscript.abstract || "", contentWidth);
+  absLines.forEach(l => { if (y > 270) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
+  y += 4;
+
+  if (manuscript.keywords?.length) {
+    doc.setFont("times", "bold"); doc.text("Keywords: ", margin, y);
+    doc.setFont("times", "italic"); doc.text(manuscript.keywords.join(", "), margin + 22, y); y += 8;
+  }
+
+  if (manuscript.formatted_body) {
+    doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
+    const div = document.createElement("div");
+    div.innerHTML = manuscript.formatted_body;
+    const bodyText = div.innerText || div.textContent || "";
+    doc.setFont("times", "normal"); doc.setFontSize(11);
+    const bodyLines = doc.splitTextToSize(bodyText, contentWidth);
+    bodyLines.forEach(l => { if (y > 268) { doc.addPage(); y = 22; } doc.text(l, margin, y); y += 6; });
+  }
+
+  stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
+  return doc;
+}
+
+const PublicationCard = ({ manuscript, journal }) => {
+  const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
+
+  const handleAbstractPDF = (e) => {
+    e.preventDefault();
+    const doc = buildAbstractPDF(manuscript, journal);
+    doc.save(`${fn}_abstract.pdf`);
+    base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+  };
+
+  const handleFullPDF = (e) => {
+    e.preventDefault();
+    const doc = buildFullPDF(manuscript, journal);
+    doc.save(`${fn}_full.pdf`);
+    base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+  };
+
+  return (
   <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
     <CardHeader className="pb-4">
       <div className="flex items-start justify-between gap-4">
@@ -73,27 +195,34 @@ const PublicationCard = ({ manuscript, journal }) => (
         )}
       </div>
 
-      <div className="flex gap-2 pt-3">
+      <div className="flex flex-wrap gap-2 pt-3">
         <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>
-          <Button size="sm" variant="outline" className="flex items-center gap-1 text-xs">
+          <Button size="sm" variant="outline" className="text-xs">
             Read Article
           </Button>
         </Link>
-        {manuscript.manuscript_file_url && (
-          <Button 
-            size="sm" 
-            variant="ghost" 
-            className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700"
-            onClick={() => window.open(manuscript.manuscript_file_url, '_blank')}
-          >
-            <Download className="w-3 h-3" />
-            PDF
-          </Button>
-        )}
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-xs border-blue-400 text-blue-700 hover:bg-blue-50"
+          onClick={handleAbstractPDF}
+        >
+          <Download className="w-3 h-3 mr-1" />
+          Abstract PDF
+        </Button>
+        <Button
+          size="sm"
+          className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+          onClick={handleFullPDF}
+        >
+          <Download className="w-3 h-3 mr-1" />
+          Full PDF
+        </Button>
       </div>
     </CardContent>
   </Card>
-);
+  );
+};
 
 const PAGE_SIZE = 18;
 

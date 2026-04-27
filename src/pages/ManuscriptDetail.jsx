@@ -169,12 +169,80 @@ export default function ManuscriptDetail() {
     return doc;
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadAbstractPDF = () => {
+    const ms = manuscript;
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const contentWidth = pageWidth - margin * 2;
+    let y = 22;
+
+    // Title
+    doc.setFont("times", "bold"); doc.setFontSize(16);
+    const titleLines = doc.splitTextToSize(ms.title || "", contentWidth);
+    doc.text(titleLines, margin, y); y += titleLines.length * 8 + 4;
+
+    // Authors
+    if (ms.authors?.length) {
+      doc.setFont("times", "italic"); doc.setFontSize(11);
+      const auth = ms.authors.map(a => `${a.name}${a.affiliation ? ` (${a.affiliation})` : ""}`).join(", ");
+      const authLines = doc.splitTextToSize(auth, contentWidth);
+      doc.text(authLines, margin, y); y += authLines.length * 6 + 4;
+    }
+
+    // DOI
+    if (ms.doi) {
+      doc.setFont("times", "normal"); doc.setFontSize(10); doc.setTextColor(0, 0, 180);
+      doc.text(`DOI: https://doi.org/${ms.doi}`, margin, y); doc.setTextColor(0, 0, 0); y += 7;
+    }
+
+    // Published date
+    if (ms.publication_date) {
+      doc.setFontSize(10);
+      doc.text(`Published: ${new Date(ms.publication_date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}`, margin, y); y += 7;
+    }
+
+    // Journal
+    if (journal?.title) {
+      doc.setFont("times", "normal"); doc.setFontSize(10);
+      doc.text(`Journal: ${journal.title}`, margin, y); y += 7;
+    }
+
+    doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
+
+    // Abstract
+    doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Abstract", margin, y); y += 6;
+    doc.setFont("times", "normal"); doc.setFontSize(11);
+    const absLines = doc.splitTextToSize(ms.abstract || "", contentWidth);
+    absLines.forEach(l => { if (y > 270) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
+    y += 4;
+
+    // Keywords
+    if (ms.keywords?.length) {
+      doc.setFont("times", "bold"); doc.text("Keywords: ", margin, y);
+      doc.setFont("times", "italic"); doc.text(ms.keywords.join(", "), margin + 22, y); y += 8;
+    }
+
+    // Note about full article
+    doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(100, 100, 100);
+    doc.text("For the full article, visit: www.afriscidiscovery.com or use the DOI link above.", margin, y + 6);
+    doc.setTextColor(0, 0, 0);
+
+    stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
+    const fn = (ms.title || "abstract").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
+    doc.save(`${fn}_abstract.pdf`);
+    base44.entities.Manuscript.update(ms.id, { download_count: (ms.download_count || 0) + 1 }).catch(() => {});
+  };
+
+  const handleDownloadFullPDF = () => {
     const doc = buildPDF(manuscript);
     const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
-    doc.save(`${fn}.pdf`);
+    doc.save(`${fn}_full.pdf`);
     base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
   };
+
+  // Keep for backward compat (used in sidebar etc.)
+  const handleDownloadPDF = handleDownloadFullPDF;
 
   const handleDownloadBibTeX = () => {
     const authors = manuscript.authors?.map(a => a.name).join(" and ") || "";
@@ -373,8 +441,11 @@ export default function ManuscriptDetail() {
                 <div className="space-y-3">
                   {/* Download Actions */}
                   <div className="flex flex-wrap items-center gap-2">
-                    <Button onClick={handleDownloadPDF} className="bg-blue-700 hover:bg-blue-800 text-white">
-                      <Download className="w-4 h-4 mr-2"/>Download PDF
+                    <Button onClick={handleDownloadAbstractPDF} variant="outline" className="border-blue-600 text-blue-700 hover:bg-blue-50">
+                      <Download className="w-4 h-4 mr-2"/>Abstract PDF
+                    </Button>
+                    <Button onClick={handleDownloadFullPDF} className="bg-blue-700 hover:bg-blue-800 text-white">
+                      <Download className="w-4 h-4 mr-2"/>Full Article PDF
                     </Button>
                   </div>
                   {/* Citation Export */}
