@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Printer } from "lucide-react";
