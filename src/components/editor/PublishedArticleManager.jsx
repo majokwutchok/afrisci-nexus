@@ -1,9 +1,8 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,41 +10,81 @@ import {
 } from "@/components/ui/dialog";
 import {
   Globe, EyeOff, Edit, Loader2, ExternalLink, AlertTriangle,
-  Download, Eye, CheckCircle
+  Download, Eye, CheckCircle, Bold, Italic, Underline, List, ListOrdered,
+  AlignLeft, AlignCenter, AlignRight, AlignJustify, Heading1, Heading2,
+  Heading3, Save, Strikethrough, Quote, Undo, Redo, FileText
 } from "lucide-react";
 import { jsPDF } from "jspdf";
+
+const FONTS = ["Times New Roman", "Arial", "Helvetica", "Georgia", "Garamond"];
+const FONT_SIZES = ["10", "11", "12", "14", "16", "18", "20", "24", "28", "32"];
+
+function TB({ onClick, title, children }) {
+  return (
+    <button
+      onMouseDown={e => { e.preventDefault(); onClick(); }}
+      title={title}
+      className="p-1.5 rounded hover:bg-slate-200 transition-colors text-slate-700"
+    >
+      {children}
+    </button>
+  );
+}
+function Sep() { return <div className="w-px h-5 bg-slate-300 mx-0.5" />; }
 
 export default function PublishedArticleManager({ manuscripts, onRefresh }) {
   const [editingMs, setEditingMs] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [unpublishingId, setUnpublishingId] = useState(null);
   const [confirmUnpublish, setConfirmUnpublish] = useState(null);
   const [previewMs, setPreviewMs] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const editorRef = useRef(null);
 
   const publishedMs = manuscripts.filter(m => m.status === "published" || m.status === "online_first");
+
+  const execCmd = (cmd, val = null) => {
+    document.execCommand(cmd, false, val);
+    editorRef.current?.focus();
+  };
 
   const handleEdit = (ms) => {
     setEditingMs(ms);
     setEditForm({
       title: ms.title || "",
-      abstract: ms.abstract || "",
       keywords: (ms.keywords || []).join(", "),
       doi: ms.doi || "",
     });
+    // Populate editor after dialog opens
+    setTimeout(() => {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = ms.formatted_body ||
+          `<h2 style="text-align:center">${ms.title || ""}</h2>
+<p style="text-align:center"><em>${ms.authors?.map(a => a.name).join(", ") || ""}</em></p>
+<hr/>
+<h3>Abstract</h3>
+<p>${ms.abstract || ""}</p>
+<h3>Introduction</h3>
+<p>Write article body here...</p>`;
+      }
+    }, 80);
   };
 
   const handleSaveEdit = async () => {
     if (!editingMs) return;
     setSaving(true);
+    const bodyHtml = editorRef.current?.innerHTML || "";
     await base44.entities.Manuscript.update(editingMs.id, {
       title: editForm.title,
-      abstract: editForm.abstract,
       keywords: editForm.keywords.split(",").map(k => k.trim()).filter(Boolean),
       doi: editForm.doi,
+      formatted_body: bodyHtml,
     });
     setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
     setEditingMs(null);
     onRefresh();
   };
@@ -253,36 +292,98 @@ export default function PublishedArticleManager({ manuscripts, onRefresh }) {
         ))}
       </div>
 
+      {/* Full Word-style Editor Dialog */}
       <Dialog open={!!editingMs} onOpenChange={() => setEditingMs(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Edit className="w-5 h-5" /> Edit Published Article</DialogTitle>
-            <DialogDescription>Changes will be saved immediately to the database.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div>
-              <Label>Title</Label>
-              <Input className="mt-1" value={editForm.title || ""} onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))} />
+        <DialogContent className="max-w-5xl w-full" style={{ height: "92vh", maxHeight: "92vh", display: "flex", flexDirection: "column", padding: 0, background: "#f1f3f4" }}>
+          {/* Top bar */}
+          <div className="flex items-center justify-between px-4 py-2 bg-indigo-700 text-white flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              <span className="font-semibold text-sm truncate max-w-xs">{editForm.title || "Untitled Article"}</span>
             </div>
-            <div>
-              <Label>Abstract</Label>
-              <Textarea className="mt-1" rows={6} value={editForm.abstract || ""} onChange={e => setEditForm(p => ({ ...p, abstract: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Keywords (comma-separated)</Label>
-              <Input className="mt-1" value={editForm.keywords || ""} onChange={e => setEditForm(p => ({ ...p, keywords: e.target.value }))} />
-            </div>
-            <div>
-              <Label>DOI</Label>
-              <Input className="mt-1 font-mono text-sm" value={editForm.doi || ""} onChange={e => setEditForm(p => ({ ...p, doi: e.target.value }))} />
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="ghost" className="text-white hover:bg-white/20" onClick={() => setEditingMs(null)}>Discard</Button>
+              <Button size="sm" className="bg-white text-indigo-700 hover:bg-slate-100 font-semibold" onClick={handleSaveEdit} disabled={saving}>
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <><CheckCircle className="w-4 h-4 mr-1" />Saved!</> : <><Save className="w-4 h-4 mr-1" />Save</>}
+              </Button>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditingMs(null)}>Cancel</Button>
-            <Button onClick={handleSaveEdit} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 text-white">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle className="w-4 h-4 mr-1" />Save Changes</>}
-            </Button>
-          </DialogFooter>
+
+          {/* Metadata bar */}
+          <div className="flex flex-wrap items-center gap-3 px-4 py-2 bg-white border-b flex-shrink-0">
+            <div className="flex items-center gap-1.5">
+              <Label className="text-xs text-slate-500 whitespace-nowrap">Title</Label>
+              <Input className="h-7 text-xs w-56" value={editForm.title || ""} onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))} />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Label className="text-xs text-slate-500 whitespace-nowrap">DOI</Label>
+              <Input className="h-7 text-xs font-mono w-40" value={editForm.doi || ""} onChange={e => setEditForm(p => ({ ...p, doi: e.target.value }))} />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Label className="text-xs text-slate-500 whitespace-nowrap">Keywords</Label>
+              <Input className="h-7 text-xs w-48" value={editForm.keywords || ""} onChange={e => setEditForm(p => ({ ...p, keywords: e.target.value }))} />
+            </div>
+          </div>
+
+          {/* Toolbar */}
+          <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 bg-white border-b flex-shrink-0">
+            <TB onClick={() => execCmd("undo")} title="Undo"><Undo className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("redo")} title="Redo"><Redo className="w-4 h-4" /></TB>
+            <Sep />
+            <select className="text-xs border border-slate-200 rounded px-1 py-0.5 bg-white h-7"
+              onChange={e => execCmd("fontName", e.target.value)} defaultValue="Times New Roman">
+              {FONTS.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
+            <select className="text-xs border border-slate-200 rounded px-1 py-0.5 bg-white ml-1 h-7"
+              onChange={e => execCmd("fontSize", e.target.value)} defaultValue="3">
+              {FONT_SIZES.map((s, i) => <option key={s} value={i + 1}>{s}pt</option>)}
+            </select>
+            <Sep />
+            <TB onClick={() => execCmd("bold")} title="Bold"><Bold className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("italic")} title="Italic"><Italic className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("underline")} title="Underline"><Underline className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("strikeThrough")} title="Strikethrough"><Strikethrough className="w-4 h-4" /></TB>
+            <Sep />
+            <TB onClick={() => execCmd("formatBlock", "h1")} title="H1"><Heading1 className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("formatBlock", "h2")} title="H2"><Heading2 className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("formatBlock", "h3")} title="H3"><Heading3 className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("formatBlock", "p")} title="Normal"><FileText className="w-4 h-4" /></TB>
+            <Sep />
+            <TB onClick={() => execCmd("justifyLeft")} title="Left"><AlignLeft className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("justifyCenter")} title="Center"><AlignCenter className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("justifyRight")} title="Right"><AlignRight className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("justifyFull")} title="Justify"><AlignJustify className="w-4 h-4" /></TB>
+            <Sep />
+            <TB onClick={() => execCmd("insertUnorderedList")} title="Bullet List"><List className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("insertOrderedList")} title="Numbered List"><ListOrdered className="w-4 h-4" /></TB>
+            <TB onClick={() => execCmd("formatBlock", "blockquote")} title="Blockquote"><Quote className="w-4 h-4" /></TB>
+            <Sep />
+            <input type="color" title="Text Color" className="w-6 h-6 rounded cursor-pointer border border-slate-200"
+              onChange={e => execCmd("foreColor", e.target.value)} />
+            <input type="color" title="Highlight" className="w-6 h-6 rounded cursor-pointer border border-slate-200 ml-1"
+              defaultValue="#ffff00" onChange={e => execCmd("hiliteColor", e.target.value)} />
+          </div>
+
+          {/* Page editor area */}
+          <div className="flex-1 overflow-y-auto flex justify-center py-8 px-4" style={{ background: "#f1f3f4" }}>
+            <div
+              ref={editorRef}
+              contentEditable
+              suppressContentEditableWarning
+              className="focus:outline-none text-slate-900"
+              style={{
+                width: "210mm",
+                minHeight: "297mm",
+                background: "#ffffff",
+                padding: "25mm 20mm",
+                fontFamily: "Times New Roman, serif",
+                fontSize: "12pt",
+                lineHeight: "1.8",
+                boxShadow: "0 2px 16px rgba(0,0,0,0.18)",
+                borderRadius: "2px",
+              }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
