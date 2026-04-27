@@ -24,6 +24,7 @@ import { format } from "date-fns";
 import ProgressTracker from "../components/submission/ProgressTracker";
 import AISummary from "../components/publication/AISummary";
 import InlinePDFViewer from "../components/publication/InlinePDFViewer";
+import AnnotatedPDFViewer from "../components/publication/AnnotatedPDFViewer";
 import ScholarMetaTags from "../components/publication/ScholarMetaTags";
 import DOIPanel from "../components/publication/DOIPanel";
 import CitationTracker from "../components/publication/CitationTracker";
@@ -507,7 +508,7 @@ export default function ManuscriptDetail() {
                     <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
                       <FileText className="w-5 h-5 text-indigo-500" /> Read Article
                     </h3>
-                    <InlinePDFViewer fileUrl={manuscript.manuscript_file_url} />
+                    <AnnotatedPDFViewer fileUrl={manuscript.manuscript_file_url} manuscriptId={manuscript.id} />
                   </div>
                 ) : null}
                 <Separator />

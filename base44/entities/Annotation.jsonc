@@ -1,0 +1,125 @@
+{
+  "name": "Annotation",
+  "type": "object",
+  "properties": {
+    "manuscript_id": {
+      "type": "string",
+      "description": "ID of the manuscript being annotated"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who created the annotation"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Display name of the user"
+    },
+    "page_number": {
+      "type": "number",
+      "description": "Page number where annotation appears"
+    },
+    "highlighted_text": {
+      "type": "string",
+      "description": "The text that was highlighted"
+    },
+    "note_content": {
+      "type": "string",
+      "description": "User's note or comment on the highlight"
+    },
+    "position": {
+      "type": "object",
+      "description": "Position data (x, y coordinates and bounding box)",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        }
+      }
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether annotation is visible to other readers"
+    },
+    "color": {
+      "type": "string",
+      "default": "yellow",
+      "enum": [
+        "yellow",
+        "green",
+        "blue",
+        "red",
+        "pink"
+      ],
+      "description": "Highlight color"
+    },
+    "reply_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of replies to this annotation"
+    }
+  },
+  "required": [
+    "manuscript_id",
+    "user_email",
+    "page_number",
+    "highlighted_text"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": [
+          "user",
+          "admin"
+        ]
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.is_public": true
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
