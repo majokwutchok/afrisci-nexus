@@ -10,8 +10,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription
 } from "@/components/ui/dialog";
 import {
-  Globe, EyeOff, Edit, FileText, Loader2, ExternalLink, AlertTriangle,
-  Download, Eye, CheckCircle, BookOpen
+  Globe, EyeOff, Edit, Loader2, ExternalLink, AlertTriangle,
+  Download, Eye, CheckCircle
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 
@@ -156,7 +156,6 @@ export default function PublishedArticleManager({ manuscripts, onRefresh }) {
     if (ms.manuscript_file_url) {
       window.open(ms.manuscript_file_url, "_blank");
     } else {
-      // Generate and preview inline
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const margin = 20;
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -249,7 +248,6 @@ export default function PublishedArticleManager({ manuscripts, onRefresh }) {
         ))}
       </div>
 
-      {/* Edit Dialog */}
       <Dialog open={!!editingMs} onOpenChange={() => setEditingMs(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -283,7 +281,6 @@ export default function PublishedArticleManager({ manuscripts, onRefresh }) {
         </DialogContent>
       </Dialog>
 
-      {/* Confirm Unpublish Dialog */}
       <Dialog open={!!confirmUnpublish} onOpenChange={() => setConfirmUnpublish(null)}>
         <DialogContent>
           <DialogHeader>

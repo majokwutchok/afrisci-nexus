@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,6 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
     if (!selectedMs || !editorRef.current) return;
     setSaving(true);
     const htmlContent = editorRef.current.innerHTML;
-    // Store formatted content in the manuscript's abstract field supplement or a dedicated field
     await base44.entities.Manuscript.update(selectedMs.id, {
       formatted_body: htmlContent
     });
@@ -73,14 +72,12 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
     const contentWidth = pageWidth - margin * 2;
     let y = margin;
 
-    // Title
     doc.setFont("times", "bold");
     doc.setFontSize(16);
     const titleLines = doc.splitTextToSize(selectedMs.title || "", contentWidth);
     doc.text(titleLines, margin, y);
     y += titleLines.length * 8 + 4;
 
-    // Authors
     if (selectedMs.authors?.length) {
       doc.setFont("times", "italic");
       doc.setFontSize(11);
@@ -89,7 +86,6 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
       y += 8;
     }
 
-    // DOI
     if (selectedMs.doi) {
       doc.setFont("times", "normal");
       doc.setFontSize(10);
@@ -99,12 +95,10 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
       y += 7;
     }
 
-    // Line
     doc.setDrawColor(150);
     doc.line(margin, y, pageWidth - margin, y);
     y += 6;
 
-    // Abstract
     doc.setFont("times", "bold");
     doc.setFontSize(12);
     doc.text("Abstract", margin, y);
@@ -119,7 +113,6 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
     });
     y += 4;
 
-    // Keywords
     if (selectedMs.keywords?.length) {
       doc.setFont("times", "bold");
       doc.setFontSize(11);
@@ -129,7 +122,6 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
       y += 8;
     }
 
-    // Body from editor
     doc.setFont("times", "normal");
     doc.setFontSize(11);
     const tempDiv = document.createElement("div");
@@ -173,7 +165,6 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
         <Badge className="bg-indigo-100 text-indigo-700">Word-style Editor</Badge>
       </div>
 
-      {/* Manuscript selector */}
       <Card className="border border-slate-200">
         <CardContent className="p-4">
           <Label className="mb-2 block text-sm font-medium">Select Manuscript to Format</Label>
@@ -235,7 +226,6 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
             </div>
           </CardHeader>
 
-          {/* Toolbar */}
           <div className="border-t border-b border-slate-200 bg-slate-50 px-3 py-1.5 flex flex-wrap items-center gap-0.5">
             <ToolbarButton onClick={() => execCmd("undo")} title="Undo"><Undo className="w-4 h-4" /></ToolbarButton>
             <ToolbarButton onClick={() => execCmd("redo")} title="Redo"><Redo className="w-4 h-4" /></ToolbarButton>
@@ -275,7 +265,6 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
               onChange={e => execCmd("hiliteColor", e.target.value)} />
           </div>
 
-          {/* Editor Body */}
           <CardContent className="p-0">
             <div
               ref={editorRef}
@@ -293,7 +282,6 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
         </Card>
       )}
 
-      {/* Preview Modal */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
