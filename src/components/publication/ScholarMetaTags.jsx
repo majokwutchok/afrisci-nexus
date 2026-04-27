@@ -90,6 +90,33 @@ export default function ScholarMetaTags({ manuscript, journal }) {
     og("og:url", articleUrl);
     og("og:description", manuscript.abstract?.substring(0, 300));
     og("og:site_name", "AfriSci Nexus");
+    
+    // Add cover image for social media preview (1200x630px is optimal)
+    if (manuscript.cover_image_url) {
+      og("og:image", manuscript.cover_image_url);
+      og("og:image:width", "1200");
+      og("og:image:height", "630");
+      og("og:image:alt", `${manuscript.title} - ${journal?.title || 'AfriSci Nexus'}`);
+    }
+    
+    // Twitter Card tags for enhanced social media sharing
+    const twitterMeta = (name, content) => {
+      if (!content) return;
+      const meta = document.createElement("meta");
+      meta.setAttribute("name", name);
+      meta.setAttribute("content", String(content));
+      meta.setAttribute("data-scholar-tag", "true");
+      document.head.appendChild(meta);
+      tags.push(meta);
+    };
+    
+    twitterMeta("twitter:card", "summary_large_image");
+    twitterMeta("twitter:title", manuscript.title);
+    twitterMeta("twitter:description", manuscript.abstract?.substring(0, 280));
+    if (manuscript.cover_image_url) {
+      twitterMeta("twitter:image", manuscript.cover_image_url);
+    }
+    twitterMeta("twitter:site", "@AfriSciNexus");
 
     // Cleanup: remove tags on unmount / manuscript change
     return () => tags.forEach(t => t.parentNode?.removeChild(t));

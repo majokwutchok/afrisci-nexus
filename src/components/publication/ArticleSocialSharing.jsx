@@ -22,13 +22,13 @@ export default function ArticleSocialSharing({
 }) {
   const [copied, setCopied] = useState(false);
 
-  // Generate shareable link using article DOI or ID
+  // Generate shareable link using current domain
   const getShareableLink = () => {
-    const baseUrl = 'https://afriscinexus.com';
+    const baseUrl = window.location.origin;
     if (manuscript.doi) {
-      return `${baseUrl}/article/${manuscript.doi}`;
+      return `${baseUrl}/ManuscriptDetail?id=${manuscript.id}&doi=${manuscript.doi}`;
     }
-    return `${baseUrl}/article/${manuscript.id}`;
+    return `${baseUrl}/ManuscriptDetail?id=${manuscript.id}`;
   };
 
   // Copy link to clipboard
