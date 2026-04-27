@@ -94,9 +94,7 @@ const TimelineItem = ({ status, date, actor, comment, isActive, isCompleted }) =
           )}
         </div>
         <p className="text-sm text-slate-600 mb-2">{config.description}</p>
-        {actor && (
-          <p className="text-xs text-slate-500">By: {actor}</p>
-        )}
+        <p className="text-xs text-slate-500">By: {actor || "Chief Editor"}</p>
         {comment && (
           <p className="text-sm bg-slate-50 p-2 rounded-lg mt-2 italic">{comment}</p>
         )}

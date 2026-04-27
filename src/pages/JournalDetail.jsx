@@ -226,6 +226,20 @@ function downloadFullPDF(manuscript, journal) {
     const bodyText = div.innerText || div.textContent || "";
     doc.setFont("times", "normal"); doc.setFontSize(11);
     doc.splitTextToSize(bodyText, contentWidth).forEach(l => { if (y > 268) { doc.addPage(); y = 22; } doc.text(l, margin, y); y += 6; });
+  } else {
+    doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 8;
+    doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Full Article", margin, y); y += 7;
+    doc.setFont("times", "normal"); doc.setFontSize(11);
+    doc.splitTextToSize(
+      "The full text of this article is available online. Please visit the AfriSci Nexus Discovery portal and use the DOI link above to access the complete article.",
+      contentWidth
+    ).forEach(l => { doc.text(l, margin, y); y += 6; });
+    if (manuscript.manuscript_file_url) {
+      y += 4;
+      doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(0, 0, 180);
+      doc.splitTextToSize(`Direct link: ${manuscript.manuscript_file_url}`, contentWidth).forEach(l => { doc.text(l, margin, y); y += 5; });
+      doc.setTextColor(0, 0, 0);
+    }
   }
   stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
   doc.save(`${(manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50)}_full.pdf`);
