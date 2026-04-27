@@ -175,14 +175,15 @@ export default function ManuscriptDetail() {
       doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Full Article", margin, y); y += 7;
       doc.setFont("times", "normal"); doc.setFontSize(11);
       const noteLines = doc.splitTextToSize(
-        "The full text of this article is available online. Please visit the AfriSci Nexus Discovery portal and use the DOI link above to access the complete article.",
+        "The full text of this article is available online. Please visit https://afriscinexus.com and use the DOI link above to access the complete article.",
         contentWidth
       );
       noteLines.forEach(l => { doc.text(l, margin, y); y += 6; });
       if (ms.manuscript_file_url) {
         y += 4;
         doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(0, 0, 180);
-        const urlLines = doc.splitTextToSize(`Direct link: ${ms.manuscript_file_url}`, contentWidth);
+        const doiLink = ms.doi ? `https://doi.org/${ms.doi}` : `https://afriscinexus.com/article/${ms.id}`;
+        const urlLines = doc.splitTextToSize(`Read online: ${doiLink}`, contentWidth);
         urlLines.forEach(l => { doc.text(l, margin, y); y += 5; });
         doc.setTextColor(0, 0, 0);
       }
@@ -249,7 +250,7 @@ export default function ManuscriptDetail() {
 
     // Note about full article
     doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(100, 100, 100);
-    doc.text("For the full article, visit: www.afriscidiscovery.com or use the DOI link above.", margin, y + 6);
+    doc.text("For the full article, visit: https://afriscinexus.com or use the DOI link above.", margin, y + 6);
     doc.setTextColor(0, 0, 0);
 
     stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
@@ -259,10 +260,29 @@ export default function ManuscriptDetail() {
   };
 
   const handleDownloadFullPDF = () => {
-    const doc = buildPDF(manuscript);
-    const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
-    doc.save(`${fn}_full.pdf`);
+    // If manuscript has a file URL, download directly from there
+    if (manuscript.manuscript_file_url) {
+      const link = document.createElement('a');
+      link.href = manuscript.manuscript_file_url;
+      link.download = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50) + "_full.pdf";
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // Fallback: build PDF from formatted body
+      const doc = buildPDF(manuscript);
+      const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
+      doc.save(`${fn}_full.pdf`);
+    }
     base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+  };
+
+  const handleOpenFullArticle = () => {
+    // Open article in new tab using afriscinexus.com shareable link
+    if (manuscript.manuscript_file_url) {
+      window.open(manuscript.manuscript_file_url, '_blank');
+    }
   };
 
   // Keep for backward compat (used in sidebar etc.)
@@ -305,14 +325,22 @@ export default function ManuscriptDetail() {
     }
   };
 
+  const getShareableLink = () => {
+    // Create shareable link using afriscinexus.com domain
+    if (manuscript.doi) {
+      return `https://afriscinexus.com/article/${manuscript.doi}`;
+    }
+    return `https://afriscinexus.com/article/${manuscript.id}`;
+  };
+
   const shareOnTwitter = () => {
     const text = `Check out this article: "${manuscript.title}"`;
-    const url = window.location.href;
+    const url = getShareableLink();
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
   };
 
   const shareOnLinkedIn = () => {
-    const url = window.location.href;
+    const url = getShareableLink();
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
   };
   
@@ -457,21 +485,30 @@ export default function ManuscriptDetail() {
                   </div>
                 ) : manuscript.manuscript_file_url ? (
                   <div>
-                    <h3 className="font-bold text-slate-800 mb-3">Read Article</h3>
+                    <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-indigo-500" /> Read Article
+                    </h3>
                     <InlinePDFViewer fileUrl={manuscript.manuscript_file_url} />
                   </div>
                 ) : null}
                 <Separator />
                 <div className="space-y-3">
-                  {/* Download Actions */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button onClick={handleDownloadAbstractPDF} variant="outline" className="border-blue-600 text-blue-700 hover:bg-blue-50">
-                      <Download className="w-4 h-4 mr-2"/>Abstract PDF
-                    </Button>
-                    <Button onClick={handleDownloadFullPDF} className="bg-blue-700 hover:bg-blue-800 text-white">
-                      <Download className="w-4 h-4 mr-2"/>Full Article PDF
-                    </Button>
-                  </div>
+                   {/* Download Actions */}
+                   <div className="flex flex-wrap items-center gap-2">
+                     <Button onClick={handleDownloadAbstractPDF} variant="outline" className="border-blue-600 text-blue-700 hover:bg-blue-50">
+                       <Download className="w-4 h-4 mr-2"/>Abstract PDF
+                     </Button>
+                     {manuscript.manuscript_file_url && (
+                       <>
+                         <Button onClick={handleOpenFullArticle} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                           <FileText className="w-4 h-4 mr-2"/>Read Full Article
+                         </Button>
+                         <Button onClick={handleDownloadFullPDF} className="bg-blue-700 hover:bg-blue-800 text-white">
+                           <Download className="w-4 h-4 mr-2"/>Download Full PDF
+                         </Button>
+                       </>
+                     )}
+                   </div>
                   {/* Citation Export */}
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs text-slate-500 font-medium">Export citation:</span>

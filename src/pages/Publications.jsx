@@ -11,14 +11,14 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Search,
-  FileText,
-  Download,
-  TrendingUp,
-  Calendar,
-  Users,
-  BookOpen
-} from 'lucide-react';
+   Search,
+   FileText,
+   Download,
+   TrendingUp,
+   Calendar,
+   Users,
+   BookOpen
+ } from 'lucide-react'; // FileText already imported, used in OpenFullArticle button
 import AISummary from '../components/publication/AISummary';
 import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
@@ -67,8 +67,8 @@ function buildAbstractPDF(manuscript, journal) {
   }
 
   doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(100, 100, 100);
-  doc.text("For the full article, visit: www.afriscidiscovery.com or use the DOI link above.", margin, y + 6);
-  doc.setTextColor(0, 0, 0);
+   doc.text("For the full article, visit: https://afriscinexus.com or use the DOI link above.", margin, y + 6);
+   doc.setTextColor(0, 0, 0);
 
   stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
   return doc;
@@ -124,19 +124,20 @@ function buildFullPDF(manuscript, journal) {
   } else {
     doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 8;
     doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Full Article", margin, y); y += 7;
-    doc.setFont("times", "normal"); doc.setFontSize(11);
-    const noteLines = doc.splitTextToSize(
-      "The full text of this article is available online. Please visit the AfriSci Nexus Discovery portal and use the DOI link above to access the complete article.",
-      contentWidth
-    );
-    noteLines.forEach(l => { doc.text(l, margin, y); y += 6; });
-    if (manuscript.manuscript_file_url) {
-      y += 4;
-      doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(0, 0, 180);
-      const urlLines = doc.splitTextToSize(`Direct link: ${manuscript.manuscript_file_url}`, contentWidth);
-      urlLines.forEach(l => { doc.text(l, margin, y); y += 5; });
-      doc.setTextColor(0, 0, 0);
-    }
+     doc.setFont("times", "normal"); doc.setFontSize(11);
+     const noteLines = doc.splitTextToSize(
+       "The full text of this article is available online. Please visit https://afriscinexus.com and use the DOI link above to access the complete article.",
+       contentWidth
+     );
+     noteLines.forEach(l => { doc.text(l, margin, y); y += 6; });
+     if (manuscript.manuscript_file_url) {
+       y += 4;
+       doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(0, 0, 180);
+       const doiLink = manuscript.doi ? `https://doi.org/${manuscript.doi}` : `https://afriscinexus.com/article/${manuscript.id}`;
+       const urlLines = doc.splitTextToSize(`Read online: ${doiLink}`, contentWidth);
+       urlLines.forEach(l => { doc.text(l, margin, y); y += 5; });
+       doc.setTextColor(0, 0, 0);
+     }
   }
 
   stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
@@ -155,9 +156,29 @@ const PublicationCard = ({ manuscript, journal }) => {
 
   const handleFullPDF = (e) => {
     e.preventDefault();
-    const doc = buildFullPDF(manuscript, journal);
-    doc.save(`${fn}_full.pdf`);
+    // If manuscript has a file URL, download directly from there
+    if (manuscript.manuscript_file_url) {
+      const link = document.createElement('a');
+      link.href = manuscript.manuscript_file_url;
+      link.download = fn + "_full.pdf";
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // Fallback: build PDF from formatted body
+      const doc = buildFullPDF(manuscript, journal);
+      doc.save(`${fn}_full.pdf`);
+    }
     base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+  };
+
+  const handleOpenFullArticle = (e) => {
+    e.preventDefault();
+    // Open article in new tab
+    if (manuscript.manuscript_file_url) {
+      window.open(manuscript.manuscript_file_url, '_blank');
+    }
   };
 
   return (
@@ -212,29 +233,41 @@ const PublicationCard = ({ manuscript, journal }) => {
       </div>
 
       <div className="flex flex-wrap gap-2 pt-3">
-        <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>
-          <Button size="sm" variant="outline" className="text-xs">
-            Read Article
-          </Button>
-        </Link>
-        <Button
-          size="sm"
-          variant="outline"
-          className="text-xs border-blue-400 text-blue-700 hover:bg-blue-50"
-          onClick={handleAbstractPDF}
-        >
-          <Download className="w-3 h-3 mr-1" />
-          Abstract PDF
-        </Button>
-        <Button
-          size="sm"
-          className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-          onClick={handleFullPDF}
-        >
-          <Download className="w-3 h-3 mr-1" />
-          Full PDF
-        </Button>
-      </div>
+         <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>
+           <Button size="sm" variant="outline" className="text-xs">
+             View Details
+           </Button>
+         </Link>
+         <Button
+           size="sm"
+           variant="outline"
+           className="text-xs border-blue-400 text-blue-700 hover:bg-blue-50"
+           onClick={handleAbstractPDF}
+         >
+           <Download className="w-3 h-3 mr-1" />
+           Abstract PDF
+         </Button>
+         {manuscript.manuscript_file_url && (
+           <>
+             <Button
+               size="sm"
+               className="text-xs bg-teal-600 hover:bg-teal-700 text-white"
+               onClick={handleOpenFullArticle}
+             >
+               <FileText className="w-3 h-3 mr-1" />
+               Read Full
+             </Button>
+             <Button
+               size="sm"
+               className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+               onClick={handleFullPDF}
+             >
+               <Download className="w-3 h-3 mr-1" />
+               Download
+             </Button>
+           </>
+         )}
+       </div>
     </CardContent>
   </Card>
   );
