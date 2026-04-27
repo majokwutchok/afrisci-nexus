@@ -6,6 +6,8 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import ResearcherDirectory from './pages/ResearcherDirectory';
+import ResearcherProfile from './pages/ResearcherProfile';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import InstitutionalPartnership from './pages/InstitutionalPartnership';
 import Accreditations from './pages/Accreditations';
@@ -78,6 +80,8 @@ const AuthenticatedApp = () => {
       <Route path="/AuthorProfile" element={<LayoutWrapper currentPageName="AuthorProfile"><AuthorProfile /></LayoutWrapper>} />
       <Route path="/Editorial" element={<LayoutWrapper currentPageName="Editorial"><Editorial /></LayoutWrapper>} />
       <Route path="/Submit" element={<LayoutWrapper currentPageName="Submit"><Submit /></LayoutWrapper>} />
+      <Route path="/ResearcherDirectory" element={<LayoutWrapper currentPageName="ResearcherDirectory"><ResearcherDirectory /></LayoutWrapper>} />
+      <Route path="/ResearcherProfile" element={<LayoutWrapper currentPageName="ResearcherProfile"><ResearcherProfile /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -1,0 +1,22 @@
+{
+  "name": "ArticleSubscription",
+  "type": "object",
+  "properties": {
+    "manuscript_id": {
+      "type": "string",
+      "description": "ID of the manuscript being followed"
+    },
+    "manuscript_title": {
+      "type": "string",
+      "description": "Title snapshot for display"
+    },
+    "subscriber_email": {
+      "type": "string",
+      "description": "Email address to notify"
+    }
+  },
+  "required": [
+    "manuscript_id",
+    "subscriber_email"
+  ]
+}
