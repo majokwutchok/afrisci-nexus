@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { stampAfriSciNexus } from "@/utils/pdfStamp";
+import { convertToAfriSciURL, getArticleReadOnlineURL } from "@/utils/afrisciLinks";
 import { format } from "date-fns";
 import ProgressTracker from "../components/submission/ProgressTracker";
 import AISummary from "../components/publication/AISummary";
@@ -262,8 +263,9 @@ export default function ManuscriptDetail() {
   const handleDownloadFullPDF = () => {
     // If manuscript has a file URL, download directly from there
     if (manuscript.manuscript_file_url) {
+      const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
       const link = document.createElement('a');
-      link.href = manuscript.manuscript_file_url;
+      link.href = afrisciUrl;
       link.download = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50) + "_full.pdf";
       link.target = '_blank';
       document.body.appendChild(link);
@@ -281,7 +283,8 @@ export default function ManuscriptDetail() {
   const handleOpenFullArticle = () => {
     // Open article in new tab using afriscinexus.com shareable link
     if (manuscript.manuscript_file_url) {
-      window.open(manuscript.manuscript_file_url, '_blank');
+      const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
+      window.open(afrisciUrl, '_blank');
     }
   };
 

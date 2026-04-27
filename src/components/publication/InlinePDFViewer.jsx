@@ -4,10 +4,12 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, FileText, Loader2 } from "lucide-react";
+import { convertToAfriSciURL } from "@/utils/afrisciLinks";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function InlinePDFViewer({ fileUrl }) {
+  const afrisciUrl = convertToAfriSciURL(fileUrl);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
@@ -96,11 +98,11 @@ export default function InlinePDFViewer({ fileUrl }) {
           </div>
         )}
         <Document
-          file={fileUrl}
-          onLoadSuccess={onLoadSuccess}
-          onLoadError={onLoadError}
-          loading={null}
-        >
+           file={afrisciUrl}
+           onLoadSuccess={onLoadSuccess}
+           onLoadError={onLoadError}
+           loading={null}
+         >
           <Page
             pageNumber={pageNumber}
             scale={scale}

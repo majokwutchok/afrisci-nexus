@@ -23,6 +23,7 @@ import AISummary from '../components/publication/AISummary';
 import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
 import { stampAfriSciNexus } from '@/utils/pdfStamp';
+import { convertToAfriSciURL } from '@/utils/afrisciLinks';
 
 function buildAbstractPDF(manuscript, journal) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -158,8 +159,9 @@ const PublicationCard = ({ manuscript, journal }) => {
     e.preventDefault();
     // If manuscript has a file URL, download directly from there
     if (manuscript.manuscript_file_url) {
+      const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
       const link = document.createElement('a');
-      link.href = manuscript.manuscript_file_url;
+      link.href = afrisciUrl;
       link.download = fn + "_full.pdf";
       link.target = '_blank';
       document.body.appendChild(link);
@@ -177,7 +179,8 @@ const PublicationCard = ({ manuscript, journal }) => {
     e.preventDefault();
     // Open article in new tab
     if (manuscript.manuscript_file_url) {
-      window.open(manuscript.manuscript_file_url, '_blank');
+      const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
+      window.open(afrisciUrl, '_blank');
     }
   };
 

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, TrendingUp, BookOpen, Calendar, ArrowLeft, Download } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { stampAfriSciNexus } from "@/utils/pdfStamp";
+import { convertToAfriSciURL } from "@/utils/afrisciLinks";
 
 export default function ResearcherProfile() {
   const [manuscripts, setManuscripts] = useState([]);
