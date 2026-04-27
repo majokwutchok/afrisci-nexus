@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen, Hash } from "lucide-react";
+import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen, Hash, FileEdit, Globe } from "lucide-react";
 import AutomatedReminderSystem from "../components/admin/AutomatedReminderSystem";
 import ReviewerDatabase from "../components/editor/ReviewerDatabase";
 import JournalManagementPanel from "../components/editor/JournalManagementPanel";
@@ -25,6 +25,8 @@ import AIReviewerMatcher from "../components/editor/AIReviewerMatcher";
 import PublicationWorkflow from "../components/editor/PublicationWorkflow";
 import PlagiarismReport from "../components/editor/PlagiarismReport";
 import DOIManagerPanel from "../components/editor/DOIManagerPanel";
+import ArticleFormatter from "../components/editor/ArticleFormatter";
+import PublishedArticleManager from "../components/editor/PublishedArticleManager";
 
 // Mock utility functions (in a real app, these would be in a utils folder or separate services)
 const addDays = (date, days) => {
@@ -332,6 +334,12 @@ Editorial Team`
             <TabsTrigger value="doi_manager" className="flex items-center gap-1">
               <Hash className="w-4 h-4" /> DOI Manager
             </TabsTrigger>
+            <TabsTrigger value="article_formatter" className="flex items-center gap-1">
+              <FileEdit className="w-4 h-4" /> Article Formatter
+            </TabsTrigger>
+            <TabsTrigger value="published_manager" className="flex items-center gap-1">
+              <Globe className="w-4 h-4" /> Published Articles
+            </TabsTrigger>
             <TabsTrigger value="reminders">Reminders</TabsTrigger>
           </TabsList>
 
@@ -393,6 +401,14 @@ Editorial Team`
 
           <TabsContent value="doi_manager" className="mt-6">
             <DOIManagerPanel manuscripts={manuscripts} onRefresh={loadData} />
+          </TabsContent>
+
+          <TabsContent value="article_formatter" className="mt-6">
+            <ArticleFormatter manuscripts={manuscripts} onRefresh={loadData} />
+          </TabsContent>
+
+          <TabsContent value="published_manager" className="mt-6">
+            <PublishedArticleManager manuscripts={manuscripts} onRefresh={loadData} />
           </TabsContent>
 
           <TabsContent value="reminders" className="mt-6">

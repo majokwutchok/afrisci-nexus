@@ -15,8 +15,10 @@ import {
   Share2,
   Twitter,
   Linkedin,
-  MessageSquare
+  MessageSquare,
+  ExternalLink
 } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 import ProgressTracker from "../components/submission/ProgressTracker";
 import AISummary from "../components/publication/AISummary";
@@ -104,10 +106,73 @@ export default function ManuscriptDetail() {
     setManuscript(prev => prev ? { ...prev, doi } : prev);
   };
 
-  const handleDownload = async () => {
+  const handlePreviewPDF = () => {
     if (!manuscript?.manuscript_file_url) return;
     window.open(manuscript.manuscript_file_url, '_blank');
+    base44.entities.Manuscript.update(manuscript.id, { view_count: (manuscript.view_count || 0) + 1 }).catch(() => {});
+  };
+
+  const handleDownloadPDF = () => {
+    if (!manuscript?.manuscript_file_url) {
+      // Generate a basic PDF from metadata
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const margin = 20;
+      const contentWidth = doc.internal.pageSize.getWidth() - margin * 2;
+      let y = margin;
+      doc.setFont("times", "bold"); doc.setFontSize(16);
+      const titleLines = doc.splitTextToSize(manuscript.title || "", contentWidth);
+      doc.text(titleLines, margin, y); y += titleLines.length * 8 + 6;
+      if (manuscript.authors?.length) {
+        doc.setFont("times", "italic"); doc.setFontSize(11);
+        const auth = manuscript.authors.map(a => a.name).join(", ");
+        doc.text(doc.splitTextToSize(auth, contentWidth), margin, y); y += 8;
+      }
+      if (manuscript.doi) {
+        doc.setFont("times", "normal"); doc.setFontSize(10);
+        doc.setTextColor(0, 0, 180);
+        doc.text(`DOI: https://doi.org/${manuscript.doi}`, margin, y);
+        doc.setTextColor(0, 0, 0); y += 8;
+      }
+      doc.setDrawColor(150); doc.line(margin, y, doc.internal.pageSize.getWidth() - margin, y); y += 6;
+      doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Abstract", margin, y); y += 6;
+      doc.setFont("times", "normal"); doc.setFontSize(11);
+      const abs = doc.splitTextToSize(manuscript.abstract || "", contentWidth);
+      abs.forEach(l => { if (y > 270) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
+      if (manuscript.keywords?.length) {
+        y += 2; doc.setFont("times", "bold"); doc.text("Keywords: ", margin, y);
+        doc.setFont("times", "italic"); doc.text(manuscript.keywords.join(", "), margin + 22, y);
+      }
+      const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
+      doc.save(`${fn}.pdf`);
+    } else {
+      const a = document.createElement("a");
+      a.href = manuscript.manuscript_file_url;
+      a.download = `${(manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50)}.pdf`;
+      a.target = "_blank";
+      a.click();
+    }
     base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+  };
+
+  const handleDownloadBibTeX = () => {
+    const authors = manuscript.authors?.map(a => a.name).join(" and ") || "";
+    const year = manuscript.publication_date ? new Date(manuscript.publication_date).getFullYear() : new Date().getFullYear();
+    const key = `${manuscript.authors?.[0]?.name?.split(" ").pop() || "Author"}${year}`;
+    const bib = `@article{${key},\n  title={${manuscript.title || ""}},\n  author={${authors}},\n  year={${year}},\n  doi={${manuscript.doi || ""}},\n  journal={${journal?.title || "AfriSci Nexus"}},\n  keywords={${(manuscript.keywords || []).join(", ")}}\n}`;
+    const blob = new Blob([bib], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `${key}.bib`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadRIS = () => {
+    const year = manuscript.publication_date ? new Date(manuscript.publication_date).getFullYear() : new Date().getFullYear();
+    const authors = manuscript.authors?.map(a => `AU  - ${a.name}`).join("\n") || "";
+    const ris = `TY  - JOUR\nTI  - ${manuscript.title || ""}\n${authors}\nPY  - ${year}\nDO  - ${manuscript.doi || ""}\nJO  - ${journal?.title || "AfriSci Nexus"}\nKW  - ${(manuscript.keywords || []).join("\nKW  - ")}\nER  -`;
+    const blob = new Blob([ris], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `${manuscript.title?.replace(/[^a-z0-9]/gi, "_").substring(0, 40) || "citation"}.ris`; a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handlePostComment = async () => {
@@ -272,14 +337,32 @@ export default function ManuscriptDetail() {
                   </div>
                 )}
                 <Separator />
-                <div className="flex items-center justify-between">
-                  {manuscript.manuscript_file_url && (
-                    <Button onClick={handleDownload}>
+                <div className="space-y-3">
+                  {/* PDF Actions */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {manuscript.manuscript_file_url && (
+                      <Button onClick={handlePreviewPDF} variant="outline">
+                        <ExternalLink className="w-4 h-4 mr-2"/>Open PDF
+                      </Button>
+                    )}
+                    <Button onClick={handleDownloadPDF}>
                       <Download className="w-4 h-4 mr-2"/>Download PDF
                     </Button>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <Share2 className="w-5 h-5 text-slate-600"/>
+                  </div>
+                  {/* Citation Export */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-slate-500 font-medium">Export citation:</span>
+                    <Button size="sm" variant="outline" className="text-xs" onClick={handleDownloadBibTeX}>
+                      BibTeX
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-xs" onClick={handleDownloadRIS}>
+                      RIS / EndNote
+                    </Button>
+                  </div>
+                  {/* Share */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <Share2 className="w-4 h-4 text-slate-500"/>
+                    <span className="text-xs text-slate-500">Share:</span>
                     <Button variant="ghost" size="icon" onClick={shareOnTwitter}><Twitter className="w-5 h-5 text-sky-500"/></Button>
                     <Button variant="ghost" size="icon" onClick={shareOnLinkedIn}><Linkedin className="w-5 h-5 text-blue-700"/></Button>
                   </div>
