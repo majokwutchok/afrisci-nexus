@@ -124,7 +124,7 @@ export default function SuggestedArticles({ manuscript, journal }) {
         {suggestedArticles.map((article, idx) => (
           <div
             key={article.id}
-            onClick={() => navigate(`/ManuscriptDetail?id=${article.id}`)}
+            onClick={() => window.location.href = `/ManuscriptDetail?id=${article.id}`}
             className="block"
           >
             <div className="p-4 rounded-lg border border-slate-200 hover:border-teal-300 hover:bg-teal-50 transition-all group cursor-pointer">
@@ -191,7 +191,7 @@ export default function SuggestedArticles({ manuscript, journal }) {
 
         {/* View All Articles CTA */}
         <Button 
-          onClick={() => navigate('/Publications')}
+          onClick={() => window.location.href = '/Publications'}
           variant="outline" 
           className="w-full border-teal-300 text-teal-600 hover:bg-teal-50"
         >
