@@ -30,6 +30,7 @@ import CitationTracker from "../components/publication/CitationTracker";
 import ArticleEngagementMetrics from "../components/publication/ArticleEngagementMetrics";
 import ArticleSubscribeWidget from "../components/publication/ArticleSubscribeWidget";
 import ArticleSocialSharing from "../components/publication/ArticleSocialSharing";
+import SuggestedArticles from "../components/publication/SuggestedArticles";
 import { generateArticleCoverImage, generateSocialMetadata } from "@/utils/articleCoverGenerator";
 
 const statusColors = {
@@ -102,7 +103,7 @@ export default function ManuscriptDetail() {
         const generatedCover = generateArticleCoverImage(msData, journalData);
         setCoverImage(generatedCover);
 
-        // Optionally save to manuscript if not already set
+        // Save generated cover to manuscript if not already set
         if (!msData.cover_image_url && typeof generatedCover === 'string') {
           base44.entities.Manuscript.update(manuscriptId, { cover_image_url: generatedCover }).catch(() => {});
         }
@@ -410,7 +411,7 @@ export default function ManuscriptDetail() {
 
   return (
     <div className="p-6 bg-slate-50 min-h-screen">
-      <ScholarMetaTags manuscript={manuscript} journal={journal} />
+      <ScholarMetaTags manuscript={manuscript} journal={journal} coverImage={coverImage || manuscript?.cover_image_url} />
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -547,6 +548,11 @@ export default function ManuscriptDetail() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Suggested Articles */}
+            {manuscript.status === 'published' && (
+              <SuggestedArticles manuscript={manuscript} journal={journal} />
+            )}
 
             {/* Comments Section */}
             {manuscript.status === 'published' && (

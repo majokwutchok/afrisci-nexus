@@ -9,7 +9,7 @@ import { useEffect } from "react";
  *
  * Spec: https://scholar.google.com/intl/en/scholar/inclusion.html#indexing
  */
-export default function ScholarMetaTags({ manuscript, journal }) {
+export default function ScholarMetaTags({ manuscript, journal, coverImage }) {
   useEffect(() => {
     if (!manuscript || manuscript.status !== "published") return;
 
@@ -92,8 +92,10 @@ export default function ScholarMetaTags({ manuscript, journal }) {
     og("og:site_name", "AfriSci Nexus");
     
     // Add cover image for social media preview (1200x630px is optimal)
-    if (manuscript.cover_image_url) {
-      og("og:image", manuscript.cover_image_url);
+    // Use provided coverImage or fallback to stored URL
+    const imageToUse = coverImage || manuscript.cover_image_url;
+    if (imageToUse) {
+      og("og:image", imageToUse);
       og("og:image:width", "1200");
       og("og:image:height", "630");
       og("og:image:alt", `${manuscript.title} - ${journal?.title || 'AfriSci Nexus'}`);
@@ -113,14 +115,14 @@ export default function ScholarMetaTags({ manuscript, journal }) {
     twitterMeta("twitter:card", "summary_large_image");
     twitterMeta("twitter:title", manuscript.title);
     twitterMeta("twitter:description", manuscript.abstract?.substring(0, 280));
-    if (manuscript.cover_image_url) {
-      twitterMeta("twitter:image", manuscript.cover_image_url);
+    if (imageToUse) {
+      twitterMeta("twitter:image", imageToUse);
     }
     twitterMeta("twitter:site", "@AfriSciNexus");
 
     // Cleanup: remove tags on unmount / manuscript change
     return () => tags.forEach(t => t.parentNode?.removeChild(t));
-  }, [manuscript?.id, manuscript?.status, journal?.id]);
+  }, [manuscript?.id, manuscript?.status, journal?.id, coverImage]);
 
   return null;
 }
