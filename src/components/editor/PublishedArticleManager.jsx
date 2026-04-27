@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,8 @@ export default function PublishedArticleManager({ manuscripts, onRefresh }) {
   const [saving, setSaving] = useState(false);
   const [unpublishingId, setUnpublishingId] = useState(null);
   const [confirmUnpublish, setConfirmUnpublish] = useState(null);
+  const [previewMs, setPreviewMs] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const publishedMs = manuscripts.filter(m => m.status === "published" || m.status === "online_first");
 
@@ -153,27 +155,30 @@ export default function PublishedArticleManager({ manuscripts, onRefresh }) {
   };
 
   const handlePreviewPDF = (ms) => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     if (ms.manuscript_file_url) {
-      window.open(ms.manuscript_file_url, "_blank");
-    } else {
-      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const margin = 20;
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const contentWidth = pageWidth - margin * 2;
-      let y = margin;
-      doc.setFont("times", "bold");
-      doc.setFontSize(16);
-      const titleLines = doc.splitTextToSize(ms.title || "", contentWidth);
-      doc.text(titleLines, margin, y);
-      y += titleLines.length * 8 + 8;
-      doc.setFont("times", "normal");
-      doc.setFontSize(11);
-      const absLines = doc.splitTextToSize(ms.abstract || "", contentWidth);
-      absLines.forEach(line => { doc.text(line, margin, y); y += 6; });
-      const blob = doc.output("blob");
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      setPreviewUrl(ms.manuscript_file_url);
+      setPreviewMs(ms);
+      return;
     }
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const contentWidth = pageWidth - margin * 2;
+    let y = margin;
+    doc.setFont("times", "bold");
+    doc.setFontSize(16);
+    const titleLines = doc.splitTextToSize(ms.title || "", contentWidth);
+    doc.text(titleLines, margin, y);
+    y += titleLines.length * 8 + 8;
+    doc.setFont("times", "normal");
+    doc.setFontSize(11);
+    const absLines = doc.splitTextToSize(ms.abstract || "", contentWidth);
+    absLines.forEach(line => { doc.text(line, margin, y); y += 6; });
+    const blob = doc.output("blob");
+    const url = URL.createObjectURL(blob);
+    setPreviewUrl(url);
+    setPreviewMs(ms);
   };
 
   if (publishedMs.length === 0) {
@@ -277,6 +282,28 @@ export default function PublishedArticleManager({ manuscripts, onRefresh }) {
             <Button onClick={handleSaveEdit} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 text-white">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle className="w-4 h-4 mr-1" />Save Changes</>}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* PDF Preview Dialog */}
+      <Dialog open={!!previewMs} onOpenChange={() => { setPreviewMs(null); if (previewUrl && !previewUrl.startsWith("http")) URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }}>
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Eye className="w-5 h-5" /> {previewMs?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0" style={{ height: "70vh" }}>
+            {previewUrl && (
+              <iframe
+                src={previewUrl}
+                className="w-full h-full rounded border"
+                title="PDF Preview"
+              />
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setPreviewMs(null); setPreviewUrl(null); }}>Close</Button>
+            <Button onClick={() => handleDownloadPDF(previewMs)}><Download className="w-4 h-4 mr-1" />Download</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
