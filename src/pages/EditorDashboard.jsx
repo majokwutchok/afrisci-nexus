@@ -407,7 +407,7 @@ Editorial Team`
           <TabsContent value="publication" className="mt-4">
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
               <h2 className="text-lg font-semibold text-slate-800 mb-4">Publication Workflow</h2>
-              <PublicationWorkflow manuscripts={manuscripts} onRefresh={loadData} />
+              <PublicationWorkflow manuscripts={manuscripts} journals={editorJournals} onRefresh={loadData} />
             </div>
           </TabsContent>
 
@@ -425,7 +425,7 @@ Editorial Team`
 
           <TabsContent value="article_formatter" className="mt-4">
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <ArticleFormatter manuscripts={manuscripts} onRefresh={loadData} />
+              <ArticleFormatter manuscripts={manuscripts} journals={editorJournals} onRefresh={loadData} />
             </div>
           </TabsContent>
 

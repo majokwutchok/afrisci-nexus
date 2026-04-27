@@ -25,7 +25,7 @@ function getWorkflowStatus(manuscript) {
   return { completed: completed.length, accepted: accepted.length, total, readyForPublication };
 }
 
-export default function PublicationWorkflow({ manuscripts, onRefresh }) {
+export default function PublicationWorkflow({ manuscripts, journals = [], onRefresh }) {
   const [loadingId, setLoadingId] = useState(null);
   const [transitioningId, setTransitioningId] = useState(null);
   const [proofViewer, setProofViewer] = useState(null); // { manuscript, proof }
@@ -122,7 +122,8 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
     try {
       const res = await generateGalleyProof({ manuscript_id: manuscript.id });
       if (res.data?.proof) {
-        setProofViewer({ manuscript, proof: res.data.proof });
+        const journal = journals.find(j => j.id === manuscript.journal_id) || null;
+        setProofViewer({ manuscript, proof: res.data.proof, journal });
         onRefresh();
       } else {
         alert("Failed to generate galley proof. " + (res.data?.error || "Unknown error"));
@@ -325,6 +326,7 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
         <GalleyProofViewer
           proof={proofViewer.proof}
           manuscript={proofViewer.manuscript}
+          journal={proofViewer.journal}
           onClose={() => setProofViewer(null)}
         />
       )}

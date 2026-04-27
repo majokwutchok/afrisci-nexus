@@ -15,6 +15,7 @@ import {
   Download, Printer, Strikethrough, Quote, Undo, Redo, Loader2, CheckCircle, X
 } from "lucide-react";
 import { jsPDF } from "jspdf";
+import { stampAfriSciNexus } from "@/utils/pdfStamp";
 
 const FONT_SIZES = ["10", "11", "12", "14", "16", "18", "20", "24", "28", "32"];
 const FONTS = ["Times New Roman", "Arial", "Helvetica", "Georgia", "Garamond"];
@@ -35,7 +36,7 @@ function ToolbarSeparator() {
   return <div className="w-px h-5 bg-slate-300 mx-1" />;
 }
 
-export default function ArticleFormatter({ manuscripts, onRefresh }) {
+export default function ArticleFormatter({ manuscripts, journals = [], onRefresh }) {
   const [selectedMs, setSelectedMs] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -70,7 +71,7 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
     const margin = 20;
     const pageWidth = doc.internal.pageSize.getWidth();
     const contentWidth = pageWidth - margin * 2;
-    let y = margin;
+    let y = 22; // start below header stamp
 
     doc.setFont("times", "bold");
     doc.setFontSize(16);
@@ -139,6 +140,9 @@ export default function ArticleFormatter({ manuscripts, onRefresh }) {
       });
     }
 
+    // Stamp every page with AfriSci Nexus branding
+    const journal = journals.find(j => j.id === selectedMs.journal_id);
+    stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
     const filename = (selectedMs.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
     doc.save(`${filename}.pdf`);
   };

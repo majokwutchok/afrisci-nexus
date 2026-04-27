@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { jsPDF } from 'jspdf';
+import { stampAfriSciNexus } from '@/utils/pdfStamp';
 import {
   FileText,
   Clock,
@@ -84,7 +85,7 @@ const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
     const margin = 20;
     const pageWidth = doc.internal.pageSize.getWidth();
     const contentWidth = pageWidth - margin * 2;
-    let y = margin;
+    let y = 22; // start below header stamp
     doc.setFont("times", "bold"); doc.setFontSize(16);
     const titleLines = doc.splitTextToSize(manuscript.title || "", contentWidth);
     doc.text(titleLines, margin, y); y += titleLines.length * 8 + 4;
@@ -109,8 +110,10 @@ const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
       const bodyText = div.innerText || div.textContent || "";
       doc.setFont("times", "normal"); doc.setFontSize(11);
       const bodyLines = doc.splitTextToSize(bodyText, contentWidth);
-      bodyLines.forEach(l => { if (y > 275) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
+      bodyLines.forEach(l => { if (y > 268) { doc.addPage(); y = 22; } doc.text(l, margin, y); y += 6; });
     }
+    // Stamp every page with AfriSci Nexus branding
+    stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
     return doc;
   };
 

@@ -8,7 +8,7 @@ import { X, Printer } from "lucide-react";
  * Renders a Nature/Lancet-style academic galley proof in a full-screen overlay.
  * White background, clean serif typography, print-ready layout.
  */
-export default function GalleyProofViewer({ proof, manuscript, onClose }) {
+export default function GalleyProofViewer({ proof, manuscript, journal, onClose }) {
   const printRef = useRef(null);
 
   if (!proof || !manuscript) return null;
@@ -212,7 +212,10 @@ export default function GalleyProofViewer({ proof, manuscript, onClose }) {
 </head>
 <body>
   <div class="journal-banner">
-    <span class="journal-name">AfriSci Nexus Discovery &mdash; Galley Proof</span>
+    <div>
+      <span class="journal-name">AfriSci Nexus Discovery</span>
+      <span style="display:block; font-size:8pt; color:#0d9488; font-weight:bold; letter-spacing:0.05em; text-transform:uppercase;">${journal?.title || ''}</span>
+    </div>
     <span class="proof-stamp">PROOF &mdash; Not for citation until published &mdash; ${new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
   </div>
 
@@ -304,9 +307,9 @@ export default function GalleyProofViewer({ proof, manuscript, onClose }) {
   </div>
 
   <div class="proof-footer">
-    <span>AfriSci Nexus Discovery | www.afrisco-nexus.org</span>
+    <span>AfriSci Nexus Discovery | www.afriscidiscovery.com${journal?.title ? ' | ' + journal.title : ''}</span>
     <span>${proof.doi_display || (manuscript.doi ? `https://doi.org/${manuscript.doi}` : 'DOI: Pending')}</span>
-    <span>© ${new Date().getFullYear()} The Authors</span>
+    <span>© ${new Date().getFullYear()} The Authors | CC BY 4.0</span>
   </div>
 </body>
 </html>`);
@@ -349,11 +352,18 @@ export default function GalleyProofViewer({ proof, manuscript, onClose }) {
           style={{ fontFamily: "'Times New Roman', Times, serif", minHeight: "1123px", padding: "40px 56px" }}
         >
           {/* ── Journal Banner ── */}
-          <div style={{ borderTop: "4px solid #003366", borderBottom: "1px solid #ccc", paddingBottom: "8px", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "9px", fontWeight: "bold", letterSpacing: "0.08em", textTransform: "uppercase", color: "#003366", fontFamily: "sans-serif" }}>
-              AfriSci Nexus Discovery — Galley Proof
-            </span>
-            <span style={{ fontSize: "8px", color: "#888", fontStyle: "italic", fontFamily: "sans-serif" }}>
+          <div style={{ background: "linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)", borderBottom: "3px solid #0d9488", paddingBottom: "8px", paddingTop: "8px", paddingLeft: "16px", paddingRight: "16px", marginBottom: "20px", marginLeft: "-56px", marginRight: "-56px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <span style={{ fontSize: "11px", fontWeight: "bold", letterSpacing: "0.08em", textTransform: "uppercase", color: "#ffffff", fontFamily: "sans-serif" }}>
+                AfriSci Nexus Discovery
+              </span>
+              {journal?.title && (
+                <span style={{ display: "block", fontSize: "9px", color: "#5eead4", fontFamily: "sans-serif", marginTop: "1px" }}>
+                  {journal.title}
+                </span>
+              )}
+            </div>
+            <span style={{ fontSize: "8px", color: "#bae6fd", fontStyle: "italic", fontFamily: "sans-serif" }}>
               PROOF · Not for citation · {new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
           </div>
@@ -491,8 +501,8 @@ export default function GalleyProofViewer({ proof, manuscript, onClose }) {
           </div>
 
           {/* ── Footer ── */}
-          <div style={{ borderTop: "1px solid #ccc", marginTop: "28px", paddingTop: "8px", display: "flex", justifyContent: "space-between", fontSize: "9px", color: "#999", fontFamily: "sans-serif" }}>
-            <span>AfriSci Nexus Discovery</span>
+          <div style={{ borderTop: "2px solid #0d9488", marginTop: "28px", paddingTop: "8px", display: "flex", justifyContent: "space-between", fontSize: "9px", color: "#64748b", fontFamily: "sans-serif" }}>
+            <span>AfriSci Nexus Discovery{journal?.title ? ` · ${journal.title}` : ""} · www.afriscidiscovery.com</span>
             <span>{proof.doi_display || (manuscript.doi ? `https://doi.org/${manuscript.doi}` : "DOI: Pending")}</span>
             <span>© {new Date().getFullYear()} The Authors | CC BY 4.0</span>
           </div>
