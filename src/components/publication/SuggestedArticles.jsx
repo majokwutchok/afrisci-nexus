@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import { Link } from 'react-router-dom';
 export default function SuggestedArticles({ manuscript, journal }) {
   const [suggestedArticles, setSuggestedArticles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!manuscript || !journal) return;
@@ -120,9 +122,9 @@ export default function SuggestedArticles({ manuscript, journal }) {
       </CardHeader>
       <CardContent className="space-y-4">
         {suggestedArticles.map((article, idx) => (
-          <Link 
-            key={article.id} 
-            to={`/ManuscriptDetail?id=${article.id}`}
+          <div
+            key={article.id}
+            onClick={() => navigate(`/ManuscriptDetail?id=${article.id}`)}
             className="block"
           >
             <div className="p-4 rounded-lg border border-slate-200 hover:border-teal-300 hover:bg-teal-50 transition-all group cursor-pointer">
@@ -184,19 +186,17 @@ export default function SuggestedArticles({ manuscript, journal }) {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
-          </Link>
+          </div>
         ))}
 
         {/* View All Articles CTA */}
         <Button 
-          asChild 
+          onClick={() => navigate('/Publications')}
           variant="outline" 
           className="w-full border-teal-300 text-teal-600 hover:bg-teal-50"
         >
-          <Link to="/Publications">
-            Browse All Articles
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Link>
+          Browse All Articles
+          <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </CardContent>
     </Card>
