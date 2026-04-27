@@ -57,6 +57,10 @@
       },
       "description": "URLs to supplementary files"
     },
+    "cover_image_url": {
+      "type": "string",
+      "description": "URL to article cover image for social media (1200x630px)"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -318,5 +322,66 @@
     "title",
     "abstract",
     "authors"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user.editor_roles": {
+            "$in": [
+              "{{data.journal_id}}"
+            ]
+          }
+        },
+        {
+          "data.status": "published"
+        },
+        {
+          "data.status": "online_first"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user.editor_roles": {
+            "$in": [
+              "{{data.journal_id}}"
+            ]
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

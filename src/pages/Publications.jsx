@@ -24,6 +24,7 @@ import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
 import { stampAfriSciNexus } from '@/utils/pdfStamp';
 import { convertToAfriSciURL } from '@/utils/afrisciLinks';
+import { generateArticleCoverImage } from '@/utils/articleCoverGenerator';
 
 function buildAbstractPDF(manuscript, journal) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -147,6 +148,15 @@ function buildFullPDF(manuscript, journal) {
 
 const PublicationCard = ({ manuscript, journal }) => {
   const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
+  
+  // Generate dynamic cover image for social media
+  const [coverImage, setCoverImage] = React.useState(manuscript.cover_image_url);
+  React.useEffect(() => {
+    if (!coverImage && journal) {
+      const generated = generateArticleCoverImage(manuscript, journal);
+      setCoverImage(generated);
+    }
+  }, [manuscript, journal, coverImage]);
 
   const handleAbstractPDF = (e) => {
     e.preventDefault();
@@ -235,10 +245,21 @@ const PublicationCard = ({ manuscript, journal }) => {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 pt-3">
+      <div className="flex flex-col gap-3 pt-3">
+         {/* Cover image preview */}
+         {coverImage && (
+           <div className="rounded-lg overflow-hidden border border-slate-200">
+             <img 
+               src={coverImage} 
+               alt={manuscript.title}
+               className="w-full h-32 object-cover"
+             />
+           </div>
+         )}
+         <div className="flex flex-wrap gap-2">
          <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>
            <Button size="sm" variant="outline" className="text-xs">
-             View Details
+             View Details & Share
            </Button>
          </Link>
          <Button
@@ -269,8 +290,9 @@ const PublicationCard = ({ manuscript, journal }) => {
                Download
              </Button>
            </>
-         )}
-       </div>
+           )}
+           </div>
+           </div>
     </CardContent>
   </Card>
   );

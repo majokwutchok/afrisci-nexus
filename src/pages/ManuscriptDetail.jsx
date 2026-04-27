@@ -29,6 +29,8 @@ import DOIPanel from "../components/publication/DOIPanel";
 import CitationTracker from "../components/publication/CitationTracker";
 import ArticleEngagementMetrics from "../components/publication/ArticleEngagementMetrics";
 import ArticleSubscribeWidget from "../components/publication/ArticleSubscribeWidget";
+import ArticleSocialSharing from "../components/publication/ArticleSocialSharing";
+import { generateArticleCoverImage, generateSocialMetadata } from "@/utils/articleCoverGenerator";
 
 const statusColors = {
   draft: "bg-gray-100 text-gray-800 border-gray-200",
@@ -49,6 +51,7 @@ export default function ManuscriptDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -81,9 +84,10 @@ export default function ManuscriptDetail() {
       setCurrentUser(userData);
 
       // Load journal data only if journal_id exists and is valid
+      let journalData = null;
       if (msData.journal_id) {
         try {
-          const journalData = await base44.entities.Journal.get(msData.journal_id);
+          journalData = await base44.entities.Journal.get(msData.journal_id);
           setJournal(journalData);
         } catch (journalError) {
           console.error("Error loading journal:", journalError);
@@ -93,12 +97,23 @@ export default function ManuscriptDetail() {
         setJournal(null);
       }
 
-    } catch (error) {
+      // Generate cover image for social media if manuscript is published
+      if (msData.status === 'published' && journalData) {
+        const generatedCover = generateArticleCoverImage(msData, journalData);
+        setCoverImage(generatedCover);
+
+        // Optionally save to manuscript if not already set
+        if (!msData.cover_image_url && typeof generatedCover === 'string') {
+          base44.entities.Manuscript.update(manuscriptId, { cover_image_url: generatedCover }).catch(() => {});
+        }
+      }
+
+      } catch (error) {
       console.error("Error loading manuscript details:", error);
       setError("Failed to load manuscript details. Please try again.");
-    }
-    setIsLoading(false);
-  };
+      }
+      setIsLoading(false);
+      };
   
   const handleCitationAdded = (newCount) => {
     setManuscript(prev => prev ? { ...prev, citation_count: newCount } : prev);
@@ -583,7 +598,12 @@ export default function ManuscriptDetail() {
             />
             <ArticleEngagementMetrics manuscript={manuscript} />
             <ArticleSubscribeWidget manuscript={manuscript} />
-          </div>
+            <ArticleSocialSharing 
+              manuscript={manuscript} 
+              journal={journal}
+              coverImage={coverImage || manuscript?.cover_image_url}
+            />
+            </div>
         </div>
       </div>
     </div>
