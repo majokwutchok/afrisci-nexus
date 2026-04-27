@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { jsPDF } from 'jspdf';
 import {
   FileText,
   Clock,
@@ -22,10 +24,12 @@ import {
   Calendar,
   Edit,
   Sparkles,
-  Lightbulb,
   Download,
   Globe,
-  Hash
+  Hash,
+  Trash2,
+  X,
+  Loader2
 } from 'lucide-react';
 import AuthorJournalRecommendations from './AuthorJournalRecommendations';
 import PerformanceNotifications from './PerformanceNotifications';
@@ -59,9 +63,12 @@ const QuickActionCard = ({ icon: Icon, title, description, action, color = "blue
   </Card>
 );
 
-const ManuscriptCard = ({ manuscript, journal }) => {
+const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
   const config = statusConfig[manuscript.status] || statusConfig.draft;
-  const Icon = config.icon;
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [pdfUploading, setPdfUploading] = useState(false);
+  const pdfRef = useRef(null);
   
   const daysInReview = manuscript.submission_date 
     ? Math.floor((new Date() - new Date(manuscript.submission_date)) / (1000 * 60 * 60 * 24))
@@ -70,106 +77,216 @@ const ManuscriptCard = ({ manuscript, journal }) => {
   const completedReviews = manuscript.review_history?.filter(r => r.status === 'completed').length || 0;
   const totalReviews = manuscript.review_history?.length || 0;
   const isPublished = manuscript.status === 'published';
+  const canWithdraw = ['draft', 'submitted', 'revision_requested', 'rejected'].includes(manuscript.status);
 
-  const handleDownload = (e) => {
-    e.preventDefault();
+  const buildPreviewPDF = () => {
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const contentWidth = pageWidth - margin * 2;
+    let y = margin;
+    doc.setFont("times", "bold"); doc.setFontSize(16);
+    const titleLines = doc.splitTextToSize(manuscript.title || "", contentWidth);
+    doc.text(titleLines, margin, y); y += titleLines.length * 8 + 4;
+    if (manuscript.authors?.length) {
+      doc.setFont("times", "italic"); doc.setFontSize(11);
+      const auth = manuscript.authors.map(a => `${a.name}${a.affiliation ? ` (${a.affiliation})` : ""}`).join(", ");
+      const authLines = doc.splitTextToSize(auth, contentWidth);
+      doc.text(authLines, margin, y); y += authLines.length * 6 + 4;
+    }
+    if (manuscript.doi) {
+      doc.setFont("times", "normal"); doc.setFontSize(10); doc.setTextColor(0, 0, 180);
+      doc.text(`DOI: https://doi.org/${manuscript.doi}`, margin, y); doc.setTextColor(0, 0, 0); y += 7;
+    }
+    doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
+    doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Abstract", margin, y); y += 6;
+    doc.setFont("times", "normal"); doc.setFontSize(11);
+    const absLines = doc.splitTextToSize(manuscript.abstract || "", contentWidth);
+    absLines.forEach(l => { if (y > 270) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
+    if (manuscript.formatted_body) {
+      y += 4; doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
+      const div = document.createElement("div"); div.innerHTML = manuscript.formatted_body;
+      const bodyText = div.innerText || div.textContent || "";
+      doc.setFont("times", "normal"); doc.setFontSize(11);
+      const bodyLines = doc.splitTextToSize(bodyText, contentWidth);
+      bodyLines.forEach(l => { if (y > 275) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
+    }
+    return doc;
+  };
+
+  const handleWithdraw = async (action) => {
+    setWithdrawing(true);
+    try {
+      if (action === 'delete') {
+        await base44.entities.Manuscript.delete(manuscript.id);
+      } else {
+        await base44.entities.Manuscript.update(manuscript.id, { status: 'draft' });
+      }
+      setWithdrawOpen(false);
+      onRefresh();
+    } catch (e) { alert('Failed: ' + (e?.message || e)); }
+    setWithdrawing(false);
+  };
+
+  const handleUploadPDF = async (file) => {
+    if (!file) return;
+    setPdfUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.Manuscript.update(manuscript.id, {
+        manuscript_file_url: file_url,
+        status: manuscript.status === 'draft' ? 'submitted' : manuscript.status
+      });
+      onRefresh();
+    } catch (e) { alert('Upload failed: ' + (e?.message || e)); }
+    setPdfUploading(false);
+  };
+
+  const handlePreview = () => {
     if (manuscript.manuscript_file_url) {
       window.open(manuscript.manuscript_file_url, '_blank');
+    } else {
+      const doc = buildPreviewPDF();
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
     }
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1">
-            <CardTitle className="text-base line-clamp-2 mb-2">{manuscript.title}</CardTitle>
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <FileText className="w-3 h-3" />
-              {journal?.title || 'Unknown Journal'}
+    <>
+      <Card className="hover:shadow-lg transition-shadow">
+        <CardHeader>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <CardTitle className="text-base line-clamp-2 mb-2">{manuscript.title}</CardTitle>
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <FileText className="w-3 h-3" />
+                {journal?.title || 'Unknown Journal'}
+              </div>
             </div>
+            <Badge className={`${config.color} border`}>
+              {config.label}
+            </Badge>
           </div>
-          <Badge className={`${config.color} border`}>
-            {config.label}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* DOI display for published */}
-        {manuscript.doi && (
-          <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-3 py-2">
-            <Hash className="w-3 h-3 text-blue-600 flex-shrink-0" />
-            <a
-              href={`https://doi.org/${manuscript.doi}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs font-mono text-blue-700 hover:underline truncate"
-            >
-              {manuscript.doi}
-            </a>
-          </div>
-        )}
-
-        {isPublished && manuscript.publication_date && (
-          <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
-            <Globe className="w-3 h-3 flex-shrink-0" />
-            Published: {new Date(manuscript.publication_date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-slate-500" />
-            <span className="text-slate-600">{daysInReview}d submitted</span>
-          </div>
-          {totalReviews > 0 && (
-            <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4 text-slate-500" />
-              <span className="text-slate-600">{completedReviews}/{totalReviews} reviews</span>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {manuscript.doi && (
+            <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-3 py-2">
+              <Hash className="w-3 h-3 text-blue-600 flex-shrink-0" />
+              <a href={`https://doi.org/${manuscript.doi}`} target="_blank" rel="noreferrer"
+                className="text-xs font-mono text-blue-700 hover:underline truncate">
+                {manuscript.doi}
+              </a>
             </div>
           )}
-        </div>
-
-        {manuscript.status === 'under_review' && totalReviews > 0 && (
-          <div>
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-slate-600">Review Progress</span>
-              <span className="text-slate-600">{Math.round((completedReviews / totalReviews) * 100)}%</span>
+          {isPublished && manuscript.publication_date && (
+            <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+              <Globe className="w-3 h-3 flex-shrink-0" />
+              Published: {new Date(manuscript.publication_date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
             </div>
-            <Progress value={(completedReviews / totalReviews) * 100} className="h-2" />
+          )}
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-slate-500" />
+              <span className="text-slate-600">{daysInReview}d submitted</span>
+            </div>
+            {totalReviews > 0 && (
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-slate-500" />
+                <span className="text-slate-600">{completedReviews}/{totalReviews} reviews</span>
+              </div>
+            )}
           </div>
-        )}
-
-        {manuscript.status === 'revision_requested' && (
-          <Alert className="bg-orange-50 border-orange-200">
-            <AlertCircle className="h-4 w-4 text-orange-600" />
-            <AlertDescription className="text-orange-800 text-sm">
-              Revisions requested. Please review feedback and resubmit.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="flex gap-2 flex-wrap">
-          <Link to={createPageUrl('ManuscriptDetail') + '?id=' + manuscript.id} className="flex-1">
-            <Button variant="outline" size="sm" className="w-full">
-              <Eye className="w-3 h-3 mr-1" /> View
-            </Button>
-          </Link>
-          {manuscript.manuscript_file_url && (
-            <Button variant="outline" size="sm" onClick={handleDownload}>
-              <Download className="w-3 h-3 mr-1" /> Download
-            </Button>
+          {manuscript.status === 'under_review' && totalReviews > 0 && (
+            <div>
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="text-slate-600">Review Progress</span>
+                <span className="text-slate-600">{Math.round((completedReviews / totalReviews) * 100)}%</span>
+              </div>
+              <Progress value={(completedReviews / totalReviews) * 100} className="h-2" />
+            </div>
           )}
           {manuscript.status === 'revision_requested' && (
-            <Link to={createPageUrl('Submit')}>
-              <Button size="sm" className="bg-orange-600 hover:bg-orange-700 text-white">
-                <Edit className="w-3 h-3 mr-1" /> Revise
+            <Alert className="bg-orange-50 border-orange-200">
+              <AlertCircle className="h-4 w-4 text-orange-600" />
+              <AlertDescription className="text-orange-800 text-sm">
+                Revisions requested. Please review feedback and resubmit.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-2 flex-wrap">
+            <Link to={createPageUrl('ManuscriptDetail') + '?id=' + manuscript.id} className="flex-1">
+              <Button variant="outline" size="sm" className="w-full">
+                <Eye className="w-3 h-3 mr-1" /> View
               </Button>
             </Link>
+            <Button variant="outline" size="sm" onClick={handlePreview} title="Preview how it will look when published">
+              <FileText className="w-3 h-3 mr-1" /> Preview
+            </Button>
+            {manuscript.status === 'revision_requested' && (
+              <Link to={createPageUrl('Submit')}>
+                <Button size="sm" className="bg-orange-600 hover:bg-orange-700 text-white">
+                  <Edit className="w-3 h-3 mr-1" /> Revise
+                </Button>
+              </Link>
+            )}
+          </div>
+
+          {/* PDF Upload for quick publish */}
+          <div className="pt-1 border-t border-slate-100">
+            <input ref={pdfRef} type="file" accept=".pdf" className="hidden"
+              onChange={e => { const f = e.target.files[0]; if (f) handleUploadPDF(f); }} />
+            <Button size="sm" variant="outline" className="w-full text-indigo-700 border-indigo-200 hover:bg-indigo-50"
+              onClick={() => pdfRef.current?.click()} disabled={pdfUploading}>
+              {pdfUploading
+                ? <><Loader2 className="w-3 h-3 animate-spin mr-1" /> Uploading...</>
+                : <><Upload className="w-3 h-3 mr-1" /> {manuscript.manuscript_file_url ? 'Replace PDF' : 'Upload Final PDF'}</>}
+            </Button>
+            {!manuscript.manuscript_file_url && (
+              <p className="text-xs text-slate-400 mt-1 text-center">Upload clean PDF for quick publication</p>
+            )}
+          </div>
+
+          {/* Withdraw/Delete for eligible statuses */}
+          {canWithdraw && (
+            <Button size="sm" variant="ghost" className="w-full text-red-500 hover:text-red-700 hover:bg-red-50 text-xs"
+              onClick={() => setWithdrawOpen(true)}>
+              <Trash2 className="w-3 h-3 mr-1" /> Withdraw / Delete
+            </Button>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Withdraw Dialog */}
+      <Dialog open={withdrawOpen} onOpenChange={setWithdrawOpen}>
+        <DialogContent className="bg-white max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-700">
+              <AlertCircle className="w-5 h-5" /> Withdraw or Delete
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-slate-600">What would you like to do with <strong>{manuscript.title}</strong>?</p>
+          <div className="flex flex-col gap-3 mt-2">
+            <Button variant="outline" className="text-orange-700 border-orange-300 hover:bg-orange-50 justify-start"
+              disabled={withdrawing} onClick={() => handleWithdraw('withdraw')}>
+              {withdrawing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <X className="w-4 h-4 mr-2" />}
+              Withdraw — revert to Draft
+            </Button>
+            <Button variant="outline" className="text-red-700 border-red-300 hover:bg-red-50 justify-start"
+              disabled={withdrawing} onClick={() => handleWithdraw('delete')}>
+              {withdrawing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Permanently delete
+            </Button>
+          </div>
+          <DialogFooter className="mt-2">
+            <Button variant="ghost" size="sm" onClick={() => setWithdrawOpen(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
@@ -386,6 +503,7 @@ export default function AuthorDashboard() {
                     key={manuscript.id}
                     manuscript={manuscript}
                     journal={journals.find(j => j.id === manuscript.journal_id)}
+                    onRefresh={loadData}
                   />
                 ))}
               </div>
@@ -410,6 +528,7 @@ export default function AuthorDashboard() {
                     key={manuscript.id}
                     manuscript={manuscript}
                     journal={journals.find(j => j.id === manuscript.journal_id)}
+                    onRefresh={loadData}
                   />
                 ))}
               </div>
@@ -431,6 +550,7 @@ export default function AuthorDashboard() {
                     key={manuscript.id}
                     manuscript={manuscript}
                     journal={journals.find(j => j.id === manuscript.journal_id)}
+                    onRefresh={loadData}
                   />
                 ))}
               </div>
@@ -452,6 +572,7 @@ export default function AuthorDashboard() {
                     key={manuscript.id}
                     manuscript={manuscript}
                     journal={journals.find(j => j.id === manuscript.journal_id)}
+                    onRefresh={loadData}
                   />
                 ))}
               </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { generateGalleyProof } from "@/functions/generateGalleyProof";
 import { publishManuscript } from "@/functions/publishManuscript";
@@ -6,8 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { assignDOI } from "@/functions/assignDOI";
-import { CheckCircle, FileText, Loader2, Sparkles, ChevronRight, BookOpen, Clock, Hash, ExternalLink, Pencil, Globe } from "lucide-react";
+import { CheckCircle, FileText, Loader2, Sparkles, ChevronRight, BookOpen, Clock, Hash, ExternalLink, Pencil, Globe, Trash2, Upload, Eye, AlertTriangle, X } from "lucide-react";
 import GalleyProofViewer from "./GalleyProofViewer";
 
 const REVIEW_ACCEPT_STATUSES = ["accept", "minor_revision"];
@@ -33,6 +34,51 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
   const [doiInputs, setDoiInputs] = useState({});
 
   const [publishingId, setPublishingId] = useState(null);
+  const [withdrawConfirm, setWithdrawConfirm] = useState(null); // manuscript to withdraw/delete
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [pdfUploadMs, setPdfUploadMs] = useState(null); // manuscript for PDF upload
+  const [pdfUploading, setPdfUploading] = useState(false);
+  const pdfInputRef = useRef(null);
+
+  const handleWithdraw = async (manuscript, action) => {
+    setWithdrawing(true);
+    try {
+      if (action === 'delete') {
+        await base44.entities.Manuscript.delete(manuscript.id);
+      } else {
+        // Withdraw = revert to accepted
+        await base44.entities.Manuscript.update(manuscript.id, {
+          status: 'accepted',
+          publication_date: null,
+          timeline: [...(manuscript.timeline || []), {
+            status: 'accepted',
+            date: new Date().toISOString().split('T')[0],
+            actor: 'Editor',
+            comment: 'Article withdrawn from publication.'
+          }]
+        });
+      }
+      setWithdrawConfirm(null);
+      onRefresh();
+    } catch (e) {
+      alert('Failed: ' + (e?.message || e));
+    }
+    setWithdrawing(false);
+  };
+
+  const handleUploadPDF = async (manuscript, file) => {
+    if (!file) return;
+    setPdfUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.Manuscript.update(manuscript.id, { manuscript_file_url: file_url });
+      setPdfUploadMs(null);
+      onRefresh();
+    } catch (e) {
+      alert('Upload failed: ' + (e?.message || e));
+    }
+    setPdfUploading(false);
+  };
 
   const workflowManuscripts = manuscripts.filter(m =>
     ["under_review", "revised", "editor_assigned", "online_first", "accepted", "published"].includes(m.status)
@@ -162,7 +208,7 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
                     </div>
                   </div>
 
-                  {/* Status badge + accept button */}
+                  {/* Status badge + actions */}
                   <div className="flex flex-col gap-2 flex-shrink-0 items-end">
                     <Badge className={
                       isPublished ? "bg-blue-100 text-blue-700 text-xs" :
@@ -189,6 +235,18 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
                         {publishingId === ms.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Globe className="w-3 h-3 mr-1" />Publish Now</>}
                       </Button>
                     )}
+                    {/* PDF Upload for accepted/published */}
+                    {(isAccepted || isOnlineFirst || isPublished) && (
+                      <Button size="sm" variant="outline" onClick={() => setPdfUploadMs(ms)}
+                        className="text-xs text-indigo-700 border-indigo-200 hover:bg-indigo-50">
+                        <Upload className="w-3 h-3 mr-1" /> {ms.manuscript_file_url ? "Replace PDF" : "Upload PDF"}
+                      </Button>
+                    )}
+                    {/* Withdraw/Delete */}
+                    <Button size="sm" variant="ghost" onClick={() => setWithdrawConfirm(ms)}
+                      className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50">
+                      <Trash2 className="w-3 h-3 mr-1" /> Withdraw
+                    </Button>
                   </div>
                 </div>
 
@@ -262,7 +320,7 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
         })}
       </div>
 
-      {/* Full-screen galley proof viewer — rendered outside card flow */}
+      {/* Full-screen galley proof viewer */}
       {proofViewer && (
         <GalleyProofViewer
           proof={proofViewer.proof}
@@ -270,6 +328,75 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
           onClose={() => setProofViewer(null)}
         />
       )}
+
+      {/* Withdraw / Delete Confirm Dialog */}
+      <Dialog open={!!withdrawConfirm} onOpenChange={() => setWithdrawConfirm(null)}>
+        <DialogContent className="bg-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="w-5 h-5" /> Withdraw / Delete Article
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-slate-700 mt-1">
+            <strong>{withdrawConfirm?.title}</strong>
+          </p>
+          <p className="text-sm text-slate-600 mt-2">Choose an action:</p>
+          <div className="flex flex-col gap-3 mt-2">
+            <Button variant="outline" className="text-orange-700 border-orange-300 hover:bg-orange-50 justify-start"
+              disabled={withdrawing}
+              onClick={() => handleWithdraw(withdrawConfirm, 'withdraw')}>
+              {withdrawing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <X className="w-4 h-4 mr-2" />}
+              Withdraw from public — revert to "Accepted"
+            </Button>
+            <Button variant="outline" className="text-red-700 border-red-300 hover:bg-red-50 justify-start"
+              disabled={withdrawing}
+              onClick={() => handleWithdraw(withdrawConfirm, 'delete')}>
+              {withdrawing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Permanently delete this article
+            </Button>
+          </div>
+          <DialogFooter className="mt-2">
+            <Button variant="ghost" size="sm" onClick={() => setWithdrawConfirm(null)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* PDF Upload Dialog */}
+      <Dialog open={!!pdfUploadMs} onOpenChange={() => setPdfUploadMs(null)}>
+        <DialogContent className="bg-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-indigo-600" /> Upload Final PDF
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-slate-600 mb-3">
+            Upload the final formatted PDF for <strong>{pdfUploadMs?.title}</strong>. This will be used as the downloadable and displayable version on the public article page.
+          </p>
+          {pdfUploadMs?.manuscript_file_url && (
+            <div className="flex items-center gap-2 mb-3 p-2 bg-blue-50 rounded-lg text-xs text-blue-700">
+              <Eye className="w-4 h-4" />
+              <a href={pdfUploadMs.manuscript_file_url} target="_blank" rel="noreferrer" className="hover:underline">View current PDF</a>
+            </div>
+          )}
+          <input
+            ref={pdfInputRef}
+            type="file"
+            accept=".pdf"
+            className="hidden"
+            onChange={e => {
+              const file = e.target.files[0];
+              if (file) handleUploadPDF(pdfUploadMs, file);
+            }}
+          />
+          <Button onClick={() => pdfInputRef.current?.click()} disabled={pdfUploading}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white w-full">
+            {pdfUploading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Uploading...</> : <><Upload className="w-4 h-4 mr-2" /> Choose PDF File</>}
+          </Button>
+          <DialogFooter className="mt-1">
+            <Button variant="ghost" size="sm" onClick={() => setPdfUploadMs(null)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
