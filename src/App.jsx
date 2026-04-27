@@ -8,7 +8,6 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import ResearcherDirectory from './pages/ResearcherDirectory';
 import ResearcherProfile from './pages/ResearcherProfile';
-import SpringerNatureSubmission from './pages/SpringerNatureSubmission';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import InstitutionalPartnership from './pages/InstitutionalPartnership';
 import Accreditations from './pages/Accreditations';
@@ -83,7 +82,6 @@ const AuthenticatedApp = () => {
       <Route path="/Submit" element={<LayoutWrapper currentPageName="Submit"><Submit /></LayoutWrapper>} />
       <Route path="/ResearcherDirectory" element={<LayoutWrapper currentPageName="ResearcherDirectory"><ResearcherDirectory /></LayoutWrapper>} />
       <Route path="/ResearcherProfile" element={<LayoutWrapper currentPageName="ResearcherProfile"><ResearcherProfile /></LayoutWrapper>} />
-      <Route path="/SpringerNatureSubmission" element={<LayoutWrapper currentPageName="SpringerNatureSubmission"><SpringerNatureSubmission /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
