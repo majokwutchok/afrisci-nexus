@@ -65,7 +65,12 @@ const statusConfig = {
 };
 
 const TimelineItem = ({ status, date, actor, comment, isActive, isCompleted }) => {
-  const config = statusConfig[status];
+  const config = statusConfig[status] || {
+    icon: FileText,
+    color: "bg-slate-100 text-slate-800",
+    title: status ? status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Unknown',
+    description: ""
+  };
   const Icon = config.icon;
   
   return (
@@ -103,6 +108,12 @@ const TimelineItem = ({ status, date, actor, comment, isActive, isCompleted }) =
 export default function ProgressTracker({ manuscript, showReviewDetails = false }) {
   const timeline = manuscript.timeline || [];
   const currentStatus = manuscript.status;
+  const currentConfig = statusConfig[currentStatus] || {
+    icon: FileText,
+    color: "bg-slate-100 text-slate-800",
+    title: currentStatus ? currentStatus.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Unknown',
+    description: ""
+  };
   
   const statusOrder = ['submitted', 'editor_assigned', 'under_review', 'revision_requested', 'revised', 'accepted', 'published'];
   const currentIndex = statusOrder.indexOf(currentStatus);
@@ -133,11 +144,11 @@ export default function ProgressTracker({ manuscript, showReviewDetails = false 
         <CardContent>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <Badge className={statusConfig[currentStatus].color} variant="secondary">
-                {statusConfig[currentStatus].title}
+              <Badge className={currentConfig.color} variant="secondary">
+                {currentConfig.title}
               </Badge>
               <p className="text-sm text-slate-600 mt-1">
-                {statusConfig[currentStatus].description}
+                {currentConfig.description}
               </p>
             </div>
             <div className="text-right">
@@ -150,7 +161,7 @@ export default function ProgressTracker({ manuscript, showReviewDetails = false 
             <div className="bg-white rounded-lg p-3 border">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-medium">Estimated timeline for {statusConfig[currentStatus].title.toLowerCase()}:</span>
+                <span className="text-sm font-medium">Estimated timeline for {currentConfig.title.toLowerCase()}:</span>
                 <span className="text-sm text-blue-600 font-semibold">
                   {estimatedDays[currentStatus]} days
                 </span>
