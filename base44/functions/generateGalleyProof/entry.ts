@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 Deno.serve(async (req) => {
   try {
@@ -19,21 +19,23 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Manuscript not found' }, { status: 404 });
     }
 
-    const prompt = `
-You are a professional academic journal typesetter. Generate a complete, publication-ready galley proof for the following manuscript.
+    const today = new Date().toISOString().split('T')[0];
+    const acceptedEntry = (manuscript.timeline || []).find(t => t.status === 'accepted');
+
+    const prompt = `You are a professional academic journal typesetter for AfriSci Nexus Discovery.
+Generate a complete, publication-ready galley proof for the following manuscript.
 
 MANUSCRIPT DETAILS:
 Title: ${manuscript.title}
-Authors: ${(manuscript.authors || []).map(a => `${a.name} (${a.affiliation || 'Unknown affiliation'}${a.is_corresponding ? ', Corresponding Author' : ''})`).join('; ')}
+Authors: ${(manuscript.authors || []).map(a => `${a.name} (${a.affiliation || 'Unknown'}${a.is_corresponding ? ', Corresponding Author' : ''})`).join('; ')}
 Keywords: ${(manuscript.keywords || []).join(', ')}
 Abstract: ${manuscript.abstract}
 Language: ${manuscript.language || 'English'}
-Journal ID: ${manuscript.journal_id || 'AfriSci Nexus Journal'}
 DOI: ${manuscript.doi || 'Pending assignment'}
 Submitted: ${manuscript.submission_date || 'N/A'}
+Accepted: ${acceptedEntry?.date || today}
 
-Generate a complete galley proof in the following JSON format, adhering to academic publishing standards (APA/Chicago). Be detailed and professional.
-`;
+Generate a professional galley proof JSON. Be detailed and accurate.`;
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
@@ -57,20 +59,19 @@ Generate a complete galley proof in the following JSON format, adhering to acade
             type: "array",
             items: { type: "object", properties: { number: { type: "number" }, text: { type: "string" } } }
           },
-          formatted_abstract: { type: "string", description: "Polished, publication-ready abstract" },
+          formatted_abstract: { type: "string" },
           structured_keywords: { type: "array", items: { type: "string" } },
-          citation_suggestion: { type: "string", description: "How this article should be cited" },
+          citation_suggestion: { type: "string" },
           doi_display: { type: "string" },
           received_date: { type: "string" },
           accepted_date: { type: "string" },
-          publication_note: { type: "string", description: "Brief editorial note for publication" },
-          formatting_notes: { type: "array", items: { type: "string" }, description: "Any notes for final typesetting" }
+          publication_note: { type: "string" },
+          formatting_notes: { type: "array", items: { type: "string" } }
         }
       }
     });
 
-    // Update manuscript status to online_first and store proof data
-    const today = new Date().toISOString().split('T')[0];
+    // Update manuscript to online_first
     const timeline = [...(manuscript.timeline || []), {
       status: 'online_first',
       date: today,

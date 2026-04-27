@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { generateGalleyProof } from "@/functions/generateGalleyProof";
+import { publishManuscript } from "@/functions/publishManuscript";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { assignDOI } from "@/functions/assignDOI";
-import { CheckCircle, FileText, Loader2, Sparkles, ChevronRight, BookOpen, Clock, Hash, ExternalLink, Pencil } from "lucide-react";
+import { CheckCircle, FileText, Loader2, Sparkles, ChevronRight, BookOpen, Clock, Hash, ExternalLink, Pencil, Globe } from "lucide-react";
 import GalleyProofViewer from "./GalleyProofViewer";
 
 const REVIEW_ACCEPT_STATUSES = ["accept", "minor_revision"];
@@ -31,8 +32,10 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
   const [doiEditId, setDoiEditId] = useState(null);
   const [doiInputs, setDoiInputs] = useState({});
 
+  const [publishingId, setPublishingId] = useState(null);
+
   const workflowManuscripts = manuscripts.filter(m =>
-    ["under_review", "revised", "editor_assigned", "online_first", "accepted"].includes(m.status)
+    ["under_review", "revised", "editor_assigned", "online_first", "accepted", "published"].includes(m.status)
   );
 
   const handleAutoTransition = async (manuscript) => {
@@ -70,12 +73,30 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
 
   const handleGenerateProof = async (manuscript) => {
     setLoadingId(manuscript.id);
-    const res = await generateGalleyProof({ manuscript_id: manuscript.id });
-    setLoadingId(null);
-    if (res.data?.proof) {
-      setProofViewer({ manuscript, proof: res.data.proof });
-      onRefresh();
+    try {
+      const res = await generateGalleyProof({ manuscript_id: manuscript.id });
+      if (res.data?.proof) {
+        setProofViewer({ manuscript, proof: res.data.proof });
+        onRefresh();
+      } else {
+        alert("Failed to generate galley proof. " + (res.data?.error || "Unknown error"));
+      }
+    } catch (e) {
+      alert("Error generating galley proof: " + (e?.message || e));
     }
+    setLoadingId(null);
+  };
+
+  const handlePublish = async (manuscript) => {
+    if (!window.confirm(`Publish "${manuscript.title}"? This will make it publicly visible on the journal website.`)) return;
+    setPublishingId(manuscript.id);
+    try {
+      await publishManuscript({ manuscript_id: manuscript.id });
+      onRefresh();
+    } catch (e) {
+      alert("Failed to publish: " + (e?.message || e));
+    }
+    setPublishingId(null);
   };
 
   if (workflowManuscripts.length === 0) {
@@ -100,6 +121,7 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
           const wf = getWorkflowStatus(ms);
           const isOnlineFirst = ms.status === "online_first";
           const isAccepted = ms.status === "accepted";
+          const isPublished = ms.status === "published";
 
           return (
             <Card key={ms.id} className="border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
@@ -143,20 +165,28 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
                   {/* Status badge + accept button */}
                   <div className="flex flex-col gap-2 flex-shrink-0 items-end">
                     <Badge className={
+                      isPublished ? "bg-blue-100 text-blue-700 text-xs" :
                       isOnlineFirst ? "bg-teal-100 text-teal-700 text-xs" :
                       isAccepted ? "bg-emerald-100 text-emerald-700 text-xs" :
                       wf.readyForPublication ? "bg-amber-100 text-amber-700 text-xs" :
                       "bg-slate-100 text-slate-500 text-xs"
                     }>
-                      {isOnlineFirst ? "Online First" :
+                      {isPublished ? <><Globe className="w-3 h-3 inline mr-1" />Published</> :
+                       isOnlineFirst ? "Online First" :
                        isAccepted ? "Accepted" :
                        wf.readyForPublication ? "Ready to Accept" :
                        <><Clock className="w-3 h-3 inline mr-1" />In Review</>}
                     </Badge>
-                    {wf.readyForPublication && !isAccepted && !isOnlineFirst && (
+                    {wf.readyForPublication && !isAccepted && !isOnlineFirst && !isPublished && (
                       <Button size="sm" onClick={() => handleAutoTransition(ms)} disabled={transitioningId === ms.id}
                         className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
                         {transitioningId === ms.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><CheckCircle className="w-3 h-3 mr-1" />Accept</>}
+                      </Button>
+                    )}
+                    {(isAccepted || isOnlineFirst) && !isPublished && (
+                      <Button size="sm" onClick={() => handlePublish(ms)} disabled={publishingId === ms.id}
+                        className="text-xs bg-blue-600 hover:bg-blue-700 text-white">
+                        {publishingId === ms.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Globe className="w-3 h-3 mr-1" />Publish Now</>}
                       </Button>
                     )}
                   </div>
@@ -179,7 +209,7 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
                           <Pencil className="w-3 h-3" /> Edit
                         </button>
                       </>
-                    ) : (isAccepted || isOnlineFirst) ? (
+                    ) : (isAccepted || isOnlineFirst || isPublished) ? (
                       <>
                         <span className="text-xs text-amber-700 font-semibold flex items-center gap-1">
                           <Hash className="w-3 h-3" /> No DOI yet —
@@ -215,7 +245,7 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
                     </div>
                   )}
 
-                  {(isAccepted || isOnlineFirst) && (
+                  {(isAccepted || isOnlineFirst || isPublished) && (
                     <div className="mt-2">
                       <Button size="sm" variant="outline" onClick={() => handleGenerateProof(ms)} disabled={loadingId === ms.id}
                         className="text-xs text-teal-700 border-teal-200 hover:bg-teal-50">

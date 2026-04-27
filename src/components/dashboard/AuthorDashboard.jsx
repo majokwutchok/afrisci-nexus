@@ -22,7 +22,10 @@ import {
   Calendar,
   Edit,
   Sparkles,
-  Lightbulb
+  Lightbulb,
+  Download,
+  Globe,
+  Hash
 } from 'lucide-react';
 import AuthorJournalRecommendations from './AuthorJournalRecommendations';
 import PerformanceNotifications from './PerformanceNotifications';
@@ -66,6 +69,14 @@ const ManuscriptCard = ({ manuscript, journal }) => {
 
   const completedReviews = manuscript.review_history?.filter(r => r.status === 'completed').length || 0;
   const totalReviews = manuscript.review_history?.length || 0;
+  const isPublished = manuscript.status === 'published';
+
+  const handleDownload = (e) => {
+    e.preventDefault();
+    if (manuscript.manuscript_file_url) {
+      window.open(manuscript.manuscript_file_url, '_blank');
+    }
+  };
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -84,10 +95,32 @@ const ManuscriptCard = ({ manuscript, journal }) => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* DOI display for published */}
+        {manuscript.doi && (
+          <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-3 py-2">
+            <Hash className="w-3 h-3 text-blue-600 flex-shrink-0" />
+            <a
+              href={`https://doi.org/${manuscript.doi}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-mono text-blue-700 hover:underline truncate"
+            >
+              {manuscript.doi}
+            </a>
+          </div>
+        )}
+
+        {isPublished && manuscript.publication_date && (
+          <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+            <Globe className="w-3 h-3 flex-shrink-0" />
+            Published: {new Date(manuscript.publication_date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-slate-500" />
-            <span className="text-slate-600">{daysInReview} days in review</span>
+            <span className="text-slate-600">{daysInReview}d submitted</span>
           </div>
           {totalReviews > 0 && (
             <div className="flex items-center gap-2">
@@ -116,11 +149,25 @@ const ManuscriptCard = ({ manuscript, journal }) => {
           </Alert>
         )}
 
-        <Link to={createPageUrl('ManuscriptDetail') + '?id=' + manuscript.id}>
-          <Button variant="outline" size="sm" className="w-full">
-            View Details
-          </Button>
-        </Link>
+        <div className="flex gap-2 flex-wrap">
+          <Link to={createPageUrl('ManuscriptDetail') + '?id=' + manuscript.id} className="flex-1">
+            <Button variant="outline" size="sm" className="w-full">
+              <Eye className="w-3 h-3 mr-1" /> View
+            </Button>
+          </Link>
+          {manuscript.manuscript_file_url && (
+            <Button variant="outline" size="sm" onClick={handleDownload}>
+              <Download className="w-3 h-3 mr-1" /> Download
+            </Button>
+          )}
+          {manuscript.status === 'revision_requested' && (
+            <Link to={createPageUrl('Submit')}>
+              <Button size="sm" className="bg-orange-600 hover:bg-orange-700 text-white">
+                <Edit className="w-3 h-3 mr-1" /> Revise
+              </Button>
+            </Link>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -176,8 +223,9 @@ export default function AuthorDashboard() {
     );
   }
 
-  const activeManuscripts = manuscripts.filter(m => !['rejected', 'published'].includes(m.status));
-  const completedManuscripts = manuscripts.filter(m => ['rejected', 'published', 'accepted'].includes(m.status));
+  const activeManuscripts = manuscripts.filter(m => !['rejected', 'published', 'accepted', 'online_first'].includes(m.status));
+  const publishedManuscripts = manuscripts.filter(m => ['published', 'accepted', 'online_first'].includes(m.status));
+  const completedManuscripts = manuscripts.filter(m => m.status === 'rejected');
   const revisionNeeded = manuscripts.filter(m => m.status === 'revision_requested');
 
   return (
@@ -315,15 +363,18 @@ export default function AuthorDashboard() {
 
         {/* Manuscripts */}
         <Tabs defaultValue="active" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-lg grid-cols-4">
             <TabsTrigger value="active">
               Active ({activeManuscripts.length})
             </TabsTrigger>
             <TabsTrigger value="revision">
               Revisions ({revisionNeeded.length})
             </TabsTrigger>
+            <TabsTrigger value="published" className="text-emerald-700">
+              Published ({publishedManuscripts.length})
+            </TabsTrigger>
             <TabsTrigger value="completed">
-              Completed ({completedManuscripts.length})
+              Rejected ({completedManuscripts.length})
             </TabsTrigger>
           </TabsList>
 
@@ -372,6 +423,27 @@ export default function AuthorDashboard() {
             )}
           </TabsContent>
 
+          <TabsContent value="published" className="space-y-4">
+            {publishedManuscripts.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {publishedManuscripts.map(manuscript => (
+                  <ManuscriptCard
+                    key={manuscript.id}
+                    manuscript={manuscript}
+                    journal={journals.find(j => j.id === manuscript.journal_id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Card className="border-2 border-dashed">
+                <CardContent className="p-12 text-center">
+                  <Globe className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-600">No published articles yet</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
           <TabsContent value="completed" className="space-y-4">
             {completedManuscripts.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -386,8 +458,8 @@ export default function AuthorDashboard() {
             ) : (
               <Card className="border-2 border-dashed">
                 <CardContent className="p-12 text-center">
-                  <Clock className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-600">No completed manuscripts yet</p>
+                  <CheckCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-600">No rejected manuscripts</p>
                 </CardContent>
               </Card>
             )}

@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Manuscript } from "@/entities/Manuscript";
-import { Journal } from "@/entities/Journal";
-import { Comment } from "@/entities/Comment";
-import { User } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -64,16 +61,16 @@ export default function ManuscriptDetail() {
     setIsLoading(true);
     setError(null);
     try {
-      const msData = await Manuscript.get(manuscriptId);
+      const msData = await base44.entities.Manuscript.get(manuscriptId);
       setManuscript(msData);
 
       // Increment view count asynchronously (fire and forget)
-      Manuscript.update(manuscriptId, { view_count: (msData.view_count || 0) + 1 }).catch(() => {});
+      base44.entities.Manuscript.update(manuscriptId, { view_count: (msData.view_count || 0) + 1 }).catch(() => {});
 
       // Load other data in parallel, with error handling for each
       const [commentsData, userData] = await Promise.all([
-        Comment.filter({ manuscript_id: manuscriptId }).catch(() => []),
-        User.me().catch(() => null)
+        base44.entities.Comment.filter({ manuscript_id: manuscriptId }).catch(() => []),
+        base44.auth.me().catch(() => null)
       ]);
 
       setComments(commentsData);
@@ -82,15 +79,13 @@ export default function ManuscriptDetail() {
       // Load journal data only if journal_id exists and is valid
       if (msData.journal_id) {
         try {
-          const journalData = await Journal.get(msData.journal_id);
+          const journalData = await base44.entities.Journal.get(msData.journal_id);
           setJournal(journalData);
         } catch (journalError) {
           console.error("Error loading journal:", journalError);
-          // Set journal to null but don't fail the entire load
           setJournal(null);
         }
       } else {
-        console.warn("No journal_id found for manuscript");
         setJournal(null);
       }
 
@@ -112,14 +107,14 @@ export default function ManuscriptDetail() {
   const handleDownload = async () => {
     if (!manuscript?.manuscript_file_url) return;
     window.open(manuscript.manuscript_file_url, '_blank');
-    Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+    base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
   };
 
   const handlePostComment = async () => {
     if (!newComment.trim() || !currentUser || !manuscript) return;
     
     try {
-      await Comment.create({
+      await base44.entities.Comment.create({
         manuscript_id: manuscript.id,
         content: newComment,
         author_name: currentUser.full_name
@@ -220,16 +215,23 @@ export default function ManuscriptDetail() {
                   )}
                 </div>
                 {manuscript.doi && (
-                  <div className="flex items-center gap-2 pt-2">
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">DOI:</span>
-                    <a
-                      href={`https://doi.org/${manuscript.doi}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-sm font-mono text-teal-700 hover:text-teal-900 hover:underline"
-                    >
-                      {manuscript.doi}
-                    </a>
+                  <div className="flex items-center gap-3 pt-3 mt-2 border-t border-slate-100">
+                    <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                      <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">DOI</span>
+                      <a
+                        href={`https://doi.org/${manuscript.doi}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm font-mono text-blue-700 hover:text-blue-900 hover:underline font-semibold"
+                      >
+                        {manuscript.doi}
+                      </a>
+                    </div>
+                    {manuscript.publication_date && (
+                      <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 font-medium">
+                        Published: {new Date(manuscript.publication_date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </span>
+                    )}
                   </div>
                 )}
               </CardHeader>
