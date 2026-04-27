@@ -5,16 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   FileText, Upload, Users, ShieldAlert, ChevronRight, ChevronLeft,
-  Check, Plus, Trash2, Loader2
+  Check, Plus, Trash2, Loader2, Eye, Edit3
 } from "lucide-react";
+import ArticleBodyEditor from "./ArticleBodyEditor";
+import ManuscriptPreviewModal from "./ManuscriptPreviewModal";
 
 const STORAGE_KEY = "afrisci_submission_draft";
 
 const STEPS = [
   { id: 1, label: "Metadata", icon: FileText, description: "Title, abstract & keywords" },
-  { id: 2, label: "Files", icon: Upload, description: "Manuscript & supplementary files" },
-  { id: 3, label: "Authors", icon: Users, description: "Author attribution" },
-  { id: 4, label: "Disclosures", icon: ShieldAlert, description: "Conflict of interest" },
+  { id: 2, label: "Body", icon: Edit3, description: "Article body content" },
+  { id: 3, label: "Files", icon: Upload, description: "Manuscript & supplementary files" },
+  { id: 4, label: "Authors", icon: Users, description: "Author attribution" },
+  { id: 5, label: "Disclosures", icon: ShieldAlert, description: "Conflict of interest" },
 ];
 
 const emptyAuthor = { name: "", email: "", affiliation: "", orcid: "", is_corresponding: false };
@@ -23,6 +26,7 @@ const defaultFormData = {
   title: "",
   abstract: "",
   keywords: "",
+  body: "",
   journal_id: "",
   language: "english",
   review_type: "double_blind",
@@ -319,22 +323,40 @@ function Step4Disclosures({ data, onChange }) {
   );
 }
 
+function Step2Body({ data, onChange }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-slate-500">
+        Write or paste your full article body here. You can use section headings (## Introduction, ## Methods, etc.). 
+        This content will be combined with your abstract in the final document.
+      </p>
+      <ArticleBodyEditor
+        value={data.body}
+        onChange={val => onChange("body", val)}
+        compact
+      />
+      <p className="text-xs text-slate-400 italic">Optional — you can also upload a manuscript file in the next step.</p>
+    </div>
+  );
+}
+
 function validate(step, data) {
   if (step === 1) {
     if (!data.title.trim()) return "Please enter a manuscript title.";
     if (!data.abstract.trim()) return "Please provide an abstract.";
     if (!data.keywords.trim()) return "Please enter at least one keyword.";
   }
-  if (step === 2) {
-    if (!data.manuscript_file_url) return "Please upload your manuscript file.";
-  }
+  // step 2 (body) is optional
   if (step === 3) {
+    if (!data.manuscript_file_url && !data.body?.trim()) return "Please upload a manuscript file or enter article body content.";
+  }
+  if (step === 4) {
     for (const a of data.authors) {
       if (!a.name.trim() || !a.email.trim() || !a.affiliation.trim()) return "Please complete all required author fields (name, email, affiliation).";
     }
     if (!data.authors.some(a => a.is_corresponding)) return "Please designate a corresponding author.";
   }
-  if (step === 4) {
+  if (step === 5) {
     if (!data.conflict_of_interest) return "Please select a conflict of interest option.";
   }
   return null;
@@ -349,6 +371,7 @@ export default function SubmissionWizard({ journals, onSubmit, isLoading }) {
     } catch { return defaultFormData; }
   });
   const [validationError, setValidationError] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
@@ -381,12 +404,24 @@ export default function SubmissionWizard({ journals, onSubmit, isLoading }) {
 
   const stepComponent = {
     1: <Step1Metadata data={formData} onChange={handleChange} journals={journals} />,
-    2: <Step2Files data={formData} onChange={handleChange} />,
-    3: <Step3Authors data={formData} onChange={handleChange} />,
-    4: <Step4Disclosures data={formData} onChange={handleChange} />,
+    2: <Step2Body data={formData} onChange={handleChange} />,
+    3: <Step2Files data={formData} onChange={handleChange} />,
+    4: <Step3Authors data={formData} onChange={handleChange} />,
+    5: <Step4Disclosures data={formData} onChange={handleChange} />,
   };
 
   return (
+    <>
+    {showPreview && (
+      <ManuscriptPreviewModal
+        manuscript={{
+          ...formData,
+          keywords: formData.keywords.split(",").map(k => k.trim()).filter(Boolean),
+        }}
+        journal={journals.find(j => j.id === formData.journal_id) || null}
+        onClose={() => setShowPreview(false)}
+      />
+    )}
     <Card className="border border-slate-200 shadow-lg">
       <CardContent className="p-6 sm:p-8">
         <StepIndicator currentStep={step} />
@@ -408,7 +443,18 @@ export default function SubmissionWizard({ journals, onSubmit, isLoading }) {
           <Button variant="outline" onClick={back} disabled={step === 1} className="gap-1">
             <ChevronLeft className="w-4 h-4" /> Back
           </Button>
-          <span className="text-xs text-slate-400">Step {step} of {STEPS.length}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400">Step {step} of {STEPS.length}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1 border-indigo-300 text-indigo-700 hover:bg-indigo-50"
+              onClick={() => setShowPreview(true)}
+              disabled={!formData.title && !formData.abstract}
+            >
+              <Eye className="w-3.5 h-3.5" /> Preview
+            </Button>
+          </div>
           {step < STEPS.length ? (
             <Button onClick={next} className="bg-blue-900 hover:bg-blue-800 gap-1">
               Next <ChevronRight className="w-4 h-4" />
@@ -422,5 +468,6 @@ export default function SubmissionWizard({ journals, onSubmit, isLoading }) {
         </div>
       </CardContent>
     </Card>
+    </>
   );
 }

@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import AIManuscriptAssistant from "./AIManuscriptAssistant";
 import ManuscriptPreparationTools from "./ManuscriptPreparationTools";
+import ArticleBodyEditor from "./ArticleBodyEditor";
+import ManuscriptPreviewModal from "./ManuscriptPreviewModal";
 import { 
   Sparkles, 
   CheckCircle, 
@@ -23,7 +25,8 @@ import {
   Plus,
   X,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  Eye
 } from "lucide-react";
 
 const categoryLabels = {
@@ -93,6 +96,7 @@ export default function UniversalSubmissionForm({ onSubmit, initialData, journal
   const [isLoadingReviewers, setIsLoadingReviewers] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [keywordInput, setKeywordInput] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
   const [preparationChecklist, setPreparationChecklist] = useState({});
   const [reviewerPreferences, setReviewerPreferences] = useState({
     preferred: [],
@@ -460,6 +464,16 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
             </div>
 
             <div>
+              <Label>Article Body (optional but recommended)</Label>
+              <p className="text-xs text-slate-500 mb-2 mt-1">Write your full article — introduction, methods, results, discussion, conclusions. You can also upload a file in Step 4 instead.</p>
+              <ArticleBodyEditor
+                value={manuscript.body || ""}
+                onChange={val => handleInputChange('body', val)}
+                compact
+              />
+            </div>
+
+            <div>
               <Label>Keywords * (minimum 3)</Label>
               <div className="flex gap-2 mt-2">
                 <Input
@@ -530,6 +544,7 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
       {currentStep === 3 && (
         <div className="space-y-6">
           <ManuscriptPreparationTools
+
             manuscriptText={`${manuscript.title}\n\n${manuscript.abstract}\n\nKeywords: ${manuscript.keywords.join(', ')}`}
             checklist={preparationChecklist}
             onChecklistUpdate={setPreparationChecklist}
@@ -871,6 +886,14 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
         </>
       )}
 
+      {showPreview && (
+        <ManuscriptPreviewModal
+          manuscript={manuscript}
+          journal={journals?.find(j => j.id === manuscript.journal_id) || null}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
+
       {/* Step 7: Review & Submit */}
       {currentStep === 7 && (
         <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
@@ -881,6 +904,15 @@ Rank the top 5 most suitable reviewers based on expertise match. Return as JSON 
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowPreview(true)}
+                className="gap-2 border-indigo-300 text-indigo-700 hover:bg-indigo-50"
+              >
+                <Eye className="w-4 h-4" /> Preview Full Document
+              </Button>
+            </div>
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>

@@ -5,7 +5,7 @@ import { createPageUrl } from "@/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle, Sparkles } from "lucide-react";
+import { AlertCircle, CheckCircle, Sparkles, Globe } from "lucide-react";
 import SubmissionWizard from "../components/submission/SubmissionWizard";
 import AIManuscriptAssessment from "../components/submission/AIManuscriptAssessment";
 
@@ -133,6 +133,19 @@ export default function Submit() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Submit Your Manuscript</h1>
           <p className="text-lg text-slate-600">AI-powered submission with intelligent journal matching</p>
+        </div>
+
+        {/* Cross-submission options */}
+        <div className="flex flex-wrap gap-3 mb-6 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <span className="text-sm font-semibold text-slate-600 self-center">Submit to:</span>
+          <Link to={createPageUrl("Submit")}>
+            <button className="px-4 py-2 rounded-lg bg-blue-900 text-white text-sm font-medium">AfriSci Nexus</button>
+          </Link>
+          <Link to={createPageUrl("SpringerNatureSubmission")}>
+            <button className="px-4 py-2 rounded-lg border border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100 text-sm font-medium flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5" /> Springer Nature
+            </button>
+          </Link>
         </div>
 
         {error && (
