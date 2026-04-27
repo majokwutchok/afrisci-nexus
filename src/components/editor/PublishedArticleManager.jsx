@@ -389,22 +389,23 @@ export default function PublishedArticleManager({ manuscripts, onRefresh }) {
 
       {/* PDF Preview Dialog */}
       <Dialog open={!!previewMs} onOpenChange={() => { setPreviewMs(null); if (previewUrl && !previewUrl.startsWith("http")) URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Eye className="w-5 h-5" /> {previewMs?.title}</DialogTitle>
+        <DialogContent className="max-w-5xl bg-white" style={{ height: "90vh", maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2"><Eye className="w-5 h-5 text-blue-600" /> {previewMs?.title}</DialogTitle>
           </DialogHeader>
-          <div className="flex-1 min-h-0" style={{ height: "70vh" }}>
+          <div className="flex-1 min-h-0 bg-white rounded-lg border border-slate-200 overflow-hidden">
             {previewUrl && (
               <iframe
                 src={previewUrl}
-                className="w-full h-full rounded border"
+                className="w-full h-full"
                 title="PDF Preview"
+                style={{ background: "#fff" }}
               />
             )}
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => { setPreviewMs(null); setPreviewUrl(null); }}>Close</Button>
-            <Button onClick={() => handleDownloadPDF(previewMs)}><Download className="w-4 h-4 mr-1" />Download</Button>
+          <DialogFooter className="flex-shrink-0 bg-white pt-3 border-t border-slate-100">
+            <Button variant="outline" onClick={() => { setPreviewMs(null); setPreviewUrl(null); }}>Close</Button>
+            <Button className="bg-blue-700 hover:bg-blue-800 text-white" onClick={() => handleDownloadPDF(previewMs)}><Download className="w-4 h-4 mr-1" />Download PDF</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

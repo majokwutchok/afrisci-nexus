@@ -15,8 +15,7 @@ import {
   Share2,
   Twitter,
   Linkedin,
-  MessageSquare,
-  ExternalLink
+  MessageSquare
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
@@ -106,51 +105,71 @@ export default function ManuscriptDetail() {
     setManuscript(prev => prev ? { ...prev, doi } : prev);
   };
 
-  const handlePreviewPDF = () => {
-    if (!manuscript?.manuscript_file_url) return;
-    window.open(manuscript.manuscript_file_url, '_blank');
-    base44.entities.Manuscript.update(manuscript.id, { view_count: (manuscript.view_count || 0) + 1 }).catch(() => {});
+  const buildPDF = (ms) => {
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const contentWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    // Title
+    doc.setFont("times", "bold"); doc.setFontSize(16);
+    const titleLines = doc.splitTextToSize(ms.title || "", contentWidth);
+    doc.text(titleLines, margin, y); y += titleLines.length * 8 + 4;
+
+    // Authors
+    if (ms.authors?.length) {
+      doc.setFont("times", "italic"); doc.setFontSize(11);
+      const auth = ms.authors.map(a => `${a.name}${a.affiliation ? ` (${a.affiliation})` : ""}`).join(", ");
+      const authLines = doc.splitTextToSize(auth, contentWidth);
+      doc.text(authLines, margin, y); y += authLines.length * 6 + 4;
+    }
+
+    // DOI
+    if (ms.doi) {
+      doc.setFont("times", "normal"); doc.setFontSize(10); doc.setTextColor(0, 0, 180);
+      doc.text(`DOI: https://doi.org/${ms.doi}`, margin, y); doc.setTextColor(0, 0, 0); y += 7;
+    }
+
+    // Published date
+    if (ms.publication_date) {
+      doc.setFontSize(10);
+      doc.text(`Published: ${new Date(ms.publication_date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}`, margin, y); y += 7;
+    }
+
+    doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
+
+    // Abstract
+    doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Abstract", margin, y); y += 6;
+    doc.setFont("times", "normal"); doc.setFontSize(11);
+    const absLines = doc.splitTextToSize(ms.abstract || "", contentWidth);
+    absLines.forEach(l => { if (y > 270) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
+    y += 4;
+
+    // Keywords
+    if (ms.keywords?.length) {
+      doc.setFont("times", "bold"); doc.text("Keywords: ", margin, y);
+      doc.setFont("times", "italic"); doc.text(ms.keywords.join(", "), margin + 22, y); y += 8;
+    }
+
+    // Body from formatted_body
+    if (ms.formatted_body) {
+      doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
+      const div = document.createElement("div");
+      div.innerHTML = ms.formatted_body;
+      const bodyText = div.innerText || div.textContent || "";
+      doc.setFont("times", "normal"); doc.setFontSize(11);
+      const bodyLines = doc.splitTextToSize(bodyText, contentWidth);
+      bodyLines.forEach(l => { if (y > 275) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
+    }
+
+    return doc;
   };
 
   const handleDownloadPDF = () => {
-    if (!manuscript?.manuscript_file_url) {
-      // Generate a basic PDF from metadata
-      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const margin = 20;
-      const contentWidth = doc.internal.pageSize.getWidth() - margin * 2;
-      let y = margin;
-      doc.setFont("times", "bold"); doc.setFontSize(16);
-      const titleLines = doc.splitTextToSize(manuscript.title || "", contentWidth);
-      doc.text(titleLines, margin, y); y += titleLines.length * 8 + 6;
-      if (manuscript.authors?.length) {
-        doc.setFont("times", "italic"); doc.setFontSize(11);
-        const auth = manuscript.authors.map(a => a.name).join(", ");
-        doc.text(doc.splitTextToSize(auth, contentWidth), margin, y); y += 8;
-      }
-      if (manuscript.doi) {
-        doc.setFont("times", "normal"); doc.setFontSize(10);
-        doc.setTextColor(0, 0, 180);
-        doc.text(`DOI: https://doi.org/${manuscript.doi}`, margin, y);
-        doc.setTextColor(0, 0, 0); y += 8;
-      }
-      doc.setDrawColor(150); doc.line(margin, y, doc.internal.pageSize.getWidth() - margin, y); y += 6;
-      doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Abstract", margin, y); y += 6;
-      doc.setFont("times", "normal"); doc.setFontSize(11);
-      const abs = doc.splitTextToSize(manuscript.abstract || "", contentWidth);
-      abs.forEach(l => { if (y > 270) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
-      if (manuscript.keywords?.length) {
-        y += 2; doc.setFont("times", "bold"); doc.text("Keywords: ", margin, y);
-        doc.setFont("times", "italic"); doc.text(manuscript.keywords.join(", "), margin + 22, y);
-      }
-      const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
-      doc.save(`${fn}.pdf`);
-    } else {
-      const a = document.createElement("a");
-      a.href = manuscript.manuscript_file_url;
-      a.download = `${(manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50)}.pdf`;
-      a.target = "_blank";
-      a.click();
-    }
+    const doc = buildPDF(manuscript);
+    const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
+    doc.save(`${fn}.pdf`);
     base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
   };
 
@@ -329,23 +348,29 @@ export default function ManuscriptDetail() {
                   </>
                 )}
                 <Separator />
-                {/* Inline PDF Viewer */}
-                {manuscript.manuscript_file_url && (
+                {/* Full Article Body (formatted HTML from editor) */}
+                {manuscript.formatted_body ? (
+                  <div>
+                    <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-indigo-500" /> Full Article
+                    </h3>
+                    <div
+                      className="prose max-w-none p-6 bg-slate-50 rounded-xl border border-slate-200"
+                      style={{ fontFamily: "Times New Roman, serif", fontSize: "12pt", lineHeight: "1.8", color: "#1e293b" }}
+                      dangerouslySetInnerHTML={{ __html: manuscript.formatted_body }}
+                    />
+                  </div>
+                ) : manuscript.manuscript_file_url ? (
                   <div>
                     <h3 className="font-bold text-slate-800 mb-3">Read Article</h3>
                     <InlinePDFViewer fileUrl={manuscript.manuscript_file_url} />
                   </div>
-                )}
+                ) : null}
                 <Separator />
                 <div className="space-y-3">
-                  {/* PDF Actions */}
+                  {/* Download Actions */}
                   <div className="flex flex-wrap items-center gap-2">
-                    {manuscript.manuscript_file_url && (
-                      <Button onClick={handlePreviewPDF} variant="outline">
-                        <ExternalLink className="w-4 h-4 mr-2"/>Open PDF
-                      </Button>
-                    )}
-                    <Button onClick={handleDownloadPDF}>
+                    <Button onClick={handleDownloadPDF} className="bg-blue-700 hover:bg-blue-800 text-white">
                       <Download className="w-4 h-4 mr-2"/>Download PDF
                     </Button>
                   </div>

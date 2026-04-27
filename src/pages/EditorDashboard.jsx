@@ -311,117 +311,145 @@ Editorial Team`
   }
 
   return (
-    <div className="p-6 bg-slate-50 min-h-screen">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-slate-900">Editor Dashboard</h1>
-          <Badge variant="outline" className="text-sm">
+    <div className="bg-slate-100 min-h-screen">
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between bg-white rounded-xl shadow-sm p-5 border border-slate-200">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Editor Dashboard</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Manage manuscripts, reviewers, journals & publications</p>
+          </div>
+          <Badge variant="outline" className="text-sm border-slate-300">
             Managing {editorJournals.length} journal{editorJournals.length !== 1 ? 's' : ''}
           </Badge>
         </div>
 
         <Tabs defaultValue="new_submissions">
-          <TabsList className="flex flex-wrap gap-1 h-auto p-1">
-            <TabsTrigger value="new_submissions">New Submissions</TabsTrigger>
-            <TabsTrigger value="under_review">Under Review</TabsTrigger>
-            <TabsTrigger value="revisions">Revisions</TabsTrigger>
-            <TabsTrigger value="publication">Publication</TabsTrigger>
-            <TabsTrigger value="reviewer_db" className="text-teal-700 font-semibold">👥 Reviewer Database</TabsTrigger>
-            <TabsTrigger value="journal_management" className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              Journals
-            </TabsTrigger>
-            <TabsTrigger value="doi_manager" className="flex items-center gap-1">
-              <Hash className="w-4 h-4" /> DOI Manager
-            </TabsTrigger>
-            <TabsTrigger value="article_formatter" className="flex items-center gap-1">
-              <FileEdit className="w-4 h-4" /> Article Formatter
-            </TabsTrigger>
-            <TabsTrigger value="published_manager" className="flex items-center gap-1">
-              <Globe className="w-4 h-4" /> Published Articles
-            </TabsTrigger>
-            <TabsTrigger value="reminders">Reminders</TabsTrigger>
-          </TabsList>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-2">
+            <TabsList className="flex flex-wrap gap-1 h-auto p-0 bg-transparent w-full">
+              <TabsTrigger value="new_submissions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg">New Submissions</TabsTrigger>
+              <TabsTrigger value="under_review" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg">Under Review</TabsTrigger>
+              <TabsTrigger value="revisions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg">Revisions</TabsTrigger>
+              <TabsTrigger value="publication" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg">Publication</TabsTrigger>
+              <TabsTrigger value="reviewer_db" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white rounded-lg">👥 Reviewer Database</TabsTrigger>
+              <TabsTrigger value="journal_management" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg flex items-center gap-1">
+                <BookOpen className="w-4 h-4" /> Journals
+              </TabsTrigger>
+              <TabsTrigger value="doi_manager" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg flex items-center gap-1">
+                <Hash className="w-4 h-4" /> DOI Manager
+              </TabsTrigger>
+              <TabsTrigger value="article_formatter" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white rounded-lg flex items-center gap-1">
+                <FileEdit className="w-4 h-4" /> Article Formatter
+              </TabsTrigger>
+              <TabsTrigger value="published_manager" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg flex items-center gap-1">
+                <Globe className="w-4 h-4" /> Published Articles
+              </TabsTrigger>
+              <TabsTrigger value="reminders" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg">Reminders</TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="new_submissions" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getManuscriptsByStatus('submitted').map(ms => (
-                <ManuscriptCard
-                  key={ms.id}
-                  manuscript={ms}
-                  onAssignReviewer={() => setSelectedManuscript(ms)}
-                  onMakeDecision={() => setSelectedManuscript(ms)}
-                />
-              ))}
+          <TabsContent value="new_submissions" className="mt-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4">New Submissions</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {getManuscriptsByStatus('submitted').map(ms => (
+                  <ManuscriptCard
+                    key={ms.id}
+                    manuscript={ms}
+                    onAssignReviewer={() => setSelectedManuscript(ms)}
+                    onMakeDecision={() => setSelectedManuscript(ms)}
+                  />
+                ))}
+              </div>
+              {getManuscriptsByStatus('submitted').length === 0 && (
+                <p className="text-center text-slate-500 py-8">No new submissions to review.</p>
+              )}
             </div>
-            {getManuscriptsByStatus('submitted').length === 0 && (
-              <p className="text-center text-slate-500 py-8">No new submissions to review.</p>
-            )}
           </TabsContent>
 
-          <TabsContent value="under_review" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getManuscriptsByStatus('under_review').map(ms => (
-                <ManuscriptCard
-                  key={ms.id}
-                  manuscript={ms}
-                  onAssignReviewer={() => setSelectedManuscript(ms)}
-                  onMakeDecision={() => setSelectedManuscript(ms)}
-                />
-              ))}
+          <TabsContent value="under_review" className="mt-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4">Under Review</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {getManuscriptsByStatus('under_review').map(ms => (
+                  <ManuscriptCard
+                    key={ms.id}
+                    manuscript={ms}
+                    onAssignReviewer={() => setSelectedManuscript(ms)}
+                    onMakeDecision={() => setSelectedManuscript(ms)}
+                  />
+                ))}
+              </div>
+              {getManuscriptsByStatus('under_review').length === 0 && (
+                <p className="text-center text-slate-500 py-8">No manuscripts currently under review.</p>
+              )}
             </div>
-            {getManuscriptsByStatus('under_review').length === 0 && (
-              <p className="text-center text-slate-500 py-8">No manuscripts currently under review.</p>
-            )}
           </TabsContent>
 
-          <TabsContent value="revisions" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getManuscriptsByStatus('revision_requested').map(ms => (
-                <ManuscriptCard
-                  key={ms.id}
-                  manuscript={ms}
-                  onAssignReviewer={() => setSelectedManuscript(ms)}
-                  onMakeDecision={() => setSelectedManuscript(ms)}
-                />
-              ))}
+          <TabsContent value="revisions" className="mt-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4">Revisions Requested</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {getManuscriptsByStatus('revision_requested').map(ms => (
+                  <ManuscriptCard
+                    key={ms.id}
+                    manuscript={ms}
+                    onAssignReviewer={() => setSelectedManuscript(ms)}
+                    onMakeDecision={() => setSelectedManuscript(ms)}
+                  />
+                ))}
+              </div>
+              {getManuscriptsByStatus('revision_requested').length === 0 && (
+                <p className="text-center text-slate-500 py-8">No manuscripts awaiting revisions.</p>
+              )}
             </div>
-            {getManuscriptsByStatus('revision_requested').length === 0 && (
-              <p className="text-center text-slate-500 py-8">No manuscripts awaiting revisions.</p>
-            )}
           </TabsContent>
 
-          <TabsContent value="publication" className="mt-6">
-            <PublicationWorkflow manuscripts={manuscripts} onRefresh={loadData} />
+          <TabsContent value="publication" className="mt-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4">Publication Workflow</h2>
+              <PublicationWorkflow manuscripts={manuscripts} onRefresh={loadData} />
+            </div>
           </TabsContent>
 
-          <TabsContent value="reviewer_db" className="mt-6">
-            <ReviewerDatabase manuscripts={manuscripts} journals={editorJournals} />
+          <TabsContent value="reviewer_db" className="mt-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <ReviewerDatabase manuscripts={manuscripts} journals={editorJournals} />
+            </div>
           </TabsContent>
 
-          <TabsContent value="doi_manager" className="mt-6">
-            <DOIManagerPanel manuscripts={manuscripts} onRefresh={loadData} />
+          <TabsContent value="doi_manager" className="mt-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <DOIManagerPanel manuscripts={manuscripts} onRefresh={loadData} />
+            </div>
           </TabsContent>
 
-          <TabsContent value="article_formatter" className="mt-6">
-            <ArticleFormatter manuscripts={manuscripts} onRefresh={loadData} />
+          <TabsContent value="article_formatter" className="mt-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <ArticleFormatter manuscripts={manuscripts} onRefresh={loadData} />
+            </div>
           </TabsContent>
 
-          <TabsContent value="published_manager" className="mt-6">
-            <PublishedArticleManager manuscripts={manuscripts} onRefresh={loadData} />
+          <TabsContent value="published_manager" className="mt-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <PublishedArticleManager manuscripts={manuscripts} onRefresh={loadData} />
+            </div>
           </TabsContent>
 
-          <TabsContent value="reminders" className="mt-6">
-            <AutomatedReminderSystem />
+          <TabsContent value="reminders" className="mt-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <AutomatedReminderSystem />
+            </div>
           </TabsContent>
 
-          <TabsContent value="journal_management" className="mt-6">
-            <JournalManagementPanel 
-              journals={editorJournals}
-              manuscripts={manuscripts}
-              onRefresh={loadData}
-              currentUser={currentUser}
-            />
+          <TabsContent value="journal_management" className="mt-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <JournalManagementPanel 
+                journals={editorJournals}
+                manuscripts={manuscripts}
+                onRefresh={loadData}
+                currentUser={currentUser}
+              />
+            </div>
           </TabsContent>
         </Tabs>
 
