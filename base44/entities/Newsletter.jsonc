@@ -1,0 +1,115 @@
+{
+  "name": "Newsletter",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Newsletter issue title"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Email subject line"
+    },
+    "featured_articles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "manuscript_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "authors": {
+            "type": "string"
+          },
+          "abstract_preview": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "Featured articles in this newsletter"
+    },
+    "editorial_message": {
+      "type": "string",
+      "description": "Opening message from editorial team"
+    },
+    "html_content": {
+      "type": "string",
+      "description": "Full HTML email template"
+    },
+    "send_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Scheduled send date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "scheduled",
+        "sent",
+        "failed"
+      ],
+      "default": "draft",
+      "description": "Newsletter status"
+    },
+    "recipient_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of recipients sent to"
+    },
+    "open_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of opens (if tracking enabled)"
+    },
+    "click_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of clicks (if tracking enabled)"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "User email who created newsletter"
+    }
+  },
+  "required": [
+    "title",
+    "subject",
+    "featured_articles"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

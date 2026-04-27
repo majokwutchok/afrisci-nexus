@@ -32,6 +32,7 @@ import ArticleEngagementMetrics from "../components/publication/ArticleEngagemen
 import ArticleSubscribeWidget from "../components/publication/ArticleSubscribeWidget";
 import ArticleSocialSharing from "../components/publication/ArticleSocialSharing";
 import SuggestedArticles from "../components/publication/SuggestedArticles";
+import NewsletterSignup from "../components/newsletter/NewsletterSignup";
 import { generateArticleCoverImage, generateSocialMetadata } from "@/utils/articleCoverGenerator";
 
 const statusColors = {
@@ -610,6 +611,7 @@ export default function ManuscriptDetail() {
               journal={journal}
               coverImage={coverImage || manuscript?.cover_image_url}
             />
+            <NewsletterSignup />
             </div>
         </div>
       </div>

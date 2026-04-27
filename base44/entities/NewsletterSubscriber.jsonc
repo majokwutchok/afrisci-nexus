@@ -1,0 +1,90 @@
+{
+  "name": "NewsletterSubscriber",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Subscriber email address"
+    },
+    "name": {
+      "type": "string",
+      "description": "Subscriber name (optional)"
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Research interest areas"
+    },
+    "is_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Email confirmed via confirmation link"
+    },
+    "confirmation_token": {
+      "type": "string",
+      "description": "Token for email confirmation"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Subscription status"
+    },
+    "last_newsletter_sent_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last newsletter delivery date"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "sidebar",
+        "page",
+        "form"
+      ],
+      "default": "sidebar",
+      "description": "Where subscription originated"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {}
+    },
+    "read": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": [
+              "admin",
+              "editor"
+            ]
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
+    }
+  }
+}
