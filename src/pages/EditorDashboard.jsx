@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen } from "lucide-react";
+import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen, Hash } from "lucide-react";
 import AutomatedReminderSystem from "../components/admin/AutomatedReminderSystem";
 import ReviewerDatabase from "../components/editor/ReviewerDatabase";
 import JournalManagementPanel from "../components/editor/JournalManagementPanel";
@@ -24,6 +24,7 @@ import ReviewScoreSummary from "../components/editor/ReviewScoreSummary";
 import AIReviewerMatcher from "../components/editor/AIReviewerMatcher";
 import PublicationWorkflow from "../components/editor/PublicationWorkflow";
 import PlagiarismReport from "../components/editor/PlagiarismReport";
+import DOIManagerPanel from "../components/editor/DOIManagerPanel";
 
 // Mock utility functions (in a real app, these would be in a utils folder or separate services)
 const addDays = (date, days) => {
@@ -328,6 +329,9 @@ Editorial Team`
               <BookOpen className="w-4 h-4" />
               Journals
             </TabsTrigger>
+            <TabsTrigger value="doi_manager" className="flex items-center gap-1">
+              <Hash className="w-4 h-4" /> DOI Manager
+            </TabsTrigger>
             <TabsTrigger value="reminders">Reminders</TabsTrigger>
           </TabsList>
 
@@ -385,6 +389,10 @@ Editorial Team`
 
           <TabsContent value="reviewer_db" className="mt-6">
             <ReviewerDatabase manuscripts={manuscripts} journals={editorJournals} />
+          </TabsContent>
+
+          <TabsContent value="doi_manager" className="mt-6">
+            <DOIManagerPanel manuscripts={manuscripts} onRefresh={loadData} />
           </TabsContent>
 
           <TabsContent value="reminders" className="mt-6">

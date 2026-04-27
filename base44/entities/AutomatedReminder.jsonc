@@ -1,0 +1,46 @@
+{
+  "name": "AutomatedReminder",
+  "type": "object",
+  "properties": {
+    "manuscript_id": {
+      "type": "string",
+      "description": "ID of the manuscript"
+    },
+    "reviewer_id": {
+      "type": "string",
+      "description": "ID of the reviewer"
+    },
+    "reminder_type": {
+      "type": "string",
+      "enum": [
+        "initial_invitation",
+        "first_reminder",
+        "second_reminder",
+        "final_reminder",
+        "editor_alert"
+      ],
+      "description": "Type of reminder"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the reminder should be sent"
+    },
+    "sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether reminder has been sent"
+    },
+    "sent_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When reminder was actually sent"
+    }
+  },
+  "required": [
+    "manuscript_id",
+    "reviewer_id",
+    "reminder_type",
+    "scheduled_date"
+  ]
+}

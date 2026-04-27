@@ -1,0 +1,27 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "manuscript_id": {
+      "type": "string",
+      "description": "ID of the manuscript being commented on"
+    },
+    "parent_comment_id": {
+      "type": "string",
+      "description": "ID of the parent comment, for threaded replies"
+    },
+    "content": {
+      "type": "string",
+      "description": "The text content of the comment"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Display name of the commenter"
+    }
+  },
+  "required": [
+    "manuscript_id",
+    "content",
+    "author_name"
+  ]
+}

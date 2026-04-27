@@ -48,10 +48,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Only assign DOI to published manuscripts
-    if (manuscript.status !== 'published' && manuscript.status !== 'online_first') {
+    // Allow DOI assignment for accepted, online_first, or published manuscripts
+    const eligibleStatuses = ['accepted', 'online_first', 'published'];
+    if (!eligibleStatuses.includes(manuscript.status)) {
       return Response.json({
-        error: 'DOI can only be assigned to published or online_first manuscripts'
+        error: 'DOI can only be assigned to accepted, online_first, or published manuscripts'
       }, { status: 400 });
     }
 

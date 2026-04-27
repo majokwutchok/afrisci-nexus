@@ -1,0 +1,75 @@
+{
+  "name": "ReadershipStats",
+  "type": "object",
+  "properties": {
+    "manuscript_id": {
+      "type": "string",
+      "description": "ID of the manuscript"
+    },
+    "journal_id": {
+      "type": "string",
+      "description": "ID of the journal"
+    },
+    "country": {
+      "type": "string",
+      "description": "Reader's country"
+    },
+    "continent": {
+      "type": "string",
+      "enum": [
+        "Africa",
+        "Europe",
+        "Asia",
+        "North America",
+        "South America",
+        "Oceania",
+        "Antarctica"
+      ],
+      "description": "Reader's continent"
+    },
+    "view_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the view"
+    },
+    "view_type": {
+      "type": "string",
+      "enum": [
+        "abstract",
+        "full_text",
+        "pdf_download"
+      ],
+      "description": "Type of interaction"
+    },
+    "device_type": {
+      "type": "string",
+      "enum": [
+        "mobile",
+        "desktop",
+        "tablet"
+      ],
+      "description": "Device used for viewing"
+    },
+    "referrer_source": {
+      "type": "string",
+      "enum": [
+        "direct",
+        "google",
+        "scholar",
+        "social_media",
+        "institutional"
+      ],
+      "description": "How the reader found the article"
+    },
+    "session_duration": {
+      "type": "number",
+      "description": "Time spent reading in minutes"
+    }
+  },
+  "required": [
+    "manuscript_id",
+    "country",
+    "view_date",
+    "view_type"
+  ]
+}

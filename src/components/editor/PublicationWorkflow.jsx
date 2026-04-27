@@ -172,10 +172,10 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
   const handleGenerateDOI = async (manuscript) => {
     setDoiLoadingId(manuscript.id);
     try {
-      const res = await assignDOI({ manuscript_id: manuscript.id });
+      await assignDOI({ manuscript_id: manuscript.id });
       onRefresh();
     } catch (e) {
-      alert('Failed to generate DOI.');
+      alert('Failed to generate DOI. ' + (e?.message || ''));
     }
     setDoiLoadingId(null);
   };
@@ -261,59 +261,8 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
                   </div>
                 </div>
 
-                {/* DOI Section */}
-                <div className="mt-3 pt-3 border-t border-slate-100">
-                  {ms.doi ? (
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-semibold text-blue-700 flex items-center gap-1"><Hash className="w-3 h-3" />DOI:</span>
-                      <a href={`https://doi.org/${ms.doi}`} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline font-mono flex items-center gap-1">
-                        {ms.doi}<ExternalLink className="w-3 h-3" />
-                      </a>
-                      <button onClick={() => { setDoiEditId(ms.id); setDoiInputs(p => ({ ...p, [ms.id]: ms.doi })); }} className="text-slate-400 hover:text-slate-600">
-                        <Pencil className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ) : doiEditId === ms.id ? null : (
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                      <Hash className="w-3 h-3" /> No DOI assigned
-                    </div>
-                  )}
-                  {doiEditId === ms.id && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <Input
-                        className="h-7 text-xs font-mono"
-                        placeholder="e.g. 10.55490/afrisci.2025.abc12345"
-                        value={doiInputs[ms.id] || ''}
-                        onChange={e => setDoiInputs(p => ({ ...p, [ms.id]: e.target.value }))}
-                      />
-                      <Button size="sm" className="h-7 text-xs bg-blue-600 hover:bg-blue-700" onClick={() => handleSaveManualDOI(ms)}>Save</Button>
-                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setDoiEditId(null)}>✕</Button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="flex flex-col gap-2 flex-shrink-0">
-                  {/* DOI generation button */}
-                  {(isAccepted || isOnlineFirst) && !ms.doi && doiEditId !== ms.id && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleGenerateDOI(ms)}
-                      disabled={doiLoadingId === ms.id}
-                      className="text-blue-700 border-blue-200 hover:bg-blue-50 text-xs"
-                    >
-                      {doiLoadingId === ms.id
-                        ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Generating DOI...</>
-                        : <><Hash className="w-3 h-3 mr-1" /> Generate DOI</>}
-                    </Button>
-                  )}
-                  {(isAccepted || isOnlineFirst) && !ms.doi && (
-                    <Button size="sm" variant="ghost" className="text-xs text-slate-500" onClick={() => { setDoiEditId(ms.id); setDoiInputs(p => ({ ...p, [ms.id]: '' })); }}>
-                      <Pencil className="w-3 h-3 mr-1" /> Enter DOI manually
-                    </Button>
-                  )}
-
+                {/* Status badge */}
+                <div className="flex flex-col gap-2 flex-shrink-0 items-end">
                   <Badge className={
                     isOnlineFirst ? "bg-teal-100 text-teal-700 text-xs" :
                     isAccepted ? "bg-emerald-100 text-emerald-700 text-xs" :
@@ -325,7 +274,81 @@ export default function PublicationWorkflow({ manuscripts, onRefresh }) {
                      wf.readyForPublication ? "Ready to Accept" :
                      <><Clock className="w-3 h-3 inline mr-1" />In Review</>}
                   </Badge>
+
+                  {/* Auto-accept action */}
+                  {wf.readyForPublication && !isAccepted && !isOnlineFirst && (
+                    <Button size="sm" onClick={() => handleAutoTransition(ms)} disabled={transitioningId === ms.id}
+                      className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+                      {transitioningId === ms.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><CheckCircle className="w-3 h-3 mr-1" />Accept</>}
+                    </Button>
+                  )}
                 </div>
+              </div>
+
+              {/* DOI Section — full width below the header row */}
+              <div className="mt-3 pt-3 border-t border-slate-100">
+                <div className="flex items-center gap-3 flex-wrap">
+                  {ms.doi ? (
+                    <>
+                      <span className="text-xs font-semibold text-blue-700 flex items-center gap-1">
+                        <Hash className="w-3 h-3" /> DOI Assigned:
+                      </span>
+                      <a href={`https://doi.org/${ms.doi}`} target="_blank" rel="noreferrer"
+                        className="text-xs text-blue-600 hover:underline font-mono flex items-center gap-1 bg-blue-50 px-2 py-1 rounded">
+                        {ms.doi} <ExternalLink className="w-3 h-3" />
+                      </a>
+                      <button onClick={() => { setDoiEditId(ms.id); setDoiInputs(p => ({ ...p, [ms.id]: ms.doi })); }}
+                        className="text-slate-400 hover:text-slate-600 text-xs flex items-center gap-1">
+                        <Pencil className="w-3 h-3" /> Edit
+                      </button>
+                    </>
+                  ) : (isAccepted || isOnlineFirst) ? (
+                    <>
+                      <span className="text-xs text-amber-700 font-semibold flex items-center gap-1">
+                        <Hash className="w-3 h-3" /> No DOI yet —
+                      </span>
+                      {doiEditId !== ms.id && (
+                        <Button size="sm" onClick={() => handleGenerateDOI(ms)} disabled={doiLoadingId === ms.id}
+                          className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white">
+                          {doiLoadingId === ms.id
+                            ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Generating...</>
+                            : <><Hash className="w-3 h-3 mr-1" /> Auto-Generate DOI</>}
+                        </Button>
+                      )}
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-slate-500"
+                        onClick={() => { setDoiEditId(ms.id); setDoiInputs(p => ({ ...p, [ms.id]: '' })); }}>
+                        <Pencil className="w-3 h-3 mr-1" /> Enter manually
+                      </Button>
+                    </>
+                  ) : (
+                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                      <Hash className="w-3 h-3" /> DOI will be assigned when accepted
+                    </span>
+                  )}
+                </div>
+
+                {doiEditId === ms.id && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <Input className="h-7 text-xs font-mono" placeholder="e.g. 10.55490/afrisci.2025.abc12345"
+                      value={doiInputs[ms.id] || ''}
+                      onChange={e => setDoiInputs(p => ({ ...p, [ms.id]: e.target.value }))}
+                    />
+                    <Button size="sm" className="h-7 text-xs bg-blue-600 hover:bg-blue-700" onClick={() => handleSaveManualDOI(ms)}>Save</Button>
+                    <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setDoiEditId(null)}>✕</Button>
+                  </div>
+                )}
+
+                {/* Galley proof button for accepted/online_first */}
+                {(isAccepted || isOnlineFirst) && (
+                  <div className="mt-2">
+                    <Button size="sm" variant="outline" onClick={() => handleGenerateProof(ms)} disabled={loadingId === ms.id}
+                      className="text-xs text-teal-700 border-teal-200 hover:bg-teal-50">
+                      {loadingId === ms.id
+                        ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Generating Proof...</>
+                        : <><FileText className="w-3 h-3 mr-1" /> Generate Galley Proof</>}
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

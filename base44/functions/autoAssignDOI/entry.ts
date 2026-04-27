@@ -24,8 +24,8 @@ Deno.serve(async (req) => {
     const manuscript = data;
     if (!manuscript) return Response.json({ skipped: 'no data' });
 
-    const isPublished = manuscript.status === 'published' || manuscript.status === 'online_first';
-    if (!isPublished) return Response.json({ skipped: 'not published' });
+    const isEligible = ['accepted', 'published', 'online_first'].includes(manuscript.status);
+    if (!isEligible) return Response.json({ skipped: 'not accepted/published' });
 
     // Skip if DOI already assigned
     if (manuscript.doi) return Response.json({ skipped: 'doi already exists', doi: manuscript.doi });
