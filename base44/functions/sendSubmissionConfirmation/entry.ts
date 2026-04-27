@@ -86,21 +86,21 @@ reviewer availability and the complexity of your manuscript.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 You can track the real-time status of your manuscript by visiting your
-Author Dashboard at: https://afrisco-nexus.base44.app/MyManuscripts
+Author Dashboard at: https://afriscinexus.com/MyManuscripts
 
 Use your Submission ID for reference in any correspondence:
 👉 ${manuscript.id}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-If you have any questions, please contact us at editorial@afrisco-nexus.org,
+If you have any questions, please contact us at editorial@afriscinexus.com,
 quoting your Submission ID.
 
 We look forward to working with you.
 
 Best regards,
 The AfriSci Nexus Editorial Team
-https://afrisco-nexus.base44.app
+https://afriscinexus.com
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 This is an automated confirmation. Please do not reply to this email.`;

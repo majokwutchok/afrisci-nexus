@@ -23,9 +23,9 @@ async function logHarvesterRequest(base44, verb, params, recordsReturned, respon
     console.error('Failed to log harvester request:', e);
   }
 }
-const BASE_URL = 'https://afrisci-nexus.com/oai';
+const BASE_URL = 'https://afriscinexus.com/api/functions/oaiPMH';
 const REPOSITORY_NAME = 'AfriSci Nexus';
-const ADMIN_EMAIL = 'admin@afriscinexus.com';
+const ADMIN_EMAIL = 'editorial@afriscinexus.com';
 
 const dublinCoreNamespace = 'http://purl.org/dc/elements/1.1/';
 const oaiNamespace = 'http://www.openarchives.org/OAI/2.0/';
@@ -35,7 +35,7 @@ function generateTimestamp() {
 }
 
 function generateOAIIdentifier(manuscriptId) {
-  return `oai:afrisci-nexus.com:manuscript-${manuscriptId}`;
+  return `oai:afriscinexus.com:manuscript-${manuscriptId}`;
 }
 
 function buildDublinCoreXML(manuscript) {
@@ -88,7 +88,7 @@ function buildDublinCoreXML(manuscript) {
   if (manuscript.doi) {
     xml += dc('identifier', `doi:${manuscript.doi}`);
   }
-  xml += dc('identifier', `oai:afrisci-nexus.com:manuscript-${manuscript.id}`);
+  xml += dc('identifier', `oai:afriscinexus.com:manuscript-${manuscript.id}`);
   
   // Source (journal)
   xml += dc('source', manuscript.journal_title || 'AfriSci Nexus');
@@ -97,7 +97,7 @@ function buildDublinCoreXML(manuscript) {
   xml += dc('rights', 'CC BY 4.0');
   
   // Access URL
-  xml += dc('relation', `https://afrisci-nexus.com/manuscript/${manuscript.id}`);
+  xml += dc('relation', `https://afriscinexus.com/ManuscriptDetail?id=${manuscript.id}`);
   
   xml += '</oai_dc:dc></metadata>';
   return xml;
@@ -307,7 +307,7 @@ Deno.serve(async (req) => {
     console.error('OAI-PMH error:', error);
     const errorXml = `<OAI-PMH xmlns="${oaiNamespace}">
       <responseDate>${generateTimestamp()}</responseDate>
-      <request>${BASE_URL}</request>
+      <request verb="">${BASE_URL}</request>
       <error code="generalError">${escapeXML(error.message)}</error>
     </OAI-PMH>`;
     return new Response(errorXml, {

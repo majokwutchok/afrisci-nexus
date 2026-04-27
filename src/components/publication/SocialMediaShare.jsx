@@ -28,7 +28,7 @@ const SocialMediaShare = ({ manuscript, journal }) => {
   const [customMessage, setCustomMessage] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const articleUrl = `${window.location.origin}/article/${manuscript.id}`;
+  const articleUrl = `https://afriscinexus.com/ManuscriptDetail?id=${manuscript.id}`;
   const encodedUrl = encodeURIComponent(articleUrl);
   
   const defaultShareText = `New African Research Published! 

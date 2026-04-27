@@ -1,37 +1,12 @@
 User-agent: *
 Allow: /
 
-# Allow all major search engine crawlers explicitly
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 1
+# Disallow admin and dashboard paths
+Disallow: /AdminDashboard
+Disallow: /EditorDashboard
+Disallow: /ReviewerDashboard
+Disallow: /MyManuscripts
+Disallow: /Profile
 
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 2
-
-User-agent: Slurp
-Allow: /
-Crawl-delay: 2
-
-User-agent: DuckDuckBot
-Allow: /
-
-User-agent: Baiduspider
-Allow: /
-
-User-agent: YandexBot
-Allow: /
-
-# Block irrelevant paths
-Disallow: /api/
-Disallow: /__vite/
-Disallow: /node_modules/
-
-# Sitemaps
-Sitemap: https://afrisco-nexus.base44.app/sitemap.xml
-Sitemap: https://afrisco-nexus.base44.app/sitemap-journals.xml
-Sitemap: https://afrisco-nexus.base44.app/sitemap-articles.xml
-
-# Canonical host
-Host: afrisco-nexus.base44.app
+# Sitemap
+Sitemap: https://afriscinexus.com/api/functions/generateSitemap

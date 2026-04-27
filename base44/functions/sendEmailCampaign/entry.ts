@@ -57,10 +57,7 @@ Deno.serve(async (req) => {
     error_count: 0
   });
 
-  // Get base URL for tracking (use app's function endpoint base)
-  const host = req.headers.get('host') || 'app.base44.com';
-  const protocol = host.includes('localhost') ? 'http' : 'https';
-  const baseUrl = `${protocol}://${host}`;
+  const baseUrl = 'https://afriscinexus.com/api/functions';
 
   let sentCount = 0;
   let errorCount = 0;
