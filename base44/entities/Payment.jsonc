@@ -99,6 +99,11 @@
     "admin_notes": {
       "type": "string",
       "description": "Internal notes for this payment"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional description or additional details for this payment"
     }
   },
   "required": [

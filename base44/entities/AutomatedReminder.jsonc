@@ -35,6 +35,11 @@
       "type": "string",
       "format": "date",
       "description": "When reminder was actually sent"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional notes or context for this reminder"
     }
   },
   "required": [

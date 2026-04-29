@@ -13,6 +13,11 @@
     "subscriber_email": {
       "type": "string",
       "description": "Email address to notify"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional notes about this subscription"
     }
   },
   "required": [

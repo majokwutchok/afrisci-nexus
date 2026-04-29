@@ -64,6 +64,11 @@
     "session_duration": {
       "type": "number",
       "description": "Time spent reading in minutes"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional notes about this readership record"
     }
   },
   "required": [

@@ -45,6 +45,11 @@
     "request_params": {
       "type": "object",
       "description": "OAI-PMH parameters sent in request"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional notes about this registry entry"
     }
   },
   "required": [

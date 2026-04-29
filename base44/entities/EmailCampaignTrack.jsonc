@@ -29,6 +29,11 @@
     },
     "ip_address": {
       "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional notes about this tracking event"
     }
   },
   "required": [

@@ -37,6 +37,11 @@
       },
       "default": [],
       "description": "Titles of recently viewed articles for LLM context"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional notes about this user's research interests"
     }
   },
   "required": [
