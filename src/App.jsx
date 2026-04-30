@@ -18,6 +18,7 @@ import ReviewerPortal from './pages/ReviewerPortal';
 import AuthorProfile from './pages/AuthorProfile';
 import Editorial from './pages/Editorial';
 import Submit from './pages/Submit';
+import QuickSubmit from './pages/QuickSubmit';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -82,6 +83,7 @@ const AuthenticatedApp = () => {
       <Route path="/Submit" element={<LayoutWrapper currentPageName="Submit"><Submit /></LayoutWrapper>} />
       <Route path="/ResearcherDirectory" element={<LayoutWrapper currentPageName="ResearcherDirectory"><ResearcherDirectory /></LayoutWrapper>} />
       <Route path="/ResearcherProfile" element={<LayoutWrapper currentPageName="ResearcherProfile"><ResearcherProfile /></LayoutWrapper>} />
+      <Route path="/QuickSubmit" element={<LayoutWrapper currentPageName="QuickSubmit"><QuickSubmit /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

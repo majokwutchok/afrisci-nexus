@@ -1,0 +1,59 @@
+{
+  "name": "Submission",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Manuscript title"
+    },
+    "abstract": {
+      "type": "string",
+      "description": "Manuscript abstract"
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Research keywords"
+    },
+    "pdf_url": {
+      "type": "string",
+      "description": "URL of the uploaded PDF manuscript"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Submitting author full name"
+    },
+    "author_email": {
+      "type": "string",
+      "description": "Submitting author email"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "under_review",
+        "accepted",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Editorial review status"
+    },
+    "submitted_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of submission"
+    },
+    "editor_notes": {
+      "type": "string",
+      "description": "Internal notes from the editorial team"
+    }
+  },
+  "required": [
+    "title",
+    "abstract",
+    "author_email"
+  ]
+}
