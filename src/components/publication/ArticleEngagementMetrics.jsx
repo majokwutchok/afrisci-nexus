@@ -41,64 +41,82 @@ function MetricBar({ value, max, color }) {
 }
 
 export default function ArticleEngagementMetrics({ manuscript }) {
-  const [liveStats, setLiveStats] = useState(null);
+  const [counts, setCounts] = useState({
+    views: manuscript?.view_count || 0,
+    downloads: manuscript?.download_count || 0,
+    citations: manuscript?.citation_count || 0,
+  });
+  const [breakdown, setBreakdown] = useState(null);
 
+  // Sync initial values from prop changes
   useEffect(() => {
     if (!manuscript) return;
+    setCounts({
+      views: manuscript.view_count || 0,
+      downloads: manuscript.download_count || 0,
+      citations: manuscript.citation_count || 0,
+    });
+  }, [manuscript?.view_count, manuscript?.download_count, manuscript?.citation_count]);
 
-    const fetch = async () => {
-      // Use live counts from manuscript entity, supplemented by ReadershipStats if available
+  // Load ReadershipStats breakdown + subscribe to future changes
+  useEffect(() => {
+    if (!manuscript?.id) return;
+
+    const loadBreakdown = async () => {
       try {
         const stats = await base44.entities.ReadershipStats.filter({ manuscript_id: manuscript.id });
-        const abstract_views = stats.filter(s => s.view_type === "abstract").length;
-        const full_text_views = stats.filter(s => s.view_type === "full_text").length;
-        const pdf_downloads = stats.filter(s => s.view_type === "pdf_download").length;
-        setLiveStats({ abstract_views, full_text_views, pdf_downloads });
+        setBreakdown({
+          abstract_views: stats.filter(s => s.view_type === "abstract").length,
+          full_text_views: stats.filter(s => s.view_type === "full_text").length,
+          pdf_downloads: stats.filter(s => s.view_type === "pdf_download").length,
+        });
       } catch {
-        setLiveStats(null);
+        setBreakdown(null);
       }
     };
 
-    fetch();
+    loadBreakdown();
+
+    // Real-time subscription to Manuscript changes (view/download/citation counts)
+    const unsubManuscript = base44.entities.Manuscript.subscribe((event) => {
+      if (event.id !== manuscript.id) return;
+      if (event.type === "update" && event.data) {
+        setCounts({
+          views: event.data.view_count || 0,
+          downloads: event.data.download_count || 0,
+          citations: event.data.citation_count || 0,
+        });
+      }
+    });
+
+    // Real-time subscription to new ReadershipStats records for this article
+    const unsubStats = base44.entities.ReadershipStats.subscribe((event) => {
+      if (event.type !== "create" || event.data?.manuscript_id !== manuscript.id) return;
+      setBreakdown(prev => {
+        if (!prev) return prev;
+        const field =
+          event.data.view_type === "abstract" ? "abstract_views" :
+          event.data.view_type === "full_text" ? "full_text_views" :
+          "pdf_downloads";
+        return { ...prev, [field]: (prev[field] || 0) + 1 };
+      });
+    });
+
+    return () => {
+      unsubManuscript();
+      unsubStats();
+    };
   }, [manuscript?.id]);
 
   if (!manuscript) return null;
 
-  const views = manuscript.view_count || 0;
-  const downloads = manuscript.download_count || 0;
-  const citations = manuscript.citation_count || 0;
-
-  const detailedAbstract = liveStats?.abstract_views ?? null;
-  const detailedFull = liveStats?.full_text_views ?? null;
-  const detailedPDF = liveStats?.pdf_downloads ?? null;
-
+  const { views, downloads, citations } = counts;
   const maxStat = Math.max(views, downloads, citations, 1);
 
   const metrics = [
-    {
-      label: "Total Views",
-      value: views,
-      icon: Eye,
-      color: "bg-blue-500",
-      textColor: "text-blue-600",
-      bgColor: "bg-blue-50",
-    },
-    {
-      label: "PDF Downloads",
-      value: downloads,
-      icon: Download,
-      color: "bg-teal-500",
-      textColor: "text-teal-600",
-      bgColor: "bg-teal-50",
-    },
-    {
-      label: "Citations",
-      value: citations,
-      icon: Quote,
-      color: "bg-purple-500",
-      textColor: "text-purple-600",
-      bgColor: "bg-purple-50",
-    },
+    { label: "Total Views", value: views, icon: Eye, color: "bg-blue-500", textColor: "text-blue-600", bgColor: "bg-blue-50" },
+    { label: "PDF Downloads", value: downloads, icon: Download, color: "bg-teal-500", textColor: "text-teal-600", bgColor: "bg-teal-50" },
+    { label: "Citations", value: citations, icon: Quote, color: "bg-purple-500", textColor: "text-purple-600", bgColor: "bg-purple-50" },
   ];
 
   return (
@@ -127,14 +145,13 @@ export default function ArticleEngagementMetrics({ manuscript }) {
           </div>
         ))}
 
-        {/* Detailed breakdown if ReadershipStats available */}
-        {liveStats && (detailedAbstract !== null || detailedFull !== null) && (
+        {breakdown && (
           <div className="border-t border-slate-100 pt-3 space-y-1.5">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">View Breakdown</p>
             {[
-              { label: "Abstract only", value: detailedAbstract },
-              { label: "Full text", value: detailedFull },
-              { label: "PDF download", value: detailedPDF },
+              { label: "Abstract only", value: breakdown.abstract_views },
+              { label: "Full text", value: breakdown.full_text_views },
+              { label: "PDF download", value: breakdown.pdf_downloads },
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between text-sm">
                 <span className="text-slate-600">{label}</span>
@@ -145,7 +162,7 @@ export default function ArticleEngagementMetrics({ manuscript }) {
         )}
 
         <p className="text-xs text-slate-400 text-center pt-1">
-          Updated in real-time
+          Live — updates automatically
         </p>
       </CardContent>
     </Card>

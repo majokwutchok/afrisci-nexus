@@ -34,6 +34,7 @@ import ArticleSocialSharing from "../components/publication/ArticleSocialSharing
 import SuggestedArticles from "../components/publication/SuggestedArticles";
 import NewsletterSignup from "../components/newsletter/NewsletterSignup";
 import { generateArticleCoverImage, generateSocialMetadata } from "@/utils/articleCoverGenerator";
+import { trackView } from "@/utils/trackEngagement";
 
 const statusColors = {
   draft: "bg-gray-100 text-gray-800 border-gray-200",
@@ -74,8 +75,8 @@ export default function ManuscriptDetail() {
       const msData = await base44.entities.Manuscript.get(manuscriptId);
       setManuscript(msData);
 
-      // Increment view count asynchronously (fire and forget)
-      base44.entities.Manuscript.update(manuscriptId, { view_count: (msData.view_count || 0) + 1 }).catch(() => {});
+      // Track abstract view (increments view_count + writes ReadershipStats)
+      trackView(manuscriptId, "abstract", msData);
 
       // Load other data in parallel, with error handling for each
       const [commentsData, userData] = await Promise.all([
@@ -275,7 +276,7 @@ export default function ManuscriptDetail() {
     stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
     const fn = (ms.title || "abstract").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
     doc.save(`${fn}_abstract.pdf`);
-    base44.entities.Manuscript.update(ms.id, { download_count: (ms.download_count || 0) + 1 }).catch(() => {});
+    trackView(ms.id, "pdf_download", ms);
   };
 
   const handleDownloadFullPDF = () => {
@@ -295,7 +296,7 @@ export default function ManuscriptDetail() {
       const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
       doc.save(`${fn}_full.pdf`);
     }
-    base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+    trackView(manuscript.id, "pdf_download", manuscript);
   };
 
   const handleOpenFullArticle = () => {
@@ -304,6 +305,7 @@ export default function ManuscriptDetail() {
       const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
       window.open(afrisciUrl, '_blank');
     }
+    trackView(manuscript.id, "full_text", manuscript);
   };
 
   // Keep for backward compat (used in sidebar etc.)

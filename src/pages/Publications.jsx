@@ -25,6 +25,7 @@ import { jsPDF } from 'jspdf';
 import { stampAfriSciNexus } from '@/utils/pdfStamp';
 import { convertToAfriSciURL } from '@/utils/afrisciLinks';
 import { generateArticleCoverImage } from '@/utils/articleCoverGenerator';
+import { trackView } from '@/utils/trackEngagement';
 
 function buildAbstractPDF(manuscript, journal) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -162,12 +163,11 @@ const PublicationCard = ({ manuscript, journal }) => {
     e.preventDefault();
     const doc = buildAbstractPDF(manuscript, journal);
     doc.save(`${fn}_abstract.pdf`);
-    base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+    trackView(manuscript.id, "pdf_download", manuscript);
   };
 
   const handleFullPDF = (e) => {
     e.preventDefault();
-    // If manuscript has a file URL, download directly from there
     if (manuscript.manuscript_file_url) {
       const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
       const link = document.createElement('a');
@@ -178,20 +178,19 @@ const PublicationCard = ({ manuscript, journal }) => {
       link.click();
       document.body.removeChild(link);
     } else {
-      // Fallback: build PDF from formatted body
       const doc = buildFullPDF(manuscript, journal);
       doc.save(`${fn}_full.pdf`);
     }
-    base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+    trackView(manuscript.id, "pdf_download", manuscript);
   };
 
   const handleOpenFullArticle = (e) => {
     e.preventDefault();
-    // Open article in new tab
     if (manuscript.manuscript_file_url) {
       const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
       window.open(afrisciUrl, '_blank');
     }
+    trackView(manuscript.id, "full_text", manuscript);
   };
 
   return (
