@@ -16,6 +16,7 @@ import {
 import JournalMetrics from '../components/journal/JournalMetrics';
 import { jsPDF } from 'jspdf';
 import { stampAfriSciNexus } from '@/utils/pdfStamp';
+import { trackView } from '@/utils/trackEngagement';
 
 const categoryLabels = {
   stem: "STEM",
@@ -196,7 +197,7 @@ function downloadAbstractPDF(manuscript, journal) {
   doc.text("For the full article, visit: www.afriscidiscovery.com", margin, y + 6); doc.setTextColor(0, 0, 0);
   stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
   doc.save(`${(manuscript.title || "abstract").replace(/[^a-z0-9]/gi, "_").substring(0, 50)}_abstract.pdf`);
-  base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+  trackView(manuscript.id, "pdf_download", manuscript);
 }
 
 function downloadFullPDF(manuscript, journal) {
@@ -243,7 +244,7 @@ function downloadFullPDF(manuscript, journal) {
   }
   stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
   doc.save(`${(manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50)}_full.pdf`);
-  base44.entities.Manuscript.update(manuscript.id, { download_count: (manuscript.download_count || 0) + 1 }).catch(() => {});
+  trackView(manuscript.id, "pdf_download", manuscript);
 }
 
 const ArticleCard = ({ manuscript, journal }) => (
@@ -251,11 +252,22 @@ const ArticleCard = ({ manuscript, journal }) => (
     <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>
       <h4 className="font-semibold text-slate-900 line-clamp-2 mb-2 hover:text-teal-700">{manuscript.title}</h4>
       <p className="text-sm text-slate-600 line-clamp-2 mb-3">{manuscript.abstract}</p>
-      <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
+      <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
         <span>{manuscript.authors?.[0]?.name || 'Unknown Author'}</span>
         <span>{new Date(manuscript.publication_date || manuscript.created_date).toLocaleDateString()}</span>
       </div>
     </Link>
+    <div className="flex items-center gap-3 text-xs text-slate-400 mb-3">
+      {manuscript.view_count > 0 && (
+        <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{manuscript.view_count.toLocaleString()}</span>
+      )}
+      {manuscript.download_count > 0 && (
+        <span className="flex items-center gap-1"><Download className="w-3 h-3" />{manuscript.download_count.toLocaleString()}</span>
+      )}
+      {manuscript.citation_count > 0 && (
+        <span className="flex items-center gap-1"><Quote className="w-3 h-3" />{manuscript.citation_count}</span>
+      )}
+    </div>
     <div className="flex gap-2">
       <Button size="sm" variant="outline" className="text-xs border-blue-400 text-blue-700 hover:bg-blue-50"
         onClick={() => downloadAbstractPDF(manuscript, journal)}>

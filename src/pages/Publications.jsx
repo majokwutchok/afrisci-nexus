@@ -17,7 +17,8 @@ import {
    TrendingUp,
    Calendar,
    Users,
-   BookOpen
+   BookOpen,
+   Eye
  } from 'lucide-react'; // FileText already imported, used in OpenFullArticle button
 import AISummary from '../components/publication/AISummary';
 import { format } from 'date-fns';
@@ -236,6 +237,20 @@ const PublicationCard = ({ manuscript, journal }) => {
           <Calendar className="w-3 h-3" />
           <span>{manuscript.publication_date ? format(new Date(manuscript.publication_date), 'MMM yyyy') : 'Recently'}</span>
         </div>
+      </div>
+      <div className="flex items-center gap-4 text-xs text-slate-500">
+        {(manuscript.view_count > 0) && (
+          <div className="flex items-center gap-1">
+            <Eye className="w-3 h-3" />
+            <span>{manuscript.view_count.toLocaleString()} views</span>
+          </div>
+        )}
+        {(manuscript.download_count > 0) && (
+          <div className="flex items-center gap-1">
+            <Download className="w-3 h-3" />
+            <span>{manuscript.download_count.toLocaleString()} downloads</span>
+          </div>
+        )}
         {manuscript.citation_count > 0 && (
           <div className="flex items-center gap-1">
             <TrendingUp className="w-3 h-3" />
