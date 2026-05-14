@@ -111,9 +111,11 @@ Based on this profile, recommend:
 
 If interests or history are sparse, recommend based on high-impact, broad-appeal content.`;
 
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      response_json_schema: {
+    let result;
+    try {
+      result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
         type: "object",
         properties: {
           journals: {
@@ -145,7 +147,10 @@ If interests or history are sparse, recommend based on high-impact, broad-appeal
       }
     });
 
-    setRecommendations(result);
+      setRecommendations(result);
+    } catch {
+      // Integration credits exhausted or network error — show fallback state
+    }
     setLoading(false);
   }, [dataLoaded, interests, journals, articles]);
 
@@ -294,9 +299,11 @@ If interests or history are sparse, recommend based on high-impact, broad-appeal
           )}
 
           {!loading && !recommendations && (
-            <div className="text-center py-4">
-              <Button size="sm" onClick={generateRecommendations} className="bg-teal-600 hover:bg-teal-700 text-white text-xs">
-                <Sparkles className="w-3 h-3 mr-1" /> Generate Recommendations
+            <div className="text-center py-6 space-y-2">
+              <Sparkles className="w-8 h-8 text-slate-200 mx-auto" />
+              <p className="text-xs text-slate-400">AI recommendations are temporarily unavailable.</p>
+              <Button size="sm" onClick={generateRecommendations} variant="outline" className="text-xs">
+                <RefreshCw className="w-3 h-3 mr-1" /> Try Again
               </Button>
             </div>
           )}

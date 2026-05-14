@@ -74,10 +74,16 @@ export default function ImpactMetrics() {
   const [lastUpdated, setLastUpdated] = useState(null);
 
   const fetchMetrics = useCallback(async () => {
-    const [readershipStats, manuscripts] = await Promise.all([
-      base44.entities.ReadershipStats.list('-view_date', 1000),
-      base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 200),
-    ]);
+    let readershipStats, manuscripts;
+    try {
+      [readershipStats, manuscripts] = await Promise.all([
+        base44.entities.ReadershipStats.list('-view_date', 1000),
+        base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 200),
+      ]);
+    } catch {
+      setLoading(false);
+      return;
+    }
 
     // Aggregate by country from ReadershipStats
     const countryMap = {};
