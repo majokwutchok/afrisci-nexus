@@ -111,23 +111,23 @@ const JournalPolicyEditor = ({ journal, isOpen, onClose, onSave }) => {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div>
-            <Label htmlFor="description">Journal Scope/Description</Label>
+            <Label htmlFor="description" className="text-slate-700 font-medium">Journal Scope/Description</Label>
             <Textarea
               id="description"
               value={policyData.description || ""}
               onChange={(e) => setPolicyData(prev => ({ ...prev, description: e.target.value }))}
               rows={5}
-              className="mt-2"
+              className="mt-2 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
             />
           </div>
           <div>
-            <Label htmlFor="submission_fee">Submission Fee (USD)</Label>
+            <Label htmlFor="submission_fee" className="text-slate-700 font-medium">Submission Fee (USD)</Label>
             <Input
               id="submission_fee"
               type="number"
               value={policyData.submission_fee || 0}
               onChange={(e) => setPolicyData(prev => ({ ...prev, submission_fee: e.target.value }))}
-              className="mt-2"
+              className="mt-2 bg-white border-slate-300 text-slate-900"
             />
           </div>
         </div>
@@ -487,20 +487,21 @@ Editorial Team`
                     />
                   </div>
                   <div>
-                     <Label htmlFor="reviewer-email">Assign Reviewer</Label>
-                     <div className="flex gap-2">
-                        <Input
-                          id="reviewer-email"
-                          type="email"
-                          placeholder="Enter reviewer email or select from AI suggestions"
-                          value={reviewerSearch}
-                          onChange={(e) => setReviewerSearch(e.target.value)}
-                        />
-                       <Button onClick={() => assignReviewer(selectedManuscript, reviewerSearch)}>
-                         <Mail className="w-4 h-4 mr-2" /> Invite
-                       </Button>
-                     </div>
-                   </div>
+                    <Label htmlFor="reviewer-email" className="text-slate-700 font-medium">Assign Reviewer</Label>
+                    <div className="flex gap-2 mt-1">
+                       <Input
+                         id="reviewer-email"
+                         type="email"
+                         placeholder="Enter reviewer email or select from AI suggestions"
+                         value={reviewerSearch}
+                         onChange={(e) => setReviewerSearch(e.target.value)}
+                         className="bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                       />
+                      <Button onClick={() => assignReviewer(selectedManuscript, reviewerSearch)}>
+                        <Mail className="w-4 h-4 mr-2" /> Invite
+                      </Button>
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     <Label>Make Decision</Label>
                     <div className="flex gap-2">

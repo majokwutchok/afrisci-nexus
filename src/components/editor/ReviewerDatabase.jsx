@@ -107,15 +107,15 @@ AfriSci Nexus Editorial Team`
           <DialogTitle className="flex items-center gap-2"><Send className="w-5 h-5 text-teal-600" /> Invite Reviewer</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
-          <div className="bg-slate-50 rounded-lg p-3 text-sm">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm">
             <p className="font-semibold text-slate-800">{reviewer.full_name}</p>
             <p className="text-slate-500">{reviewer.email} · {reviewer.affiliation}</p>
           </div>
           <div>
-            <Label>Select Manuscript *</Label>
+            <Label className="text-slate-700 font-medium">Select Manuscript *</Label>
             <Select value={manuscriptId} onValueChange={setManuscriptId}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Choose a manuscript..." /></SelectTrigger>
-              <SelectContent>
+              <SelectTrigger className="mt-1 bg-white border-slate-300 text-slate-900"><SelectValue placeholder="Choose a manuscript..." /></SelectTrigger>
+              <SelectContent className="bg-white border-slate-200">
                 {manuscripts.filter(m => ['submitted','under_review'].includes(m.status)).map(m => (
                   <SelectItem key={m.id} value={m.id}>{m.title}</SelectItem>
                 ))}
@@ -123,12 +123,12 @@ AfriSci Nexus Editorial Team`
             </Select>
           </div>
           <div>
-            <Label>Review Due Date</Label>
-            <Input type="date" className="mt-1" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+            <Label className="text-slate-700 font-medium">Review Due Date</Label>
+            <Input type="date" className="mt-1 bg-white border-slate-300 text-slate-900" value={dueDate} onChange={e => setDueDate(e.target.value)} />
           </div>
           <div>
-            <Label>Custom Message <span className="text-slate-400 font-normal">(optional)</span></Label>
-            <Textarea className="mt-1" rows={3} value={customMessage} onChange={e => setCustomMessage(e.target.value)} placeholder="Add a personal note to the reviewer..." />
+            <Label className="text-slate-700 font-medium">Custom Message <span className="text-slate-400 font-normal">(optional)</span></Label>
+            <Textarea className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" rows={3} value={customMessage} onChange={e => setCustomMessage(e.target.value)} placeholder="Add a personal note to the reviewer..." />
           </div>
         </div>
         <DialogFooter>
@@ -175,30 +175,30 @@ function ReviewerForm({ reviewer, open, onClose, onSaved }) {
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4 py-2">
           <div className="col-span-2 md:col-span-1">
-            <Label>Full Name *</Label>
-            <Input className="mt-1" value={form.full_name} onChange={e => set('full_name', e.target.value)} />
+            <Label className="text-slate-700 font-medium">Full Name *</Label>
+            <Input className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" value={form.full_name} onChange={e => set('full_name', e.target.value)} placeholder="Dr. Jane Smith" />
           </div>
           <div className="col-span-2 md:col-span-1">
-            <Label>Email *</Label>
-            <Input className="mt-1" type="email" value={form.email} onChange={e => set('email', e.target.value)} />
+            <Label className="text-slate-700 font-medium">Email *</Label>
+            <Input className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="reviewer@university.edu" />
           </div>
           <div className="col-span-2 md:col-span-1">
-            <Label>Academic Title</Label>
-            <Input className="mt-1" value={form.academic_title} onChange={e => set('academic_title', e.target.value)} placeholder="e.g. Associate Professor" />
+            <Label className="text-slate-700 font-medium">Academic Title</Label>
+            <Input className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" value={form.academic_title} onChange={e => set('academic_title', e.target.value)} placeholder="e.g. Associate Professor" />
           </div>
           <div className="col-span-2 md:col-span-1">
-            <Label>Affiliation</Label>
-            <Input className="mt-1" value={form.affiliation} onChange={e => set('affiliation', e.target.value)} />
+            <Label className="text-slate-700 font-medium">Affiliation</Label>
+            <Input className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" value={form.affiliation} onChange={e => set('affiliation', e.target.value)} placeholder="University / Institution" />
           </div>
           <div className="col-span-2 md:col-span-1">
-            <Label>Country</Label>
-            <Input className="mt-1" value={form.country} onChange={e => set('country', e.target.value)} />
+            <Label className="text-slate-700 font-medium">Country</Label>
+            <Input className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" value={form.country} onChange={e => set('country', e.target.value)} placeholder="e.g. Kenya" />
           </div>
           <div className="col-span-2 md:col-span-1">
-            <Label>Availability</Label>
+            <Label className="text-slate-700 font-medium">Availability</Label>
             <Select value={form.availability} onValueChange={v => set('availability', v)}>
-              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-              <SelectContent>
+              <SelectTrigger className="mt-1 bg-white border-slate-300 text-slate-900"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-white border-slate-200">
                 <SelectItem value="available">✅ Available</SelectItem>
                 <SelectItem value="busy">🟡 Busy</SelectItem>
                 <SelectItem value="unavailable">🔴 Unavailable</SelectItem>
@@ -206,28 +206,28 @@ function ReviewerForm({ reviewer, open, onClose, onSaved }) {
             </Select>
           </div>
           <div className="col-span-2">
-            <Label>Expertise Tags <span className="text-slate-400 font-normal">(comma separated)</span></Label>
-            <Input className="mt-1" value={tagsInput} onChange={e => setTagsInput(e.target.value)} placeholder="machine learning, climate science, public health, NLP..." />
+            <Label className="text-slate-700 font-medium">Expertise Tags <span className="text-slate-400 font-normal">(comma separated)</span></Label>
+            <Input className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" value={tagsInput} onChange={e => setTagsInput(e.target.value)} placeholder="machine learning, climate science, public health, NLP..." />
           </div>
           <div className="col-span-2 md:col-span-1">
-            <Label>ORCID</Label>
-            <Input className="mt-1" value={form.orcid} onChange={e => set('orcid', e.target.value)} placeholder="0000-0000-0000-0000" />
+            <Label className="text-slate-700 font-medium">ORCID</Label>
+            <Input className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" value={form.orcid} onChange={e => set('orcid', e.target.value)} placeholder="0000-0000-0000-0000" />
           </div>
           <div className="col-span-2 md:col-span-1">
-            <Label>Google Scholar URL</Label>
-            <Input className="mt-1" value={form.google_scholar_url} onChange={e => set('google_scholar_url', e.target.value)} />
+            <Label className="text-slate-700 font-medium">Google Scholar URL</Label>
+            <Input className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" value={form.google_scholar_url} onChange={e => set('google_scholar_url', e.target.value)} placeholder="https://scholar.google.com/..." />
           </div>
           <div className="col-span-2">
-            <Label>Bio / Research Interests</Label>
-            <Textarea className="mt-1" rows={2} value={form.bio} onChange={e => set('bio', e.target.value)} />
+            <Label className="text-slate-700 font-medium">Bio / Research Interests</Label>
+            <Textarea className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" rows={2} value={form.bio} onChange={e => set('bio', e.target.value)} placeholder="Brief description of research focus..." />
           </div>
           <div className="col-span-2">
-            <Label>Internal Notes <span className="text-slate-400 font-normal">(editors only)</span></Label>
-            <Textarea className="mt-1" rows={2} value={form.notes} onChange={e => set('notes', e.target.value)} />
+            <Label className="text-slate-700 font-medium">Internal Notes <span className="text-slate-400 font-normal">(editors only)</span></Label>
+            <Textarea className="mt-1 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400" rows={2} value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Private notes for editorial team..." />
           </div>
           <div className="col-span-2 md:col-span-1">
-            <Label>Max Reviews / Month</Label>
-            <Input className="mt-1" type="number" min={1} max={10} value={form.max_reviews_per_month} onChange={e => set('max_reviews_per_month', Number(e.target.value))} />
+            <Label className="text-slate-700 font-medium">Max Reviews / Month</Label>
+            <Input className="mt-1 bg-white border-slate-300 text-slate-900" type="number" min={1} max={10} value={form.max_reviews_per_month} onChange={e => set('max_reviews_per_month', Number(e.target.value))} />
           </div>
         </div>
         <DialogFooter>
