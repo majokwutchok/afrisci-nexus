@@ -18,13 +18,15 @@ import {
   Calendar,
   User as UserIcon,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  History
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import ManuscriptReformatter from "../components/submission/ManuscriptReformatter";
+import VersionHistoryPanel from "../components/manuscript/VersionHistoryPanel";
 
 const statusColors = {
   draft: "bg-gray-100 text-gray-800 border-gray-200",
@@ -50,8 +52,9 @@ const statusIcons = {
   published: <CheckCircle className="w-4 h-4" />
 };
 
-const ManuscriptCard = ({ manuscript, journal }) => {
+const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
   const [reformatterOpen, setReformatterOpen] = React.useState(false);
+  const [versionOpen, setVersionOpen] = React.useState(false);
   return (
   <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
     <CardHeader className="pb-4">
@@ -165,12 +168,28 @@ const ManuscriptCard = ({ manuscript, journal }) => {
             Reformat
           </Button>
         )}
+        <Button
+          size="sm"
+          variant="ghost"
+          className="flex items-center gap-1 text-xs text-slate-600 hover:text-slate-800"
+          onClick={() => setVersionOpen(true)}
+        >
+          <History className="w-3 h-3" />
+          Versions {manuscript.version_history?.length > 0 && `(${manuscript.version_history.length})`}
+        </Button>
       </div>
       <ManuscriptReformatter
         manuscript={manuscript}
         journal={journal}
         open={reformatterOpen}
         onClose={() => setReformatterOpen(false)}
+      />
+      <VersionHistoryPanel
+        manuscript={manuscript}
+        open={versionOpen}
+        onClose={() => setVersionOpen(false)}
+        onRefresh={onRefresh}
+        canUpload={true}
       />
     </CardContent>
   </Card>
@@ -341,6 +360,7 @@ export default function MyManuscripts() {
                     key={manuscript.id} 
                     manuscript={manuscript} 
                     journal={getJournalById(manuscript.journal_id)}
+                    onRefresh={loadData}
                   />
                 ))
               ) : (

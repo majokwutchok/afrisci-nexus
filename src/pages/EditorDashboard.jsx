@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen, Hash, FileEdit, Globe } from "lucide-react";
+import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen, Hash, FileEdit, Globe, History } from "lucide-react";
 import AutomatedReminderSystem from "../components/admin/AutomatedReminderSystem";
 import ReviewerDatabase from "../components/editor/ReviewerDatabase";
 import JournalManagementPanel from "../components/editor/JournalManagementPanel";
@@ -27,6 +27,7 @@ import PlagiarismReport from "../components/editor/PlagiarismReport";
 import DOIManagerPanel from "../components/editor/DOIManagerPanel";
 import ArticleFormatter from "../components/editor/ArticleFormatter";
 import PublishedArticleManager from "../components/editor/PublishedArticleManager";
+import VersionHistoryPanel from "../components/manuscript/VersionHistoryPanel";
 
 // Mock utility functions (in a real app, these would be in a utils folder or separate services)
 const addDays = (date, days) => {
@@ -55,31 +56,45 @@ const statusColors = {
   rejected: "bg-red-100 text-red-800 border-red-200"
 };
 
-const ManuscriptCard = ({ manuscript, onAssignReviewer, onMakeDecision }) => {
+const ManuscriptCard = ({ manuscript, onAssignReviewer, onMakeDecision, onRefresh }) => {
+  const [versionOpen, setVersionOpen] = React.useState(false);
   return (
-    <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-base font-bold line-clamp-2">{manuscript.title}</CardTitle>
-          <Badge className={statusColors[manuscript.status]}>{manuscript.status.replace('_', ' ')}</Badge>
-        </div>
-        <p className="text-xs text-slate-500">Submitted: {new Date(manuscript.submission_date || manuscript.created_date).toLocaleDateString()}</p>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-sm text-slate-600 line-clamp-3">{manuscript.abstract}</p>
-        <div className="text-xs">
-          <strong>Authors:</strong> {manuscript.authors?.map(a => a.name).join(', ') || 'No authors listed'}
-        </div>
-        <div className="flex gap-2 pt-2 border-t">
-          <Button size="sm" variant="outline" onClick={() => onAssignReviewer(manuscript)}>
-            <UserPlus className="w-4 h-4 mr-2" /> Assign Reviewer
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => onMakeDecision(manuscript)}>
-            <Edit className="w-4 h-4 mr-2" /> Make Decision
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <>
+      <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-base font-bold line-clamp-2">{manuscript.title}</CardTitle>
+            <Badge className={statusColors[manuscript.status]}>{manuscript.status.replace('_', ' ')}</Badge>
+          </div>
+          <p className="text-xs text-slate-500">Submitted: {new Date(manuscript.submission_date || manuscript.created_date).toLocaleDateString()}</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-slate-600 line-clamp-3">{manuscript.abstract}</p>
+          <div className="text-xs">
+            <strong>Authors:</strong> {manuscript.authors?.map(a => a.name).join(', ') || 'No authors listed'}
+          </div>
+          <div className="flex flex-wrap gap-2 pt-2 border-t">
+            <Button size="sm" variant="outline" onClick={() => onAssignReviewer(manuscript)}>
+              <UserPlus className="w-4 h-4 mr-2" /> Assign Reviewer
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => onMakeDecision(manuscript)}>
+              <Edit className="w-4 h-4 mr-2" /> Make Decision
+            </Button>
+            <Button size="sm" variant="outline" className="text-slate-600" onClick={() => setVersionOpen(true)}>
+              <History className="w-4 h-4 mr-1" />
+              Versions {manuscript.version_history?.length > 0 && `(${manuscript.version_history.length})`}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      <VersionHistoryPanel
+        manuscript={manuscript}
+        open={versionOpen}
+        onClose={() => setVersionOpen(false)}
+        onRefresh={onRefresh}
+        canUpload={false}
+      />
+    </>
   );
 };
 
@@ -357,6 +372,7 @@ Editorial Team`
                     manuscript={ms}
                     onAssignReviewer={() => setSelectedManuscript(ms)}
                     onMakeDecision={() => setSelectedManuscript(ms)}
+                    onRefresh={loadData}
                   />
                 ))}
               </div>
@@ -376,6 +392,7 @@ Editorial Team`
                     manuscript={ms}
                     onAssignReviewer={() => setSelectedManuscript(ms)}
                     onMakeDecision={() => setSelectedManuscript(ms)}
+                    onRefresh={loadData}
                   />
                 ))}
               </div>
@@ -395,6 +412,7 @@ Editorial Team`
                     manuscript={ms}
                     onAssignReviewer={() => setSelectedManuscript(ms)}
                     onMakeDecision={() => setSelectedManuscript(ms)}
+                    onRefresh={loadData}
                   />
                 ))}
               </div>

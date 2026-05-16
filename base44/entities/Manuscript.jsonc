@@ -264,6 +264,53 @@
       },
       "description": "Complete timeline of manuscript progress"
     },
+    "version_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number",
+            "description": "Version number (1, 2, 3...)"
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable label e.g. Initial Submission, Revision 1"
+          },
+          "file_url": {
+            "type": "string",
+            "description": "URL to the document at this version"
+          },
+          "uploaded_by": {
+            "type": "string",
+            "description": "Email of who uploaded this version"
+          },
+          "uploaded_by_name": {
+            "type": "string",
+            "description": "Display name of uploader"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "description": "ISO timestamp of upload"
+          },
+          "status_at_upload": {
+            "type": "string",
+            "description": "Manuscript status when this version was uploaded"
+          },
+          "change_summary": {
+            "type": "string",
+            "description": "Author's summary of changes in this version"
+          },
+          "is_current": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this is the current active version"
+          }
+        }
+      },
+      "default": [],
+      "description": "Full file version history across submission rounds"
+    },
     "plagiarism_report": {
       "type": "object",
       "description": "Automated plagiarism screening result",
