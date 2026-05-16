@@ -49,35 +49,39 @@ Rank the TOP 5 most suitable reviewers for this manuscript. For each, provide:
 Return ONLY valid JSON, no explanation.
 `;
 
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          suggestions: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                email: { type: "string" },
-                match_score: { type: "number" },
-                match_reason: { type: "string" },
-                conflict_risk: { type: "string" },
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            suggestions: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  email: { type: "string" },
+                  match_score: { type: "number" },
+                  match_reason: { type: "string" },
+                  conflict_risk: { type: "string" },
+                }
               }
             }
           }
         }
-      }
-    });
+      });
 
-    // Enrich with user profile data
-    const enriched = (result.suggestions || []).map(s => {
-      const profile = reviewerProfiles.find(r => r.email === s.email);
-      return { ...s, full_name: profile?.full_name || s.email };
-    });
+      const enriched = (result.suggestions || []).map(s => {
+        const profile = reviewerProfiles.find(r => r.email === s.email);
+        return { ...s, full_name: profile?.full_name || s.email };
+      });
 
-    setSuggestions(enriched);
-    setExpanded(true);
+      setSuggestions(enriched);
+      setExpanded(true);
+    } catch {
+      setSuggestions([]);
+      setExpanded(true);
+    }
     setLoading(false);
   };
 
@@ -160,7 +164,7 @@ Return ONLY valid JSON, no explanation.
 
       {expanded && suggestions && suggestions.length === 0 && (
         <div className="px-4 pb-3 text-xs text-slate-500 border-t border-purple-100 pt-3">
-          No strong reviewer matches found. Try adding reviewer profiles with expertise areas.
+          AI matching is temporarily unavailable (integration credits exhausted). You can still assign reviewers manually by entering their email below.
         </div>
       )}
     </div>
