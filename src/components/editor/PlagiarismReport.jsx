@@ -27,24 +27,33 @@ export default function PlagiarismReport({ manuscript, onReportUpdated }) {
   const report = manuscript.plagiarism_report;
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleRescreen = async () => {
     setLoading(true);
-    await checkPlagiarism({ manuscript_id: manuscript.id });
+    try {
+      await checkPlagiarism({ manuscript_id: manuscript.id });
+      setError(null);
+      if (onReportUpdated) onReportUpdated();
+    } catch {
+      setError("Plagiarism screening is unavailable (integration credits exhausted). Credits reset on 2026-05-25.");
+    }
     setLoading(false);
-    if (onReportUpdated) onReportUpdated();
   };
 
   if (!report && !loading) {
     return (
-      <div className="flex items-center justify-between rounded-lg border border-dashed border-slate-300 p-3 bg-slate-50">
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <Shield className="w-4 h-4" />
-          <span>No plagiarism screen run yet</span>
+      <div className="rounded-lg border border-dashed border-slate-300 p-3 bg-slate-50 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Shield className="w-4 h-4" />
+            <span>No plagiarism screen run yet</span>
+          </div>
+          <Button size="sm" variant="outline" onClick={handleRescreen} disabled={loading}>
+            {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <><RefreshCw className="w-3 h-3 mr-1" /> Screen Now</>}
+          </Button>
         </div>
-        <Button size="sm" variant="outline" onClick={handleRescreen} disabled={loading}>
-          {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <><RefreshCw className="w-3 h-3 mr-1" /> Screen Now</>}
-        </Button>
+        {error && <p className="text-xs text-amber-600">{error}</p>}
       </div>
     );
   }
