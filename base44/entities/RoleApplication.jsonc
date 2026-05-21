@@ -92,12 +92,42 @@
   ],
   "rls": {
     "create": {
-      "created_by": "{{user.email}}"
+      "data.applicant_email": "{{user.email}}"
     },
     "read": {
       "$or": [
         {
-          "created_by": "{{user.email}}"
+          "data.applicant_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": [
+              "admin",
+              "editor"
+            ]
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.applicant_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": [
+              "admin",
+              "editor"
+            ]
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.applicant_email": "{{user.email}}"
         },
         {
           "user_condition": {
@@ -105,16 +135,6 @@
           }
         }
       ]
-    },
-    "update": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
     }
   }
 }
