@@ -90,7 +90,18 @@
     "email"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "$or": [
+        {
+          "data.email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {
