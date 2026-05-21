@@ -78,29 +78,11 @@
     "view_type"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
-      }
-    },
+    "create": true,
     "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user.editor_roles": {
-            "$in": [
-              "{{data.journal_id}}"
-            ]
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "update": {
       "user_condition": {
