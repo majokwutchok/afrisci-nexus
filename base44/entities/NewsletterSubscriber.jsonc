@@ -59,19 +59,12 @@
   "rls": {
     "create": true,
     "read": {
-      "$or": [
-        {
-          "data.email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
-          }
-        }
-      ]
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
     },
     "update": {
       "$or": [
@@ -89,19 +82,12 @@
       ]
     },
     "delete": {
-      "$or": [
-        {
-          "data.email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
-          }
-        }
-      ]
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
     }
   }
 }
