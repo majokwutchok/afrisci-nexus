@@ -28,18 +28,7 @@
     "create": {
       "data.follower_email": "{{user.email}}"
     },
-    "read": {
-      "$or": [
-        {
-          "data.follower_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
+    "read": true,
     "update": {
       "$or": [
         {
