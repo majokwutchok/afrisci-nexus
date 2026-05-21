@@ -57,9 +57,7 @@
     "email"
   ],
   "rls": {
-    "create": {
-      "user_condition": {}
-    },
+    "create": true,
     "read": {
       "user_condition": {
         "role": [
@@ -68,21 +66,7 @@
         ]
       }
     },
-    "update": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
-          }
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
-    },
+    "update": null,
     "delete": {
       "user_condition": {
         "role": [
