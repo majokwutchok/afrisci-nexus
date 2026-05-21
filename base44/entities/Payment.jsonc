@@ -123,15 +123,28 @@
         },
         {
           "user_condition": {
-            "role": "admin"
+            "role": [
+              "admin",
+              "editor"
+            ]
           }
         }
       ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": [
+              "admin",
+              "editor"
+            ]
+          }
+        }
+      ]
     },
     "delete": {
       "user_condition": {
