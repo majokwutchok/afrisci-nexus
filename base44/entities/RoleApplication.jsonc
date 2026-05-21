@@ -110,31 +110,20 @@
       ]
     },
     "update": {
-      "$or": [
-        {
-          "data.applicant_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
-          }
-        }
-      ]
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
     },
     "delete": {
-      "$or": [
-        {
-          "data.applicant_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
     }
   }
 }
