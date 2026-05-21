@@ -92,21 +92,12 @@
   ],
   "rls": {
     "create": {
-      "$or": [
-        {
-          "data.applicant_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "created_by": "{{user.email}}"
     },
     "read": {
       "$or": [
         {
-          "data.applicant_email": "{{user.email}}"
+          "created_by": "{{user.email}}"
         },
         {
           "user_condition": {
@@ -116,16 +107,9 @@
       ]
     },
     "update": {
-      "$or": [
-        {
-          "data.applicant_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "delete": {
       "user_condition": {
