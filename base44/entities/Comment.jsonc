@@ -25,7 +25,9 @@
     "author_name"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "created_by": "{{user.email}}"
+    },
     "read": true,
     "update": {
       "$or": [
