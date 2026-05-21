@@ -94,16 +94,12 @@
   ],
   "rls": {
     "create": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
     },
     "read": {
       "$or": [
@@ -114,18 +110,15 @@
           "data.editor_email": "{{user.email}}"
         },
         {
-          "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
-          }
-        },
-        {
           "user.editor_roles": {
             "$in": [
               "{{data.journal_id}}"
             ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
           }
         }
       ]
@@ -136,20 +129,10 @@
           "data.reviewer_email": "{{user.email}}"
         },
         {
-          "data.editor_email": "{{user.email}}"
-        },
-        {
           "user_condition": {
             "role": [
               "admin",
               "editor"
-            ]
-          }
-        },
-        {
-          "user.editor_roles": {
-            "$in": [
-              "{{data.journal_id}}"
             ]
           }
         }
@@ -157,7 +140,10 @@
     },
     "delete": {
       "user_condition": {
-        "role": "admin"
+        "role": [
+          "admin",
+          "editor"
+        ]
       }
     }
   }
