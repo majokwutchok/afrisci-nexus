@@ -151,7 +151,10 @@
     },
     "delete": {
       "user_condition": {
-        "role": "admin"
+        "role": [
+          "admin",
+          "editor"
+        ]
       }
     }
   }
