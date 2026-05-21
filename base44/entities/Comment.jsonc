@@ -25,7 +25,16 @@
     "author_name"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "user_condition": {
+        "role": [
+          "user",
+          "admin",
+          "editor",
+          "reviewer"
+        ]
+      }
+    },
     "read": true,
     "update": {
       "$or": [
