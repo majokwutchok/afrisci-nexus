@@ -23,5 +23,44 @@
   "required": [
     "manuscript_id",
     "subscriber_email"
-  ]
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "data.subscriber_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.subscriber_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.subscriber_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }
