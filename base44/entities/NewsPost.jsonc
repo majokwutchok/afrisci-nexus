@@ -85,5 +85,43 @@
     "title",
     "category",
     "summary"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.status": "published"
+        },
+        {
+          "user_condition": {
+            "role": [
+              "admin",
+              "editor"
+            ]
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
