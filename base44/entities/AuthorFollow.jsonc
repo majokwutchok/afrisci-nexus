@@ -26,9 +26,26 @@
   ],
   "rls": {
     "create": {
-      "data.follower_email": "{{user.email}}"
+      "data.follower_email": "{{user.email}}",
+      "user_condition": {
+        "role": [
+          "user",
+          "admin"
+        ]
+      }
     },
-    "read": true,
+    "read": {
+      "$or": [
+        {
+          "data.follower_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "update": {
       "$or": [
         {
