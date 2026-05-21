@@ -96,7 +96,10 @@
   "rls": {
     "create": {
       "user_condition": {
-        "role": "admin"
+        "role": [
+          "admin",
+          "editor"
+        ]
       }
     },
     "read": true,
@@ -108,13 +111,7 @@
           }
         },
         {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "data.editor_in_chief": "{{user.full_name}}"
-        },
-        {
-          "user.editor_roles": {
+          "{{user.editor_roles}}": {
             "$in": [
               "{{_id}}"
             ]
