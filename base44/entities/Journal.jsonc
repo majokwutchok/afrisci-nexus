@@ -101,9 +101,26 @@
     },
     "read": true,
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.editor_in_chief": "{{user.full_name}}"
+        },
+        {
+          "user.editor_roles": {
+            "$in": [
+              "{{_id}}"
+            ]
+          }
+        }
+      ]
     },
     "delete": {
       "user_condition": {
