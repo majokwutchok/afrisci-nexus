@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import { jsPDF } from 'npm:jspdf@4.0.0';
 
 Deno.serve(async (req) => {
@@ -7,6 +7,15 @@ Deno.serve(async (req) => {
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { manuscript, journal } = await req.json();
+
+  // Verify the user owns the manuscript or is an editor/admin
+  if (!manuscript?.id) return Response.json({ error: 'manuscript.id is required' }, { status: 400 });
+
+  const isOwner = manuscript.created_by === user.email;
+  const isEditorOrAdmin = user.role === 'admin' || (user.editor_roles && user.editor_roles.length > 0);
+  if (!isOwner && !isEditorOrAdmin) {
+    return Response.json({ error: 'Forbidden: you do not have access to this manuscript' }, { status: 403 });
+  }
 
   // Build journal-specific formatting guidelines
   const journalGuidelines = `

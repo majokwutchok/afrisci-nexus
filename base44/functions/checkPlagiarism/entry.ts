@@ -1,10 +1,18 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Support both direct calls (with auth) and automation calls (service role)
+    // Require authentication
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    // Only editors and admins can trigger plagiarism checks
+    const hasAccess = user.role === 'admin' ||
+      (user.editor_roles && user.editor_roles.length > 0);
+    if (!hasAccess) return Response.json({ error: 'Forbidden: editor or admin access required' }, { status: 403 });
+
     let manuscript_id;
     try {
       const body = await req.json();
