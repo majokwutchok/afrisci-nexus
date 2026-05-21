@@ -107,6 +107,9 @@
           "data.reviewer_email": "{{user.email}}"
         },
         {
+          "data.editor_email": "{{user.email}}"
+        },
+        {
           "user_condition": {
             "role": [
               "admin",

@@ -125,36 +125,20 @@
     "country"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
-      }
-    },
+    "create": true,
     "read": {
       "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
+        "role": "admin"
       }
     },
     "update": {
       "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
+        "role": "admin"
       }
     },
     "delete": {
       "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
+        "role": "admin"
       }
     }
   }

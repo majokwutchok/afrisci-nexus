@@ -113,7 +113,18 @@
     "amount"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {
@@ -123,28 +134,17 @@
           "user_condition": {
             "role": "admin"
           }
-        },
-        {
-          "user_condition": {
-            "role": "editor"
-          }
         }
       ]
     },
     "update": {
       "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
+        "role": "admin"
       }
     },
     "delete": {
       "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
+        "role": "admin"
       }
     }
   }

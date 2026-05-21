@@ -111,18 +111,12 @@
     },
     "update": {
       "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
+        "role": "admin"
       }
     },
     "delete": {
       "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
+        "role": "admin"
       }
     }
   }
