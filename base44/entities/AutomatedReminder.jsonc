@@ -47,5 +47,36 @@
     "reviewer_id",
     "reminder_type",
     "scheduled_date"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
