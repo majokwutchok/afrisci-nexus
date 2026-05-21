@@ -123,10 +123,7 @@
         },
         {
           "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
+            "role": "admin"
           }
         }
       ]
@@ -138,10 +135,7 @@
         },
         {
           "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
+            "role": "admin"
           }
         }
       ]
