@@ -89,24 +89,19 @@
   "rls": {
     "create": {
       "user_condition": {
-        "role": "admin"
+        "role": [
+          "admin",
+          "editor"
+        ]
       }
     },
-    "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "data.status": "published"
-        }
-      ]
-    },
+    "read": true,
     "update": {
       "user_condition": {
-        "role": "admin"
+        "role": [
+          "admin",
+          "editor"
+        ]
       }
     },
     "delete": {
