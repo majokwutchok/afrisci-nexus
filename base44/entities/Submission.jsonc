@@ -58,12 +58,12 @@
   ],
   "rls": {
     "create": {
-      "data.author_email": "{{user.email}}"
+      "created_by": "{{user.email}}"
     },
     "read": {
       "$or": [
         {
-          "data.author_email": "{{user.email}}"
+          "created_by": "{{user.email}}"
         },
         {
           "user_condition": {
@@ -78,7 +78,7 @@
     "update": {
       "$or": [
         {
-          "data.author_email": "{{user.email}}"
+          "created_by": "{{user.email}}"
         },
         {
           "user_condition": {
@@ -93,7 +93,7 @@
     "delete": {
       "$or": [
         {
-          "data.author_email": "{{user.email}}"
+          "created_by": "{{user.email}}"
         },
         {
           "user_condition": {
