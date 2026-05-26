@@ -27,63 +27,11 @@ export default function AIReviewerMatcher({ manuscript, allUsers, onSelectReview
   const runMatching = async () => {
     if (reviewerProfiles.length === 0) return;
     setLoading(true);
-    setSuggestions(null);
-
-    const prompt = `
-You are an academic journal editor. Your task is to match reviewers to a manuscript.
-
-MANUSCRIPT:
-Title: ${manuscript.title}
-Abstract: ${manuscript.abstract || "(no abstract provided)"}
-Keywords: ${(manuscript.keywords || []).join(", ")}
-
-REVIEWER PROFILES:
-${reviewerProfiles.map((r, i) => `${i + 1}. Name: ${r.full_name} | Email: ${r.email} | Affiliation: ${r.affiliation} | Expertise: ${r.expertise.join(", ") || "Not specified"}`).join("\n")}
-
-Rank the TOP 5 most suitable reviewers for this manuscript. For each, provide:
-- email (exact match from the list above)
-- match_score (integer 0-100)
-- match_reason (1-2 sentences explaining why they are a good fit based on expertise overlap with the manuscript topic and keywords)
-- conflict_risk (low/medium/high - estimate based on overlapping affiliations with any manuscript author)
-
-Return ONLY valid JSON, no explanation.
-`;
-
-    try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            suggestions: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  email: { type: "string" },
-                  match_score: { type: "number" },
-                  match_reason: { type: "string" },
-                  conflict_risk: { type: "string" },
-                }
-              }
-            }
-          }
-        }
-      });
-
-      const enriched = (result.suggestions || []).map(s => {
-        const profile = reviewerProfiles.find(r => r.email === s.email);
-        return { ...s, full_name: profile?.full_name || s.email };
-      });
-
-      setSuggestions(enriched);
-      setExpanded(true);
-    } catch {
-      setSuggestions([]);
-      setExpanded(true);
-    }
+    setSuggestions([]);
+    setExpanded(true);
     setLoading(false);
   };
+
 
   const riskColor = (risk) => ({
     low: "bg-emerald-100 text-emerald-700",
@@ -164,7 +112,7 @@ Return ONLY valid JSON, no explanation.
 
       {expanded && suggestions && suggestions.length === 0 && (
         <div className="px-4 pb-3 text-xs text-slate-500 border-t border-purple-100 pt-3">
-          AI matching is temporarily unavailable (integration credits exhausted). You can still assign reviewers manually by entering their email below.
+          AI matching is temporarily unavailable. You can still assign reviewers manually by entering their email below.
         </div>
       )}
     </div>

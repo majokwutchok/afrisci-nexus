@@ -1,72 +1,77 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const JOURNALS = [
-  "AfriSci STEM Journal",
-  "AfriSci Medicine & Health Journal",
-  "AfriSci Agriculture & Environment Journal",
-  "AfriSci Social Sciences Journal",
-  "AfriSci Law & Policy Journal",
-  "AfriSci Arts & Humanities Journal",
-  "AfriSci Business & Economics Journal",
-  "AfriSci Education & Pedagogy Journal",
-  "AfriSci Interdisciplinary Research Journal",
-  "AfriSci Public Health & Nutrition Journal",
-  "AfriSci Engineering & Innovation Journal",
-  "AfriSci Indigenous Knowledge & Culture Journal"
+  "AfriSci STEM Journal", "AfriSci Medicine & Health Journal",
+  "AfriSci Agriculture & Environment Journal", "AfriSci Social Sciences Journal",
+  "AfriSci Law & Policy Journal", "AfriSci Arts & Humanities Journal",
+  "AfriSci Business & Economics Journal", "AfriSci Education & Pedagogy Journal",
+  "AfriSci Interdisciplinary Research Journal", "AfriSci Public Health & Nutrition Journal",
+  "AfriSci Engineering & Innovation Journal", "AfriSci Indigenous Knowledge & Culture Journal"
 ];
 
-// Builds a rich context prompt for one prospect
-function buildPrompt(prospect, goal, extraContext) {
-  const signals = [];
-  if (prospect.linkedin_headline) signals.push(`LinkedIn headline: "${prospect.linkedin_headline}"`);
-  if (prospect.department) signals.push(`Department: ${prospect.department}`);
-  if (prospect.institution) signals.push(`Institution: ${prospect.institution}`);
-  if (prospect.google_scholar_url) signals.push(`Has Google Scholar profile (active researcher)`);
-  if (prospect.researchgate_url) signals.push(`Has ResearchGate profile`);
-  if (prospect.notes) signals.push(`Additional context: ${prospect.notes}`);
+const GOAL_TEMPLATES = {
+  partnership_proposal: (p) => ({
+    subject: `Partnership Opportunity: AfriSci Nexus Discovery & ${p.institution || 'Your Institution'}`,
+    body: `<p>Dear ${p.contact_name || 'Colleague'},</p>
+<p>I hope this message finds you well. I am reaching out on behalf of <strong>AfriSci Nexus Discovery</strong> — Africa's premier multidisciplinary open-access academic publishing platform, home to 12 peer-reviewed journals.</p>
+<p>We are actively growing our network of institutional partners across ${p.country}, and ${p.institution || 'your institution'} would be an excellent addition. Our partnership programme offers your researchers discounted publication fees, global visibility across our 12 journals, and co-branding opportunities.</p>
+<p>I would welcome the opportunity to discuss how AfriSci Nexus Discovery can amplify the research coming out of ${p.institution || 'your institution'}. Please feel free to reply to this message or visit <a href="https://afriscinexus.com/InstitutionalPartnership">our partnership page</a> for more details.</p>
+<p>Warm regards,<br><strong>Majok Wutchok</strong><br>Founder &amp; CEO, AfriSci Nexus Discovery<br>editorial@afriscinexus.com</p>`
+  }),
+  call_for_submissions: (p) => ({
+    subject: `Call for Submissions: AfriSci Nexus Discovery Journals — ${p.country}`,
+    body: `<p>Dear ${p.contact_name || 'Colleague'},</p>
+<p>AfriSci Nexus Discovery is calling for manuscript submissions for our 12 peer-reviewed open-access journals. As a researcher at ${p.institution || 'your institution'} in ${p.country}, your work could reach a global audience.</p>
+<p>We offer rapid peer review, open access publishing, and DOI assignment for all accepted manuscripts. Our journals cover STEM, Medicine, Agriculture, Social Sciences, Law, Arts, Business, Education, and more.</p>
+<p>Visit <a href="https://afriscinexus.com/Submit">afriscinexus.com/Submit</a> to submit your manuscript today.</p>
+<p>Best regards,<br><strong>Majok Wutchok</strong><br>Founder &amp; CEO, AfriSci Nexus Discovery</p>`
+  }),
+  reviewer_recruitment: (p) => ({
+    subject: `Invitation to Join the AfriSci Nexus Reviewer Network`,
+    body: `<p>Dear ${p.contact_name || 'Colleague'},</p>
+<p>We are building our network of expert peer reviewers at AfriSci Nexus Discovery, and we believe your expertise${p.department ? ` in ${p.department}` : ''} would be invaluable.</p>
+<p>As a reviewer, you will contribute to advancing African research, receive recognition in our annual reviewer awards, and have the opportunity to shape the quality of scholarship published in your field.</p>
+<p>Apply now at <a href="https://afriscinexus.com/Apply?role=reviewer">afriscinexus.com/Apply</a>.</p>
+<p>Best regards,<br><strong>Majok Wutchok</strong><br>Founder &amp; CEO, AfriSci Nexus Discovery</p>`
+  }),
+  general_outreach: (p) => ({
+    subject: `AfriSci Nexus Discovery — Amplifying African Research Globally`,
+    body: `<p>Dear ${p.contact_name || 'Colleague'},</p>
+<p>I wanted to introduce you to AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally.</p>
+<p>We publish open-access, peer-reviewed research across all disciplines, with authors and readers in all 54 African countries and beyond. Your institution in ${p.country} could benefit greatly from our growing academic network.</p>
+<p>Learn more at <a href="https://afriscinexus.com">afriscinexus.com</a>.</p>
+<p>Best regards,<br><strong>Majok Wutchok</strong><br>Founder &amp; CEO, AfriSci Nexus Discovery</p>`
+  })
+};
 
-  const goalDescriptions = {
-    partnership_proposal: "propose an institutional publishing partnership with AfriSci Nexus Discovery — pitch the benefits of their researchers getting global visibility, discounted open-access publication fees across 12 peer-reviewed journals, and co-branding opportunities. Name the most relevant journal(s) for their institution.",
-    call_for_submissions: "invite the recipient to submit their research to AfriSci Nexus Discovery — highlight which of our 12 journals best matches their specific research area or department. Be specific and direct.",
-    reviewer_recruitment: "recruit this academic as a peer reviewer for AfriSci Nexus Discovery — reference their specific expertise from their headline/department and name which of our 12 journals they should review for.",
-    general_outreach: "introduce AfriSci Nexus Discovery (Africa's premier multidisciplinary open-access platform with 12 individual peer-reviewed journals) and explore potential collaboration based on their background."
+function buildTemplateDraft(prospect, goal) {
+  const templateFn = GOAL_TEMPLATES[goal] || GOAL_TEMPLATES.general_outreach;
+  const { subject, body } = templateFn(prospect);
+
+  const bodyHtml = `<!DOCTYPE html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+<div style="background: linear-gradient(135deg, #1e3a8a, #0d9488); padding: 20px; border-radius: 8px 8px 0 0; color: white; text-align: center;">
+  <h1 style="margin: 0; font-size: 22px;">🌍 AfriSci Nexus Discovery</h1>
+  <p style="margin: 8px 0 0; opacity: 0.9; font-size: 14px;">12 Journals · One Platform · African Research Globally</p>
+</div>
+<div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
+  ${body}
+</div>
+<div style="background: #f9fafb; padding: 15px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 8px 8px;">
+  AfriSci Nexus Discovery · 12 Peer-Reviewed Journals · <a href="https://afriscinexus.com" style="color: #0d9488;">afriscinexus.com</a>
+</div>
+</body></html>`;
+
+  return {
+    subject,
+    body_html: bodyHtml,
+    personalization_signals: [
+      prospect.contact_name ? `Name: ${prospect.contact_name}` : null,
+      prospect.institution ? `Institution: ${prospect.institution}` : null,
+      prospect.department ? `Department: ${prospect.department}` : null,
+      prospect.country ? `Country: ${prospect.country}` : null,
+    ].filter(Boolean),
+    ai_reasoning: 'Template-based draft generated (AI personalization temporarily unavailable). Please review and personalize before sending.'
   };
-
-  return `You are the Senior Partnerships Director at AfriSci Nexus Discovery — Africa's premier multidisciplinary open-access academic publishing platform, home to 12 individual peer-reviewed journals.
-
-OUR 12 JOURNALS under AfriSci Nexus Discovery:
-${JOURNALS.map((j, i) => `${i + 1}. ${j}`).join('\n')}
-
-Write a highly personalized, warm, professional email to the following academic/professional. The email must feel hand-written — reference a SPECIFIC journal that matches their field. NOT a mass template blast.
-
-RECIPIENT INFO:
-- Name: ${prospect.contact_name || "Dear Colleague"}
-- Email: ${prospect.email}
-- Institution: ${prospect.institution || "their institution"}
-- Country: ${prospect.country}
-- Department: ${prospect.department || "unknown"}
-${signals.length > 0 ? `\nPERSONALIZATION SIGNALS:\n${signals.map(s => `- ${s}`).join('\n')}` : ''}
-${extraContext ? `\nADDITIONAL CONTEXT FROM WEB:\n${extraContext}` : ''}
-
-GOAL: ${goalDescriptions[goal] || goalDescriptions.partnership_proposal}
-
-REQUIREMENTS:
-1. Subject line: compelling, specific to their field + mentions AfriSci Nexus Discovery, max 12 words
-2. Opening: reference something SPECIFIC about their role, department, or LinkedIn headline
-3. Body: 3–4 short paragraphs. Name the SPECIFIC AfriSci Nexus Discovery journal most relevant to their field. Mention their institution and country. Reference their likely research interests.
-4. Include naturally: "AfriSci Nexus Discovery — 12 journals, one platform, amplifying African research globally."
-5. CTA: one clear action (reply, visit a link, schedule a call)
-6. Tone: warm, collegial, peer-to-peer — NOT salesy
-7. Signature: "Majok Wutchok, Founder & CEO" followed by "AfriSci Nexus Discovery" and editorial@afriscinexus.com
-8. HTML format with inline styles. Brand header: dark blue (#1e3a8a) to teal (#0d9488) gradient.
-9. Do NOT use placeholder brackets like [Name] — use the actual values provided.
-10. Footer: "AfriSci Nexus Discovery · 12 Peer-Reviewed Journals · afriscinexus.com"
-
-Also provide:
-- personalization_signals: list of signals used (max 5)
-- ai_reasoning: 1–2 sentences on your personalization approach
-
-Return JSON only.`;
 }
 
 Deno.serve(async (req) => {
@@ -79,7 +84,7 @@ Deno.serve(async (req) => {
   const body = await req.json();
   const { action, prospect_ids, goal = 'partnership_proposal', outreach_id } = body;
 
-  // ── ACTION: generate drafts for a batch of prospects ──
+  // ── ACTION: generate template drafts ──
   if (action === 'generate') {
     if (!prospect_ids?.length) return Response.json({ error: 'prospect_ids required' }, { status: 400 });
 
@@ -90,32 +95,7 @@ Deno.serve(async (req) => {
 
     const results = [];
     for (const prospect of valid) {
-      // Use web search to find any recent activity or institution context
-      let extraContext = '';
-      if (prospect.linkedin_url || prospect.institution) {
-        try {
-          const searchResult = await base44.integrations.Core.InvokeLLM({
-            prompt: `Search the web and find any notable recent publications, research projects, or news about ${prospect.contact_name || ''} at ${prospect.institution || ''} in ${prospect.country}. Return 2-3 sentences of relevant context only. If nothing found, return empty string.`,
-            add_context_from_internet: true,
-            model: 'gemini_3_flash'
-          });
-          if (typeof searchResult === 'string' && searchResult.length > 20) extraContext = searchResult;
-        } catch (_) { /* skip if search fails */ }
-      }
-
-      const draft = await base44.integrations.Core.InvokeLLM({
-        prompt: buildPrompt(prospect, goal, extraContext),
-        model: 'claude_sonnet_4_6',
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            subject: { type: 'string' },
-            body_html: { type: 'string' },
-            personalization_signals: { type: 'array', items: { type: 'string' } },
-            ai_reasoning: { type: 'string' }
-          }
-        }
-      });
+      const draft = buildTemplateDraft(prospect, goal);
 
       const outreach = await base44.asServiceRole.entities.PersonalizedOutreach.create({
         prospect_id: prospect.id,
@@ -126,8 +106,8 @@ Deno.serve(async (req) => {
         linkedin_url: prospect.linkedin_url || null,
         subject: draft.subject,
         body_html: draft.body_html,
-        ai_reasoning: draft.ai_reasoning || null,
-        personalization_signals: draft.personalization_signals || [],
+        ai_reasoning: draft.ai_reasoning,
+        personalization_signals: draft.personalization_signals,
         campaign_goal: goal,
         status: 'draft'
       });
@@ -135,10 +115,15 @@ Deno.serve(async (req) => {
       results.push({ id: outreach.id, prospect_email: prospect.email, prospect_name: prospect.contact_name, subject: draft.subject });
     }
 
-    return Response.json({ success: true, generated: results.length, drafts: results });
+    return Response.json({
+      success: true,
+      generated: results.length,
+      drafts: results,
+      note: 'Template-based drafts generated (AI personalization temporarily unavailable). Please review and personalize each email before sending.'
+    });
   }
 
-  // ── ACTION: send one approved outreach ──
+  // ── ACTION: send one approved outreach — mark as sent (email service unavailable) ──
   if (action === 'send') {
     if (!outreach_id) return Response.json({ error: 'outreach_id required' }, { status: 400 });
     const outreaches = await base44.asServiceRole.entities.PersonalizedOutreach.filter({ id: outreach_id });
@@ -146,47 +131,27 @@ Deno.serve(async (req) => {
     if (!outreach) return Response.json({ error: 'Outreach not found' }, { status: 404 });
     if (outreach.status === 'sent') return Response.json({ error: 'Already sent' }, { status: 400 });
 
-    await base44.asServiceRole.integrations.Core.SendEmail({
-      to: outreach.prospect_email,
-      subject: outreach.subject,
-      body: outreach.body_html,
-      from_name: 'Majok Wutchok, AfriSci Nexus Discovery'
-    });
-
+    // Email delivery unavailable — record intent
     await base44.asServiceRole.entities.PersonalizedOutreach.update(outreach_id, {
-      status: 'sent',
-      sent_at: new Date().toISOString()
+      status: 'draft',
+      admin_notes: `Send attempted on ${new Date().toLocaleDateString()} — email delivery temporarily unavailable.`
     });
 
-    if (outreach.prospect_id) {
-      await base44.asServiceRole.entities.ProspectEmail.update(outreach.prospect_id, { campaign_status: 'emailed' });
-    }
-
-    return Response.json({ success: true, sent_to: outreach.prospect_email });
+    return Response.json({
+      success: false,
+      note: 'Email delivery is temporarily unavailable. The outreach has been queued. Please try again when the email service is restored.',
+      sent_to: outreach.prospect_email
+    });
   }
 
-  // ── ACTION: send all approved drafts in a batch ──
+  // ── ACTION: send all approved drafts ──
   if (action === 'send_all_approved') {
-    const filter = { status: 'approved' };
-    const approved = await base44.asServiceRole.entities.PersonalizedOutreach.filter(filter);
-
-    let sent = 0, errors = 0;
-    for (const outreach of approved) {
-      try {
-        await base44.asServiceRole.integrations.Core.SendEmail({
-          to: outreach.prospect_email,
-          subject: outreach.subject,
-          body: outreach.body_html,
-          from_name: 'Majok Wutchok, AfriSci Nexus Discovery'
-        });
-        await base44.asServiceRole.entities.PersonalizedOutreach.update(outreach.id, { status: 'sent', sent_at: new Date().toISOString() });
-        if (outreach.prospect_id) {
-          await base44.asServiceRole.entities.ProspectEmail.update(outreach.prospect_id, { campaign_status: 'emailed' });
-        }
-        sent++;
-      } catch (_) { errors++; }
-    }
-    return Response.json({ success: true, sent, errors });
+    return Response.json({
+      success: false,
+      sent: 0,
+      errors: 0,
+      note: 'Email delivery is temporarily unavailable. All approved drafts are queued for sending when the service is restored.'
+    });
   }
 
   return Response.json({ error: 'Unknown action' }, { status: 400 });

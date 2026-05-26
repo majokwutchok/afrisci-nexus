@@ -90,67 +90,65 @@ export default function AIRecommendations() {
     setRecommendations(null);
 
     const history = getLocalHistory();
-    const journalSummary = journals.map(j => `"${j.title}" (${j.category})`).join(", ");
-    const articleSummary = articles.map(a => `"${a.title}" [id:${a.id}]`).join("; ");
 
-    const prompt = `You are a scholarly recommendation engine for AfriSci Nexus, an African open-access research platform.
+    // Keyword-based matching — no LLM required
+    const userTerms = [
+      ...interests,
+      ...(history.searches || []),
+      ...(history.titles || []).flatMap(t => t.split(' ').filter(w => w.length > 4))
+    ].map(s => s.toLowerCase());
 
-User profile:
-- Selected interests: ${interests.length ? interests.join(", ") : "not specified"}
-- Recent searches: ${history.searches?.length ? history.searches.join(", ") : "none"}
-- Recently viewed articles: ${history.titles?.length ? history.titles.join("; ") : "none"}
+    const categoryKeywordMap = {
+      stem: ['science', 'technology', 'engineering', 'math', 'physics', 'chemistry', 'biology', 'stem'],
+      medicine_health: ['medicine', 'health', 'medical', 'clinical', 'disease', 'patient', 'hospital', 'nutrition', 'public health'],
+      agriculture_environment: ['agriculture', 'environment', 'farming', 'crop', 'climate', 'ecology', 'food', 'water', 'soil'],
+      social_sciences: ['social', 'society', 'community', 'behaviour', 'culture', 'poverty', 'gender', 'policy'],
+      law_policy: ['law', 'policy', 'legal', 'governance', 'rights', 'justice', 'regulation'],
+      arts_humanities: ['arts', 'humanities', 'history', 'literature', 'language', 'culture', 'philosophy'],
+      business_economics: ['business', 'economics', 'finance', 'trade', 'market', 'entrepreneurship'],
+      education_pedagogy: ['education', 'teaching', 'learning', 'school', 'university', 'pedagogy', 'curriculum'],
+      interdisciplinary: ['interdisciplinary', 'research', 'african', 'innovation'],
+    };
 
-Available journals: ${journalSummary || "various scientific journals"}
-Available published articles (title + id): ${articleSummary || "none currently available"}
+    const scoreJournal = (j) => {
+      if (userTerms.length === 0) return 50;
+      const catTerms = categoryKeywordMap[j.category] || [];
+      const allTerms = [...catTerms, ...(j.keywords || []).map(k => k.toLowerCase()), j.title.toLowerCase()];
+      const matches = userTerms.filter(t => allTerms.some(at => at.includes(t) || t.includes(at)));
+      return Math.min(100, 30 + matches.length * 15);
+    };
 
-Based on this profile, recommend:
-1. Up to 3 most relevant JOURNALS from the available list (use exact titles)
-2. Up to 4 most relevant ARTICLES from the available list (use exact title and id)
-3. A short (1 sentence) personalised reason for each recommendation
-4. 3 suggested search keywords the user might find useful
+    const scoreArticle = (a) => {
+      if (userTerms.length === 0) return 50;
+      const articleTerms = [
+        a.title.toLowerCase(),
+        ...(a.keywords || []).map(k => k.toLowerCase()),
+        (a.abstract || '').toLowerCase().split(' ').filter(w => w.length > 5)
+      ].flat();
+      const matches = userTerms.filter(t => articleTerms.some(at => at.includes(t) || t.includes(at)));
+      return matches.length;
+    };
 
-If interests or history are sparse, recommend based on high-impact, broad-appeal content.`;
+    const scoredJournals = journals
+      .map(j => ({ ...j, score: scoreJournal(j) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
 
-    let result;
-    try {
-      result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-        type: "object",
-        properties: {
-          journals: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                title: { type: "string" },
-                reason: { type: "string" }
-              }
-            }
-          },
-          articles: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                id: { type: "string" },
-                title: { type: "string" },
-                reason: { type: "string" }
-              }
-            }
-          },
-          suggested_searches: {
-            type: "array",
-            items: { type: "string" }
-          }
-        }
-      }
+    const scoredArticles = articles
+      .map(a => ({ ...a, score: scoreArticle(a) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 4);
+
+    const suggested_searches = interests.slice(0, 3).length > 0
+      ? interests.slice(0, 3)
+      : ['African research', 'open access', 'peer review'];
+
+    setRecommendations({
+      journals: scoredJournals.map(j => ({ title: j.title, reason: `Matches your interest in ${j.category?.replace(/_/g, ' ') || 'research'}.` })),
+      articles: scoredArticles.map(a => ({ id: a.id, title: a.title, reason: `Published research that aligns with your selected interests.` })),
+      suggested_searches
     });
 
-      setRecommendations(result);
-    } catch {
-      // Integration credits exhausted or network error — show fallback state
-    }
     setLoading(false);
   }, [dataLoaded, interests, journals, articles]);
 

@@ -46,12 +46,12 @@ export default function NewsletterSignup() {
         source: 'sidebar'
       });
 
-      // Trigger confirmation email via backend function
-      await base44.functions.invoke('sendNewsletterConfirmation', {
-        email,
-        name: name || email.split('@')[0],
-        confirmationToken
-      });
+      // Auto-confirm the subscription (email confirmation unavailable)
+      const newSubs = await base44.entities.NewsletterSubscriber.filter({ email });
+      const newSub = newSubs.find(s => s.confirmation_token === confirmationToken) || newSubs[0];
+      if (newSub?.id) {
+        await base44.entities.NewsletterSubscriber.update(newSub.id, { is_confirmed: true }).catch(() => {});
+      }
 
       setSubmitted(true);
       setEmail('');

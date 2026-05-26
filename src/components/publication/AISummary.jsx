@@ -16,26 +16,18 @@ export default function AISummary({ title, abstract, compact = false }) {
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
+  // AI features are temporarily unavailable (integration credits exhausted).
+  // Show a placeholder state instead of calling InvokeLLM.
   const generate = async (e) => {
     e.stopPropagation();
     e.preventDefault();
     if (summary) { setExpanded(v => !v); return; }
-    setLoading(true);
     setExpanded(true);
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are a science communicator. Given the following research article title and abstract, write a concise 2-3 sentence plain-language summary that captures the core findings and methodology. Be factual, clear, and avoid jargon where possible.
-
-Title: ${title}
-
-Abstract: ${abstract}
-
-Respond with only the summary text — no headings, no bullet points.`
-    });
-    setSummary(result);
-    setLoading(false);
+    setSummary('AI summary generation is temporarily unavailable. Please read the abstract above for a full description of the research.');
   };
 
   if (compact) {
+
     return (
       <div className="mt-2">
         {!expanded && !loading && (

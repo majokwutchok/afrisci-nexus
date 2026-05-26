@@ -96,91 +96,35 @@ export default function AIJournalRecommender({
     setIsAnalyzing(true);
     setError('');
 
-    try {
-      const journalDescriptions = journals
-        .map(j => `- "${j.title}" (Category: ${j.category}, Open Access: ${j.is_open_access}, Impact Factor: ${j.impact_factor || 'N/A'}, Submission Fee: $${j.submission_fee || 0})`)
-        .join('\n');
+    // Keyword-based scoring — no LLM required
+    const manuscriptTerms = [
+      ...(manuscript.title || '').toLowerCase().split(/\s+/),
+      ...(manuscript.keywords || []).map(k => k.toLowerCase()),
+      ...(manuscript.abstract || '').toLowerCase().split(/\s+/).filter(w => w.length > 5)
+    ];
 
-      const prompt = `You are an expert academic publishing consultant. Analyze the following author profile and manuscript to recommend the most suitable journals from the provided list.
+    const scored = journals.map(j => {
+      const journalTerms = [
+        j.title.toLowerCase(),
+        j.category?.replace(/_/g, ' ').toLowerCase() || '',
+        j.description?.toLowerCase() || '',
+        ...(j.keywords || []).map(k => k.toLowerCase())
+      ];
+      const matches = manuscriptTerms.filter(t =>
+        journalTerms.some(jt => jt.includes(t) || t.includes(jt))
+      );
+      const score = Math.min(97, 45 + matches.length * 3);
+      return { journal: j, match_score: score, reasoning: `This journal covers ${j.category?.replace(/_/g, ' ') || 'research'} which aligns with your manuscript's subject matter and keywords.` };
+    }).sort((a, b) => b.match_score - a.match_score).slice(0, 5);
 
-AUTHOR PROFILE:
-Name: ${authorProfile.full_name || 'Not provided'}
-Research Interests: ${authorProfile.research_interests?.join(', ') || 'Not specified'}
-Past Publications: ${authorProfile.publication_count || 0} publications
-Experience Level: ${authorProfile.career_stage || 'Not specified'}
-Languages: ${authorProfile.languages?.join(', ') || 'English'}
-
-MANUSCRIPT DETAILS:
-Title: ${manuscript.title}
-Abstract: ${manuscript.abstract}
-Keywords: ${manuscript.keywords?.join(', ') || 'Not provided'}
-Field: ${manuscript.field || 'General'}
-
-AVAILABLE JOURNALS:
-${journalDescriptions}
-
-Based on the author's expertise, publication history, and the manuscript's content, provide recommendations for the top 3-5 most suitable journals. Consider:
-1. Subject matter alignment
-2. Author's expertise match with journal scope
-3. Open access vs. subscription preference
-4. Impact factor appropriateness
-5. Submission fees and author resources
-
-Return ONLY valid JSON in this exact structure (no other text):
-{
-  "recommendations": [
-    {
-      "journal_id": "journal_id_from_list",
-      "journal_title": "Journal Name",
-      "match_score": 92,
-      "reasoning": "Specific reason why this journal is suitable based on the author and manuscript"
-    }
-  ],
-  "general_advice": "Brief general advice for manuscript submission"
-}`;
-
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            recommendations: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  journal_id: { type: "string" },
-                  journal_title: { type: "string" },
-                  match_score: { type: "number" },
-                  reasoning: { type: "string" }
-                }
-              }
-            },
-            general_advice: { type: "string" }
-          }
-        }
-      });
-
-      // Enhance recommendations with full journal data
-      const enrichedRecommendations = response.recommendations.map(rec => {
-        const fullJournal = journals.find(j => j.id === rec.journal_id || j.title === rec.journal_title);
-        return {
-          ...rec,
-          journal: fullJournal
-        };
-      }).filter(rec => rec.journal); // Filter out recommendations without matching journals
-
-      setRecommendations({
-        ...response,
-        recommendations: enrichedRecommendations
-      });
-      onRecommendationsReady(enrichedRecommendations);
-    } catch (err) {
-      setError('Failed to analyze manuscript and generate recommendations. Please try again.');
-      console.error('Recommendation error:', err);
-    }
+    setRecommendations({
+      recommendations: scored,
+      general_advice: 'Recommendations are based on keyword matching with journal categories and descriptions. Review each journal\'s aims and scope for the best fit.'
+    });
+    onRecommendationsReady(scored);
     setIsAnalyzing(false);
   };
+
 
   const handleSelectJournal = (journalId) => {
     setSelectedJournalId(journalId);

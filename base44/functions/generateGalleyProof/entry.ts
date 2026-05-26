@@ -22,54 +22,50 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().split('T')[0];
     const acceptedEntry = (manuscript.timeline || []).find(t => t.status === 'accepted');
 
-    const prompt = `You are a professional academic journal typesetter for AfriSci Nexus Discovery.
-Generate a complete, publication-ready galley proof for the following manuscript.
-
-MANUSCRIPT DETAILS:
-Title: ${manuscript.title}
-Authors: ${(manuscript.authors || []).map(a => `${a.name} (${a.affiliation || 'Unknown'}${a.is_corresponding ? ', Corresponding Author' : ''})`).join('; ')}
-Keywords: ${(manuscript.keywords || []).join(', ')}
-Abstract: ${manuscript.abstract}
-Language: ${manuscript.language || 'English'}
-DOI: ${manuscript.doi || 'Pending assignment'}
-Submitted: ${manuscript.submission_date || 'N/A'}
-Accepted: ${acceptedEntry?.date || today}
-
-Generate a professional galley proof JSON. Be detailed and accurate.`;
-
-    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          formatted_title: { type: "string" },
-          running_head: { type: "string", description: "Short title for page headers, max 50 chars" },
-          formatted_authors: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                name: { type: "string" },
-                affiliation_number: { type: "number" },
-                is_corresponding: { type: "boolean" }
-              }
-            }
-          },
-          affiliations: {
-            type: "array",
-            items: { type: "object", properties: { number: { type: "number" }, text: { type: "string" } } }
-          },
-          formatted_abstract: { type: "string" },
-          structured_keywords: { type: "array", items: { type: "string" } },
-          citation_suggestion: { type: "string" },
-          doi_display: { type: "string" },
-          received_date: { type: "string" },
-          accepted_date: { type: "string" },
-          publication_note: { type: "string" },
-          formatting_notes: { type: "array", items: { type: "string" } }
-        }
+    // Build structured galley proof from manuscript metadata (no LLM required)
+    const authors = manuscript.authors || [];
+    const affiliationMap = {};
+    let affNum = 1;
+    authors.forEach(a => {
+      if (a.affiliation && !affiliationMap[a.affiliation]) {
+        affiliationMap[a.affiliation] = affNum++;
       }
     });
+
+    const formattedAuthors = authors.map(a => ({
+      name: a.name,
+      affiliation_number: affiliationMap[a.affiliation] || 1,
+      is_corresponding: !!a.is_corresponding
+    }));
+
+    const affiliations = Object.entries(affiliationMap).map(([text, number]) => ({ number, text }));
+
+    const year = manuscript.publication_date
+      ? new Date(manuscript.publication_date).getFullYear()
+      : new Date().getFullYear();
+    const firstAuthor = authors[0]?.name?.split(' ').pop() || 'Author';
+    const doi = manuscript.doi || 'Pending DOI assignment';
+
+    const proof = {
+      formatted_title: manuscript.title,
+      running_head: manuscript.title.substring(0, 50).toUpperCase(),
+      formatted_authors: formattedAuthors,
+      affiliations,
+      formatted_abstract: manuscript.abstract,
+      structured_keywords: manuscript.keywords || [],
+      citation_suggestion: `${firstAuthor} et al. (${year}). ${manuscript.title}. AfriSci Nexus. ${doi !== 'Pending DOI assignment' ? `https://doi.org/${doi}` : doi}`,
+      doi_display: doi,
+      received_date: manuscript.submission_date || today,
+      accepted_date: acceptedEntry?.date || today,
+      publication_note: `Published Online First: ${today}. AfriSci Nexus Open Access Journal.`,
+      formatting_notes: [
+        'Typeset in 10pt Times New Roman, two-column layout for print.',
+        'Abstract limited to 250 words for print version.',
+        'Keywords should be MeSH or discipline-standard terms.',
+        'All figures should be minimum 300 DPI for print quality.',
+        'References formatted in APA 7th Edition.'
+      ]
+    };
 
     // Update manuscript to online_first
     const timeline = [...(manuscript.timeline || []), {
@@ -85,7 +81,7 @@ Generate a professional galley proof JSON. Be detailed and accurate.`;
       timeline
     });
 
-    return Response.json({ success: true, proof: result, manuscript_title: manuscript.title });
+    return Response.json({ success: true, proof, manuscript_title: manuscript.title });
 
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
