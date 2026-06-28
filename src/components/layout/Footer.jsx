@@ -105,6 +105,40 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Membership & ISSN badges */}
+        <div className="border-t border-slate-800 pt-6 mb-4">
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2">
+              <span className="text-lg">🔖</span>
+              <div>
+                <p className="text-xs text-slate-400 font-medium leading-none">ISSN (Online)</p>
+                <p className="text-sm text-white font-bold font-mono">3079-4730</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2">
+              <span className="text-lg">🔗</span>
+              <div>
+                <p className="text-xs text-slate-400 font-medium leading-none">Crossref Member</p>
+                <p className="text-sm text-white font-bold">DOI Prefix: 10.67418</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2">
+              <span className="text-lg">⚖️</span>
+              <div>
+                <p className="text-xs text-slate-400 font-medium leading-none">Member</p>
+                <p className="text-sm text-white font-bold">COPE</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2">
+              <span className="text-lg">🌍</span>
+              <div>
+                <p className="text-xs text-slate-400 font-medium leading-none">Access</p>
+                <p className="text-sm text-white font-bold">Open Access</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Bottom bar */}
         <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} AfriSci Nexus. All Rights Reserved.</p>
