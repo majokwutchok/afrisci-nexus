@@ -238,6 +238,16 @@ const PublicationCard = ({ manuscript, journal }) => {
           <span>{manuscript.publication_date ? format(new Date(manuscript.publication_date), 'MMM yyyy') : 'Recently'}</span>
         </div>
       </div>
+      {manuscript.doi && (
+        <a
+          href={`https://doi.org/${manuscript.doi}`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs font-mono text-blue-600 hover:text-blue-800 hover:underline truncate block"
+        >
+          https://doi.org/{manuscript.doi}
+        </a>
+      )}
       <div className="flex items-center gap-4 text-xs text-slate-500">
         {(manuscript.view_count > 0) && (
           <div className="flex items-center gap-1">

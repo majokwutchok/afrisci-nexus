@@ -454,7 +454,7 @@ export default function ManuscriptDetail() {
                         rel="noreferrer"
                         className="text-sm font-mono text-blue-700 hover:text-blue-900 hover:underline font-semibold"
                       >
-                        {manuscript.doi}
+                        https://doi.org/{manuscript.doi}
                       </a>
                     </div>
                     {manuscript.publication_date && (
