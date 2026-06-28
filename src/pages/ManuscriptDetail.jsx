@@ -535,10 +535,12 @@ export default function ManuscriptDetail() {
                   {/* Citation Export */}
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs text-slate-500 font-medium">Export citation:</span>
-                    <Button size="sm" variant="outline" className="text-xs" onClick={handleDownloadBibTeX}>
-                      BibTeX
+                    <Button variant="outline" className="border-amber-500 text-amber-700 hover:bg-amber-50 gap-2" onClick={handleDownloadBibTeX}>
+                      <Download className="w-4 h-4" />
+                      BibTeX (.bib)
                     </Button>
-                    <Button size="sm" variant="outline" className="text-xs" onClick={handleDownloadRIS}>
+                    <Button variant="outline" className="border-slate-400 text-slate-700 hover:bg-slate-50 gap-2" onClick={handleDownloadRIS}>
+                      <Download className="w-4 h-4" />
                       RIS / EndNote
                     </Button>
                   </div>
