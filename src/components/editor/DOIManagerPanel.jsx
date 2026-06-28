@@ -223,7 +223,7 @@ export default function DOIManagerPanel({ manuscripts, onRefresh }) {
                         {crossrefBadge(ms)}
                         <a href={`https://doi.org/${ms.doi}`} target="_blank" rel="noreferrer"
                           className="text-xs text-blue-600 hover:underline font-mono flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                          {ms.doi} <ExternalLink className="w-3 h-3" />
+                          https://doi.org/{ms.doi} <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
                       {ms.crossref_submitted_at && (
