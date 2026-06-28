@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const DOI_PREFIX = "10.55490";
+const DOI_PREFIX = "10.67418";
 
 function generateDOISuffix(manuscript) {
   const year = manuscript.publication_date

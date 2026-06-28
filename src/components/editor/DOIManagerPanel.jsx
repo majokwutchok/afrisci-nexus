@@ -134,9 +134,9 @@ export default function DOIManagerPanel({ manuscripts, onRefresh }) {
 
       {/* Info Banner */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
-        <strong>Crossref DOI Integration Active</strong> — DOI prefix <code className="bg-blue-100 px-1 rounded">10.55490</code>.
+        <strong>Crossref DOI Integration Active</strong> — DOI prefix <code className="bg-blue-100 px-1 rounded">10.67418</code>.
         Metadata is submitted to Crossref automatically when a manuscript is published.
-        Format: <code className="bg-blue-100 px-1 rounded">10.55490/afrisci.YEAR.SHORTID</code>.
+        Format: <code className="bg-blue-100 px-1 rounded">10.67418/afrisci.YEAR.SHORTID</code>.
       </div>
 
       {eligible.length === 0 && (
@@ -186,7 +186,7 @@ export default function DOIManagerPanel({ manuscripts, onRefresh }) {
 
                   {editId === ms.id && (
                     <div className="flex items-center gap-2 mt-3">
-                      <Input className="h-8 text-xs font-mono" placeholder="e.g. 10.55490/afrisci.2025.abc12345"
+                      <Input className="h-8 text-xs font-mono" placeholder="e.g. 10.67418/afrisci.2025.abc12345"
                         value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
                       <Button size="sm" onClick={() => handleSaveManual(ms)} disabled={savingId === ms.id}
                         className="h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white">
