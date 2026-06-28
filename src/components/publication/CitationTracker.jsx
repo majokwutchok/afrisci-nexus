@@ -22,7 +22,7 @@ function formatAPA(ms, journal) {
   const journalName = journal?.title ? `*${journal.title}*` : "";
   const doi = ms.doi ? ` https://doi.org/${ms.doi}` : "";
 
-  return `${authorStr} (${year}). ${ms.title}. ${journalName}.${doi}`;
+  return `${authorStr} (${year}). ${ms.title}. ${journalName}. ${doi}`.trim();
 }
 
 function formatMLA(ms, journal) {
@@ -38,7 +38,7 @@ function formatMLA(ms, journal) {
 
   const year = ms.publication_date ? new Date(ms.publication_date).getFullYear() : "";
   const journalName = journal?.title ? `*${journal.title}*` : "";
-  const doi = ms.doi ? ` doi:${ms.doi}` : "";
+  const doi = ms.doi ? ` https://doi.org/${ms.doi}` : "";
 
   return `${authorStr}. "${ms.title}." ${journalName}, ${year}.${doi}`;
 }
@@ -206,7 +206,7 @@ export default function CitationTracker({ manuscript, journal, onCitationAdded }
             className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 transition-colors"
           >
             <ExternalLink className="w-3 h-3" />
-            Permalink: doi.org/{manuscript.doi}
+            https://doi.org/{manuscript.doi}
           </a>
         )}
       </CardContent>

@@ -178,7 +178,7 @@ export default function DOIPanel({ manuscript, journal, onDOIAssigned }) {
           <div className="space-y-2">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Digital Object Identifier</p>
             <div className="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200 rounded-lg">
-              <code className="text-sm font-mono text-teal-800 flex-1 break-all">{manuscript.doi}</code>
+              <code className="text-sm font-mono text-teal-800 flex-1 break-all">https://doi.org/{manuscript.doi}</code>
               <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={copyDOI}>
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
               </Button>

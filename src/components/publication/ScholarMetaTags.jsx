@@ -64,7 +64,7 @@ export default function ScholarMetaTags({ manuscript, journal, coverImage }) {
     add("dc.description", manuscript.abstract);
     add("dc.rights", "https://creativecommons.org/licenses/by/4.0/");
     add("dc.identifier", articleUrl);
-    if (manuscript.doi) add("dc.identifier", `doi:${manuscript.doi}`);
+    if (manuscript.doi) add("dc.identifier", `https://doi.org/${manuscript.doi}`);
     if (journal?.title) add("dc.source", journal.title);
     if (journal?.issn) add("dc.relation", `urn:issn:${journal.issn}`);
 
@@ -72,7 +72,7 @@ export default function ScholarMetaTags({ manuscript, journal, coverImage }) {
     (manuscript.keywords || []).forEach(k => add("dc.subject", k));
 
     // ── Highwire Press tags (used by many repositories) ──────────────────
-    add("HW.identifier", manuscript.doi ? `doi:${manuscript.doi}` : articleUrl);
+    add("HW.identifier", manuscript.doi ? `https://doi.org/${manuscript.doi}` : articleUrl);
 
     // ── Open Graph for social/structured sharing ──────────────────────────
     const og = (property, content) => {
