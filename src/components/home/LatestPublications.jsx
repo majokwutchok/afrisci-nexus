@@ -36,6 +36,16 @@ const PublicationCard = ({ pub, journal }) => (
         {journal && <Badge variant="secondary">{journal.title}</Badge>}
         <span className="text-slate-500">{pub.publication_date ? format(new Date(pub.publication_date), 'dd MMM yyyy') : ''}</span>
       </div>
+      {pub.doi && (
+        <a
+          href={`https://doi.org/${pub.doi}`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs font-mono text-blue-600 hover:text-blue-800 hover:underline mt-1 block truncate"
+        >
+          https://doi.org/{pub.doi}
+        </a>
+      )}
     </div>
   </Card>
 );

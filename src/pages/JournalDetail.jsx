@@ -194,7 +194,7 @@ function downloadAbstractPDF(manuscript, journal) {
   y += 4;
   if (manuscript.keywords?.length) { doc.setFont("times", "bold"); doc.text("Keywords: ", margin, y); doc.setFont("times", "italic"); doc.text(manuscript.keywords.join(", "), margin + 22, y); y += 8; }
   doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(100, 100, 100);
-  doc.text("For the full article, visit: www.afriscidiscovery.com", margin, y + 6); doc.setTextColor(0, 0, 0);
+  doc.text("For the full article, visit: https://afriscinexus.com or use the DOI link above.", margin, y + 6); doc.setTextColor(0, 0, 0);
   stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
   doc.save(`${(manuscript.title || "abstract").replace(/[^a-z0-9]/gi, "_").substring(0, 50)}_abstract.pdf`);
   trackView(manuscript.id, "pdf_download", manuscript);
@@ -257,6 +257,16 @@ const ArticleCard = ({ manuscript, journal }) => (
         <span>{new Date(manuscript.publication_date || manuscript.created_date).toLocaleDateString()}</span>
       </div>
     </Link>
+    {manuscript.doi && (
+      <a
+        href={`https://doi.org/${manuscript.doi}`}
+        target="_blank"
+        rel="noreferrer"
+        className="text-xs font-mono text-blue-600 hover:text-blue-800 hover:underline block mb-2 truncate"
+      >
+        https://doi.org/{manuscript.doi}
+      </a>
+    )}
     <div className="flex items-center gap-3 text-xs text-slate-400 mb-3">
       {manuscript.view_count > 0 && (
         <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{manuscript.view_count.toLocaleString()}</span>
