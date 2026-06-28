@@ -171,6 +171,17 @@ const InfoCard = ({ icon: Icon, title, value, color = "teal" }) => (
   </div>
 );
 
+function downloadBibTeX(manuscript, journal) {
+  const authors = manuscript.authors?.map(a => a.name).join(" and ") || "";
+  const year = manuscript.publication_date ? new Date(manuscript.publication_date).getFullYear() : new Date().getFullYear();
+  const key = `${manuscript.authors?.[0]?.name?.split(" ").pop() || "Author"}${year}`;
+  const bib = `@article{${key},\n  title={${manuscript.title || ""}},\n  author={${authors}},\n  year={${year}},\n  doi={${manuscript.doi || ""}},\n  journal={${journal?.title || "AfriSci Nexus"}},\n  keywords={${(manuscript.keywords || []).join(", ")}}\n}`;
+  const blob = new Blob([bib], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = `${key}.bib`; a.click();
+  URL.revokeObjectURL(url);
+}
+
 function downloadAbstractPDF(manuscript, journal) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const margin = 20, pageWidth = doc.internal.pageSize.getWidth(), contentWidth = pageWidth - margin * 2;
@@ -278,7 +289,7 @@ const ArticleCard = ({ manuscript, journal }) => (
         <span className="flex items-center gap-1"><Quote className="w-3 h-3" />{manuscript.citation_count}</span>
       )}
     </div>
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       <Button size="sm" variant="outline" className="text-xs border-blue-400 text-blue-700 hover:bg-blue-50"
         onClick={() => downloadAbstractPDF(manuscript, journal)}>
         <Download className="w-3 h-3 mr-1" />Abstract PDF
@@ -286,6 +297,10 @@ const ArticleCard = ({ manuscript, journal }) => (
       <Button size="sm" className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
         onClick={() => downloadFullPDF(manuscript, journal)}>
         <Download className="w-3 h-3 mr-1" />Full PDF
+      </Button>
+      <Button size="sm" variant="outline" className="text-xs border-amber-500 text-amber-700 hover:bg-amber-50"
+        onClick={() => downloadBibTeX(manuscript, journal)}>
+        <Download className="w-3 h-3 mr-1" />BibTeX
       </Button>
     </div>
   </div>
