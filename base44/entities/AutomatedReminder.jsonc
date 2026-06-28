@@ -58,24 +58,12 @@
       }
     },
     "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
-          }
-        },
-        {
-          "data.reviewer_id": "{{user.id}}"
-        },
-        {
-          "data.manuscript_id": {
-            "$in": "{{user.author_manuscripts_ids}}"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": [
+          "admin",
+          "editor"
+        ]
+      }
     },
     "update": {
       "user_condition": {

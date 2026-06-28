@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const DOI_PREFIX = "10.55490";
 
@@ -6,6 +6,16 @@ function generateDOISuffix(manuscript) {
   const year = new Date().getFullYear();
   const shortId = manuscript.id.replace(/-/g, '').slice(-8).toLowerCase();
   return `afrisci.${year}.${shortId}`;
+}
+
+async function registerWithCrossref(base44, manuscript_id) {
+  try {
+    const res = await base44.functions.invoke('registerCrossrefDOI', { manuscript_id });
+    return res;
+  } catch (e) {
+    console.error('Crossref registration error (non-fatal):', e.message);
+    return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -47,14 +57,27 @@ Deno.serve(async (req) => {
       comment: 'Article published and made available on the journal website.'
     }];
 
+    // Publish the manuscript — set status, DOI, date
     await base44.asServiceRole.entities.Manuscript.update(manuscript_id, {
       status: 'published',
       publication_date: today,
       doi,
+      doi_registered_date: today,
+      crossref_status: 'pending',
       timeline
     });
 
-    return Response.json({ success: true, doi, publication_date: today });
+    // Immediately register with Crossref
+    const crossrefResult = await registerWithCrossref(base44, manuscript_id);
+
+    return Response.json({
+      success: true,
+      doi,
+      doi_url: `https://doi.org/${doi}`,
+      publication_date: today,
+      crossref_registered: crossrefResult?.success === true,
+      crossref_batch_id: crossrefResult?.batch_id || null,
+    });
 
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

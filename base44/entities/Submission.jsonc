@@ -58,10 +58,14 @@
   ],
   "rls": {
     "create": {
-      "created_by": "{{user.email}}",
-      "user_condition": {
-        "role": "user"
-      }
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.author_email": "{{user.email}}"
+        }
+      ]
     },
     "read": {
       "$or": [

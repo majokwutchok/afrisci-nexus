@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Copy, Check, Download, Link2, FileJson, FileCode2, ExternalLink } from "lucide-react";
+import { Copy, Check, Link2, FileJson, FileCode2, ExternalLink, Globe, RefreshCw, Loader2 } from "lucide-react";
 import { assignDOI } from "@/functions/assignDOI";
+import { registerCrossrefDOI } from "@/functions/registerCrossrefDOI";
 
 function buildJSONMetadata(manuscript, journal) {
   return {
@@ -106,9 +107,18 @@ function downloadFile(content, filename, mimeType) {
   URL.revokeObjectURL(url);
 }
 
+const CROSSREF_STATUS_LABELS = {
+  submitted: { label: "Submitted to Crossref", color: "bg-teal-100 text-teal-700" },
+  registered: { label: "Registered with Crossref", color: "bg-emerald-100 text-emerald-700" },
+  pending: { label: "Crossref Pending", color: "bg-amber-100 text-amber-700" },
+  failed: { label: "Crossref Failed", color: "bg-red-100 text-red-700" },
+};
+
 export default function DOIPanel({ manuscript, journal, onDOIAssigned }) {
   const [copied, setCopied] = useState(false);
   const [assigning, setAssigning] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [crossrefMsg, setCrossrefMsg] = useState(null);
 
   const copyDOI = () => {
     navigator.clipboard.writeText(`https://doi.org/${manuscript.doi}`);
@@ -125,6 +135,19 @@ export default function DOIPanel({ manuscript, journal, onDOIAssigned }) {
       console.error(e);
     }
     setAssigning(false);
+  };
+
+  const handleCrossrefRegister = async () => {
+    setRegistering(true);
+    setCrossrefMsg(null);
+    try {
+      const res = await registerCrossrefDOI({ manuscript_id: manuscript.id });
+      setCrossrefMsg(res.data?.success ? "✓ Submitted to Crossref" : "✗ Crossref submission failed");
+      if (onDOIAssigned) onDOIAssigned(manuscript.doi); // trigger refresh
+    } catch (e) {
+      setCrossrefMsg("✗ Error: " + e.message);
+    }
+    setRegistering(false);
   };
 
   const exportJSON = () => {
@@ -188,9 +211,36 @@ export default function DOIPanel({ manuscript, journal, onDOIAssigned }) {
           </div>
         )}
 
-        {/* DOI registered date */}
+        {/* DOI registered date & Crossref status */}
         {manuscript.doi_registered_date && (
-          <p className="text-xs text-slate-400">Registered: {manuscript.doi_registered_date}</p>
+          <p className="text-xs text-slate-400">DOI assigned: {manuscript.doi_registered_date}</p>
+        )}
+        {manuscript.doi && (() => {
+          const cfg = CROSSREF_STATUS_LABELS[manuscript.crossref_status];
+          return (
+            <div className="flex items-center justify-between gap-2">
+              <Badge className={`text-xs ${cfg ? cfg.color : 'bg-slate-100 text-slate-400'}`}>
+                <Globe className="w-3 h-3 mr-1" />
+                {cfg ? cfg.label : 'Not submitted to Crossref'}
+              </Badge>
+              {(!manuscript.crossref_status || manuscript.crossref_status === 'pending' || manuscript.crossref_status === 'failed') && (
+                <Button size="sm" variant="outline" onClick={handleCrossrefRegister} disabled={registering}
+                  className="h-6 text-xs gap-1 border-teal-200 text-teal-700 hover:bg-teal-50">
+                  {registering ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Globe className="w-3 h-3" /> Register</>}
+                </Button>
+              )}
+              {manuscript.crossref_status === 'submitted' && (
+                <Button size="sm" variant="ghost" onClick={handleCrossrefRegister} disabled={registering}
+                  className="h-6 text-xs gap-1 text-slate-500">
+                  {registering ? <Loader2 className="w-3 h-3 animate-spin" /> : <><RefreshCw className="w-3 h-3" /> Re-submit</>}
+                </Button>
+              )}
+            </div>
+          );
+        })()}
+        {crossrefMsg && <p className={`text-xs font-medium ${crossrefMsg.startsWith('✓') ? 'text-teal-700' : 'text-red-600'}`}>{crossrefMsg}</p>}
+        {manuscript.crossref_submitted_at && (
+          <p className="text-xs text-slate-400">Crossref submitted: {new Date(manuscript.crossref_submitted_at).toLocaleDateString()}</p>
         )}
 
         <Separator />

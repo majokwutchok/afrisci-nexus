@@ -147,6 +147,33 @@
       "type": "string",
       "description": "Digital Object Identifier (when published)"
     },
+    "doi_registered_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date DOI was locally assigned"
+    },
+    "crossref_submission_id": {
+      "type": "string",
+      "description": "Crossref batch ID for this DOI deposit submission"
+    },
+    "crossref_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "submitted",
+        "registered",
+        "failed"
+      ],
+      "description": "Status of Crossref DOI registration"
+    },
+    "crossref_submitted_at": {
+      "type": "string",
+      "description": "ISO timestamp when metadata was submitted to Crossref"
+    },
+    "crossref_response": {
+      "type": "string",
+      "description": "Truncated Crossref deposit response for audit"
+    },
     "access_type": {
       "type": "string",
       "enum": [

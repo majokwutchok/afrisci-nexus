@@ -1,17 +1,11 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-// DOI prefix for AfriSci Nexus (use your registered prefix in production)
 const DOI_PREFIX = "10.55490";
 
-/**
- * Generates a unique DOI suffix from manuscript metadata.
- * Format: afrisci.<year>.<paddedId>
- */
 function generateDOISuffix(manuscript) {
   const year = manuscript.publication_date
     ? new Date(manuscript.publication_date).getFullYear()
     : new Date().getFullYear();
-  // Use last 8 chars of ID for uniqueness
   const shortId = manuscript.id.replace(/-/g, '').slice(-8).toLowerCase();
   return `afrisci.${year}.${shortId}`;
 }
@@ -21,7 +15,6 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    // Allow editors, admins, and internal automation calls
     if (user && user.role !== 'admin' && user.role !== 'editor') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -39,8 +32,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Manuscript not found' }, { status: 404 });
     }
 
-    // If DOI already assigned, return it
+    // If DOI already assigned, still try Crossref registration if not yet submitted
     if (manuscript.doi) {
+      // If not yet registered with Crossref, do it now
+      if (!manuscript.crossref_status || manuscript.crossref_status === 'pending' || manuscript.crossref_status === 'failed') {
+        try {
+          await base44.functions.invoke('registerCrossrefDOI', { manuscript_id });
+        } catch (e) {
+          console.error('Crossref registration error:', e.message);
+        }
+      }
       return Response.json({
         doi: manuscript.doi,
         doi_url: `https://doi.org/${manuscript.doi}`,
@@ -58,17 +59,29 @@ Deno.serve(async (req) => {
 
     const suffix = generateDOISuffix(manuscript);
     const doi = `${DOI_PREFIX}/${suffix}`;
+    const today = new Date().toISOString().split('T')[0];
 
-    // Persist the DOI on the manuscript
+    // Persist the DOI on the manuscript, mark Crossref as pending
     await base44.asServiceRole.entities.Manuscript.update(manuscript_id, {
       doi,
-      doi_registered_date: new Date().toISOString().split('T')[0]
+      doi_registered_date: today,
+      crossref_status: 'pending',
     });
+
+    // Immediately register with Crossref
+    let crossrefResult = null;
+    try {
+      crossrefResult = await base44.functions.invoke('registerCrossrefDOI', { manuscript_id });
+    } catch (e) {
+      console.error('Crossref registration error (non-fatal):', e.message);
+    }
 
     return Response.json({
       doi,
       doi_url: `https://doi.org/${doi}`,
-      already_assigned: false
+      already_assigned: false,
+      crossref_registered: crossrefResult?.data?.success === true,
+      crossref_batch_id: crossrefResult?.data?.batch_id || null,
     });
 
   } catch (error) {
