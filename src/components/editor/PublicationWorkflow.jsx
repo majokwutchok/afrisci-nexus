@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { readFileAsDataUrl } from "@/utils/pdfUpload";
 import { base44 } from "@/api/base44Client";
 import { generateGalleyProof } from "@/functions/generateGalleyProof";
 import { publishManuscript } from "@/functions/publishManuscript";
@@ -36,10 +37,8 @@ export default function PublicationWorkflow({ manuscripts, journals = [], onRefr
   const [publishingId, setPublishingId] = useState(null);
   const [withdrawConfirm, setWithdrawConfirm] = useState(null); // manuscript to withdraw/delete
   const [withdrawing, setWithdrawing] = useState(false);
-  const [pdfUploadMs, setPdfUploadMs] = useState(null); // manuscript for PDF upload
+  const [pdfUploadMs, setPdfUploadMs] = useState(null);
   const [pdfUploading, setPdfUploading] = useState(false);
-  const [pdfUrlMode, setPdfUrlMode] = useState(false);
-  const [pdfManualUrl, setPdfManualUrl] = useState("");
   const pdfInputRef = useRef(null);
 
   const handleWithdraw = async (manuscript, action) => {
@@ -71,25 +70,9 @@ export default function PublicationWorkflow({ manuscripts, journals = [], onRefr
   const handleUploadPDF = async (manuscript, file) => {
     if (!file) return;
     setPdfUploading(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.entities.Manuscript.update(manuscript.id, { manuscript_file_url: file_url });
-      setPdfUploadMs(null);
-      setPdfUrlMode(false);
-      onRefresh();
-    } catch {
-      setPdfUrlMode(true);
-    }
-    setPdfUploading(false);
-  };
-
-  const handleSavePdfUrl = async () => {
-    if (!pdfManualUrl.trim() || !pdfUploadMs) return;
-    setPdfUploading(true);
-    await base44.entities.Manuscript.update(pdfUploadMs.id, { manuscript_file_url: pdfManualUrl.trim() });
+    const dataUrl = await readFileAsDataUrl(file);
+    await base44.entities.Manuscript.update(manuscript.id, { manuscript_file_url: dataUrl });
     setPdfUploadMs(null);
-    setPdfUrlMode(false);
-    setPdfManualUrl("");
     onRefresh();
     setPdfUploading(false);
   };
@@ -378,7 +361,7 @@ export default function PublicationWorkflow({ manuscripts, journals = [], onRefr
       </Dialog>
 
       {/* PDF Upload Dialog */}
-      <Dialog open={!!pdfUploadMs} onOpenChange={() => { setPdfUploadMs(null); setPdfUrlMode(false); setPdfManualUrl(""); }}>
+      <Dialog open={!!pdfUploadMs} onOpenChange={() => setPdfUploadMs(null)}>
         <DialogContent className="bg-white max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -386,53 +369,42 @@ export default function PublicationWorkflow({ manuscripts, journals = [], onRefr
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-slate-600 mb-3">
-            Upload the final formatted PDF for <strong>{pdfUploadMs?.title}</strong>. This will be used as the downloadable and displayable version on the public article page.
+            Upload the final formatted PDF for <strong>{pdfUploadMs?.title}</strong>.
           </p>
           {pdfUploadMs?.manuscript_file_url && (
             <div className="flex items-center gap-2 mb-3 p-2 bg-blue-50 rounded-lg text-xs text-blue-700">
               <Eye className="w-4 h-4" />
-              <a href={pdfUploadMs.manuscript_file_url} target="_blank" rel="noreferrer" className="hover:underline">View current PDF</a>
+              <span>Current PDF already set</span>
             </div>
           )}
-          {pdfUrlMode ? (
-            <div className="space-y-3">
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
-                ⚠ Direct upload unavailable (integration credits exhausted). Paste a public link to your PDF (Google Drive, Dropbox, OneDrive, etc.).
+          <input
+            ref={pdfInputRef}
+            type="file"
+            accept=".pdf"
+            className="hidden"
+            onChange={e => { const f = e.target.files[0]; if (f) handleUploadPDF(pdfUploadMs, f); }}
+          />
+          <div
+            className="border-2 border-dashed border-indigo-300 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
+            onClick={() => pdfInputRef.current?.click()}
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleUploadPDF(pdfUploadMs, f); }}
+          >
+            {pdfUploading ? (
+              <div className="flex flex-col items-center gap-2 text-indigo-600">
+                <Loader2 className="w-8 h-8 animate-spin" />
+                <span className="text-sm font-medium">Reading PDF...</span>
               </div>
-              <input
-                type="url"
-                placeholder="https://drive.google.com/file/..."
-                value={pdfManualUrl}
-                onChange={e => setPdfManualUrl(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
-              <Button onClick={handleSavePdfUrl} disabled={!pdfManualUrl.trim() || pdfUploading}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white w-full">
-                {pdfUploading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Saving...</> : <><CheckCircle className="w-4 h-4 mr-2" />Save URL</>}
-              </Button>
-              <button className="text-xs text-slate-400 underline hover:text-slate-600" onClick={() => setPdfUrlMode(false)}>← Try file upload</button>
-            </div>
-          ) : (
-            <>
-              <input
-                ref={pdfInputRef}
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                onChange={e => {
-                  const file = e.target.files[0];
-                  if (file) handleUploadPDF(pdfUploadMs, file);
-                }}
-              />
-              <Button onClick={() => pdfInputRef.current?.click()} disabled={pdfUploading}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white w-full">
-                {pdfUploading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Uploading...</> : <><Upload className="w-4 h-4 mr-2" /> Choose PDF File</>}
-              </Button>
-              <button className="mt-2 text-xs text-slate-400 underline hover:text-slate-600 block" onClick={() => setPdfUrlMode(true)}>Or paste a URL instead</button>
-            </>
-          )}
-          <DialogFooter className="mt-1">
-            <Button variant="ghost" size="sm" onClick={() => { setPdfUploadMs(null); setPdfUrlMode(false); setPdfManualUrl(""); }}>Cancel</Button>
+            ) : (
+              <>
+                <Upload className="w-8 h-8 text-indigo-400 mx-auto mb-2" />
+                <p className="text-sm font-medium text-slate-700">Click or drag & drop your PDF here</p>
+                <p className="text-xs text-slate-400 mt-1">No upload credits needed</p>
+              </>
+            )}
+          </div>
+          <DialogFooter className="mt-3">
+            <Button variant="ghost" size="sm" onClick={() => setPdfUploadMs(null)}>Cancel</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

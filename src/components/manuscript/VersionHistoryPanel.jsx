@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { readFileAsDataUrl } from "@/utils/pdfUpload";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,6 @@ import {
   ChevronDown,
   ChevronUp,
   User as UserIcon,
-  AlertTriangle,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
@@ -129,18 +129,11 @@ export default function VersionHistoryPanel({ manuscript, open, onClose, onRefre
   const [uploading, setUploading] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [changeSummary, setChangeSummary] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [uploadError, setUploadError] = useState(null);
-  const [showUrlInput, setShowUrlInput] = useState(false);
-  const [manualUrl, setManualUrl] = useState("");
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
   const versions = [...(manuscript?.version_history || [])].sort((a, b) => b.version - a.version);
   const currentVersion = versions.find(v => v.is_current) || versions[0];
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) setSelectedFile(file);
-  };
 
   const saveVersion = async (file_url) => {
     const user = await base44.auth.me();
@@ -165,35 +158,15 @@ export default function VersionHistoryPanel({ manuscript, open, onClose, onRefre
       manuscript_file_url: file_url,
       version_history: updatedHistory,
     });
-    setSelectedFile(null);
     setChangeSummary("");
-    setManualUrl("");
-    setShowUrlInput(false);
     if (onRefresh) onRefresh();
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
+  const handleFile = async (file) => {
+    if (!file) return;
     setUploading(true);
-    setUploadError(null);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: selectedFile });
-      await saveVersion(file_url);
-    } catch {
-      setUploadError(null);
-      setShowUrlInput(true);
-    }
-    setUploading(false);
-  };
-
-  const handleUrlSave = async () => {
-    if (!manualUrl.trim()) return;
-    setUploading(true);
-    try {
-      await saveVersion(manualUrl.trim());
-    } catch (e) {
-      setUploadError("Failed to save: " + (e?.message || e));
-    }
+    const dataUrl = await readFileAsDataUrl(file);
+    await saveVersion(dataUrl);
     setUploading(false);
   };
 
@@ -235,93 +208,38 @@ export default function VersionHistoryPanel({ manuscript, open, onClose, onRefre
               <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                 <Upload className="w-4 h-4 text-teal-600" /> Add New Version
               </p>
-
-              {!showUrlInput ? (
-                <>
-                  <div>
-                    <Label className="text-xs text-slate-600 mb-1 block">Select file (PDF, Word, LaTeX, etc.)</Label>
-                    <input
-                      type="file"
-                      accept=".pdf,.doc,.docx,.odt,.tex"
-                      onChange={handleFileChange}
-                      className="block w-full text-sm text-slate-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border file:border-slate-300 file:text-xs file:bg-white file:text-slate-700 hover:file:bg-slate-50"
-                    />
+              <div>
+                <Label className="text-xs text-slate-600 mb-1 block">Summary of changes (optional)</Label>
+                <Textarea
+                  value={changeSummary}
+                  onChange={(e) => setChangeSummary(e.target.value)}
+                  placeholder="Briefly describe what changed in this version..."
+                  rows={2}
+                  className="text-sm bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                />
+              </div>
+              <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.odt,.tex" className="hidden"
+                onChange={e => { const f = e.target.files[0]; if (f) handleFile(f); }} />
+              <div
+                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${dragging ? "border-teal-500 bg-teal-100" : "border-slate-300 hover:border-teal-400 hover:bg-teal-50"}`}
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={e => { e.preventDefault(); setDragging(true); }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
+              >
+                {uploading ? (
+                  <div className="flex flex-col items-center gap-2 text-teal-600">
+                    <Clock className="w-6 h-6 animate-spin" />
+                    <span className="text-sm font-medium">Reading file…</span>
                   </div>
-                  <div>
-                    <Label className="text-xs text-slate-600 mb-1 block">Summary of changes (optional)</Label>
-                    <Textarea
-                      value={changeSummary}
-                      onChange={(e) => setChangeSummary(e.target.value)}
-                      placeholder="Briefly describe what changed in this version..."
-                      rows={2}
-                      className="text-sm bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      disabled={!selectedFile || uploading}
-                      onClick={handleUpload}
-                      className="bg-teal-600 hover:bg-teal-700 text-white"
-                    >
-                      {uploading ? (
-                        <><Clock className="w-3 h-3 mr-1 animate-spin" /> Uploading…</>
-                      ) : (
-                        <><Upload className="w-3 h-3 mr-1" /> Upload Version</>
-                      )}
-                    </Button>
-                    <button className="text-xs text-slate-400 hover:text-slate-600 underline" onClick={() => setShowUrlInput(true)}>
-                      Paste URL instead
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
-                    ⚠ Direct upload unavailable (credits exhausted until 2026-07-25). Paste a public link to your file (Google Drive, Dropbox, OneDrive, etc.).
-                  </div>
-                  <div>
-                    <Label className="text-xs text-slate-600 mb-1 block">Public file URL</Label>
-                    <input
-                      type="url"
-                      placeholder="https://drive.google.com/file/..."
-                      value={manualUrl}
-                      onChange={e => setManualUrl(e.target.value)}
-                      className="block w-full text-sm border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-400 bg-white"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-slate-600 mb-1 block">Summary of changes (optional)</Label>
-                    <Textarea
-                      value={changeSummary}
-                      onChange={(e) => setChangeSummary(e.target.value)}
-                      placeholder="Briefly describe what changed in this version..."
-                      rows={2}
-                      className="text-sm bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      disabled={!manualUrl.trim() || uploading}
-                      onClick={handleUrlSave}
-                      className="bg-teal-600 hover:bg-teal-700 text-white"
-                    >
-                      {uploading ? <><Clock className="w-3 h-3 mr-1 animate-spin" /> Saving…</> : <><CheckCircle className="w-3 h-3 mr-1" /> Save Version</>}
-                    </Button>
-                    <button className="text-xs text-slate-400 hover:text-slate-600 underline" onClick={() => setShowUrlInput(false)}>
-                      ← Try file upload
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {uploadError && (
-                <div className="flex items-center gap-2 text-xs text-red-700 bg-red-50 rounded p-2 border border-red-200">
-                  <AlertTriangle className="w-3 h-3 flex-shrink-0" />
-                  {uploadError}
-                </div>
-              )}
+                ) : (
+                  <>
+                    <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1" />
+                    <p className="text-sm text-slate-600">Click or drag & drop file here</p>
+                    <p className="text-xs text-slate-400 mt-0.5">PDF, Word, LaTeX — no upload credits needed</p>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
