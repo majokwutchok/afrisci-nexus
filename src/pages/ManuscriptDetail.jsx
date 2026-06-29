@@ -280,18 +280,28 @@ export default function ManuscriptDetail() {
   };
 
   const handleDownloadFullPDF = () => {
-    // If manuscript has a file URL, download directly from there
     if (manuscript.manuscript_file_url) {
-      const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
+      const url = manuscript.manuscript_file_url;
+      let href;
+      if (url.startsWith("data:")) {
+        const [header, base64] = url.split(",");
+        const mime = header.match(/:(.*?);/)?.[1] || "application/pdf";
+        const bytes = atob(base64);
+        const arr = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+        href = URL.createObjectURL(new Blob([arr], { type: mime }));
+      } else {
+        href = convertToAfriSciURL(url);
+      }
+      const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
       const link = document.createElement('a');
-      link.href = afrisciUrl;
-      link.download = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50) + "_full.pdf";
+      link.href = href;
+      link.download = fn + "_full.pdf";
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } else {
-      // Fallback: build PDF from formatted body
       const doc = buildPDF(manuscript);
       const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
       doc.save(`${fn}_full.pdf`);
