@@ -77,10 +77,19 @@ function EditManuscriptModal({ manuscript, onClose, onSaved }) {
   const [authors, setAuthors] = useState(
     manuscript.authors?.length ? manuscript.authors.map(a => ({ ...a })) : [{ name: "", email: "", affiliation: "", orcid: "", is_corresponding: false }]
   );
+  const [keywords, setKeywords] = useState(manuscript.keywords || []);
+  const [keywordInput, setKeywordInput] = useState("");
   const [pdfUploading, setPdfUploading] = useState(false);
   const [pdfDone, setPdfDone] = useState(!!manuscript.manuscript_file_url);
   const [saving, setSaving] = useState(false);
   const pdfRef = useRef(null);
+
+  const addKeyword = () => {
+    const kw = keywordInput.trim();
+    if (kw && !keywords.includes(kw)) setKeywords(prev => [...prev, kw]);
+    setKeywordInput("");
+  };
+  const removeKeyword = (kw) => setKeywords(prev => prev.filter(k => k !== kw));
 
   const updateAuthor = (i, field, value) =>
     setAuthors(prev => prev.map((a, idx) => idx === i ? { ...a, [field]: value } : a));
@@ -106,6 +115,7 @@ function EditManuscriptModal({ manuscript, onClose, onSaved }) {
       title: title.trim(),
       abstract: abstract.trim(),
       authors,
+      keywords,
     });
     setSaving(false);
     onSaved();
@@ -210,6 +220,31 @@ function EditManuscriptModal({ manuscript, onClose, onSaved }) {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Keywords */}
+          <div>
+            <Label className="text-sm font-semibold text-slate-700">Keywords</Label>
+            <div className="mt-1 flex gap-2">
+              <Input
+                value={keywordInput}
+                onChange={e => setKeywordInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addKeyword(); } }}
+                className="bg-white border-slate-300 h-8 text-sm"
+                placeholder="Type keyword and press Enter…"
+              />
+              <Button size="sm" variant="outline" onClick={addKeyword} className="text-xs shrink-0">Add</Button>
+            </div>
+            {keywords.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {keywords.map(kw => (
+                  <span key={kw} className="inline-flex items-center gap-1 bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-full px-2.5 py-0.5">
+                    {kw}
+                    <button onClick={() => removeKeyword(kw)} className="text-blue-400 hover:text-blue-700 leading-none">&times;</button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* PDF Upload */}
