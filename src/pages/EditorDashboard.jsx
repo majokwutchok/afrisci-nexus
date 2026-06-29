@@ -15,7 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen, Hash, FileEdit, Globe, History } from "lucide-react";
+import { Edit, UserPlus, Check, X, Mail, Settings, AlertCircle, BookOpen, Hash, FileEdit, Globe, History, Layers } from "lucide-react";
+import BulkManuscriptActions from "../components/editor/BulkManuscriptActions";
 import AutomatedReminderSystem from "../components/admin/AutomatedReminderSystem";
 import ReviewerDatabase from "../components/editor/ReviewerDatabase";
 import JournalManagementPanel from "../components/editor/JournalManagementPanel";
@@ -358,6 +359,9 @@ Editorial Team`
               <TabsTrigger value="published_manager" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg flex items-center gap-1">
                 <Globe className="w-4 h-4" /> Published Articles
               </TabsTrigger>
+              <TabsTrigger value="bulk_actions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg flex items-center gap-1">
+                <Layers className="w-4 h-4" /> Bulk Actions
+              </TabsTrigger>
               <TabsTrigger value="reminders" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg">Reminders</TabsTrigger>
             </TabsList>
           </div>
@@ -451,6 +455,10 @@ Editorial Team`
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
               <PublishedArticleManager manuscripts={manuscripts} onRefresh={loadData} />
             </div>
+          </TabsContent>
+
+          <TabsContent value="bulk_actions" className="mt-4">
+            <BulkManuscriptActions manuscripts={manuscripts} onRefresh={loadData} />
           </TabsContent>
 
           <TabsContent value="reminders" className="mt-4">
