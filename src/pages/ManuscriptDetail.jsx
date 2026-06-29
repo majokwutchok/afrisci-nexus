@@ -300,10 +300,21 @@ export default function ManuscriptDetail() {
   };
 
   const handleOpenFullArticle = () => {
-    // Open article in new tab using afriscinexus.com shareable link
     if (manuscript.manuscript_file_url) {
-      const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
-      window.open(afrisciUrl, '_blank');
+      const url = manuscript.manuscript_file_url;
+      if (url.startsWith("data:")) {
+        // Base64 data URL — convert to Blob and open in new tab
+        const [header, base64] = url.split(",");
+        const mime = header.match(/:(.*?);/)?.[1] || "application/pdf";
+        const bytes = atob(base64);
+        const arr = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+        const blob = new Blob([arr], { type: mime });
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, "_blank");
+      } else {
+        window.open(convertToAfriSciURL(url), "_blank");
+      }
     }
     trackView(manuscript.id, "full_text", manuscript);
   };

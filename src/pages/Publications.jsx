@@ -199,8 +199,18 @@ const PublicationCard = ({ manuscript, journal }) => {
   const handleOpenFullArticle = (e) => {
     e.preventDefault();
     if (manuscript.manuscript_file_url) {
-      const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
-      window.open(afrisciUrl, '_blank');
+      const url = manuscript.manuscript_file_url;
+      if (url.startsWith("data:")) {
+        const [header, base64] = url.split(",");
+        const mime = header.match(/:(.*?);/)?.[1] || "application/pdf";
+        const bytes = atob(base64);
+        const arr = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+        const blob = new Blob([arr], { type: mime });
+        window.open(URL.createObjectURL(blob), "_blank");
+      } else {
+        window.open(convertToAfriSciURL(url), "_blank");
+      }
     }
     setViews(v => v + 1);
     trackView(manuscript.id, "full_text", { ...manuscript, view_count: views });
