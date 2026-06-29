@@ -10,24 +10,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-   Search,
-   FileText,
-   Download,
-   TrendingUp,
-   Calendar,
-   Users,
-   BookOpen,
-   Eye
- } from 'lucide-react'; // FileText already imported, used in OpenFullArticle button
+import { Search, FileText, Download, TrendingUp, Calendar, Users, BookOpen, Eye } from 'lucide-react';
 import AISummary from '../components/publication/AISummary';
 import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
 import { stampAfriSciNexus } from '@/utils/pdfStamp';
-import { convertToAfriSciURL } from '@/utils/afrisciLinks';
-import { openPDFInNewTab, downloadPDF } from '@/utils/pdfOpen';
+import { downloadPDF } from '@/utils/pdfOpen';
 import { generateArticleCoverImage } from '@/utils/articleCoverGenerator';
 import { trackView } from '@/utils/trackEngagement';
+import PDFViewerModal from '@/components/publication/PDFViewerModal';
 
 function buildAbstractPDF(manuscript, journal) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -72,8 +63,8 @@ function buildAbstractPDF(manuscript, journal) {
   }
 
   doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(100, 100, 100);
-   doc.text("For the full article, visit: https://afriscinexus.com or use the DOI link above.", margin, y + 6);
-   doc.setTextColor(0, 0, 0);
+  doc.text("For the full article, visit: https://afriscinexus.com or use the DOI link above.", margin, y + 6);
+  doc.setTextColor(0, 0, 0);
 
   stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
   return doc;
@@ -129,35 +120,33 @@ function buildFullPDF(manuscript, journal) {
   } else {
     doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 8;
     doc.setFont("times", "bold"); doc.setFontSize(12); doc.text("Full Article", margin, y); y += 7;
-     doc.setFont("times", "normal"); doc.setFontSize(11);
-     const noteLines = doc.splitTextToSize(
-       "The full text of this article is available online. Please visit https://afriscinexus.com and use the DOI link above to access the complete article.",
-       contentWidth
-     );
-     noteLines.forEach(l => { doc.text(l, margin, y); y += 6; });
-     if (manuscript.manuscript_file_url) {
-       y += 4;
-       doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(0, 0, 180);
-       const doiLink = manuscript.doi ? `https://doi.org/${manuscript.doi}` : `https://afriscinexus.com/article/${manuscript.id}`;
-       const urlLines = doc.splitTextToSize(`Read online: ${doiLink}`, contentWidth);
-       urlLines.forEach(l => { doc.text(l, margin, y); y += 5; });
-       doc.setTextColor(0, 0, 0);
-     }
+    doc.setFont("times", "normal"); doc.setFontSize(11);
+    const noteLines = doc.splitTextToSize(
+      "The full text of this article is available online. Please visit https://afriscinexus.com and use the DOI link above to access the complete article.",
+      contentWidth
+    );
+    noteLines.forEach(l => { doc.text(l, margin, y); y += 6; });
+    if (manuscript.manuscript_file_url) {
+      y += 4;
+      doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(0, 0, 180);
+      const doiLink = manuscript.doi ? `https://doi.org/${manuscript.doi}` : `https://afriscinexus.com/article/${manuscript.id}`;
+      const urlLines = doc.splitTextToSize(`Read online: ${doiLink}`, contentWidth);
+      urlLines.forEach(l => { doc.text(l, margin, y); y += 5; });
+      doc.setTextColor(0, 0, 0);
+    }
   }
 
   stampAfriSciNexus(doc, journal?.title || "AfriSci Nexus Discovery");
   return doc;
 }
 
-const PublicationCard = ({ manuscript, journal }) => {
+const PublicationCard = ({ manuscript, journal, onReadFull }) => {
   const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
 
-  // Live engagement counters — update optimistically on every interaction
   const [views, setViews] = React.useState(manuscript.view_count || 0);
   const [downloads, setDownloads] = React.useState(manuscript.download_count || 0);
-  
-  // Generate dynamic cover image for social media
   const [coverImage, setCoverImage] = React.useState(manuscript.cover_image_url);
+
   React.useEffect(() => {
     if (!coverImage && journal) {
       const generated = generateArticleCoverImage(manuscript, journal);
@@ -192,139 +181,114 @@ const PublicationCard = ({ manuscript, journal }) => {
 
   const handleOpenFullArticle = (e) => {
     e.preventDefault();
-    openPDFInNewTab(manuscript.manuscript_file_url);
+    onReadFull(manuscript);
     setViews(v => v + 1);
     trackView(manuscript.id, "full_text", { ...manuscript, view_count: views });
   };
 
   return (
-  <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
-    <CardHeader className="pb-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)} onClick={handleTitleClick}>
-            <CardTitle className="text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight line-clamp-2">
-              {manuscript.title}
-            </CardTitle>
-          </Link>
-          <p className="text-sm text-slate-600 font-medium mt-2">
-            {manuscript.authors?.map(a => a.name).join(', ') || 'Unknown Authors'}
-          </p>
+    <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
+      <CardHeader className="pb-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)} onClick={handleTitleClick}>
+              <CardTitle className="text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight line-clamp-2">
+                {manuscript.title}
+              </CardTitle>
+            </Link>
+            <p className="text-sm text-slate-600 font-medium mt-2">
+              {manuscript.authors?.map(a => a.name).join(', ') || 'Unknown Authors'}
+            </p>
+          </div>
+          <Badge className="bg-emerald-100 text-emerald-800 flex-shrink-0">Published</Badge>
         </div>
-        <Badge className="bg-emerald-100 text-emerald-800 flex-shrink-0">Published</Badge>
-      </div>
-    </CardHeader>
-    <CardContent className="space-y-4">
-      <p className="text-slate-600 text-sm line-clamp-3">{manuscript.abstract}</p>
-      <AISummary title={manuscript.title} abstract={manuscript.abstract} compact />
-      
-      <div className="flex flex-wrap gap-2">
-        {manuscript.keywords?.slice(0, 4).map((keyword) => (
-          <Badge key={keyword} variant="outline" className="text-xs">
-            {keyword}
-          </Badge>
-        ))}
-        {manuscript.keywords?.length > 4 && (
-          <Badge variant="outline" className="text-xs text-slate-500">
-            +{manuscript.keywords.length - 4}
-          </Badge>
-        )}
-      </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-slate-600 text-sm line-clamp-3">{manuscript.abstract}</p>
+        <AISummary title={manuscript.title} abstract={manuscript.abstract} compact />
+        
+        <div className="flex flex-wrap gap-2">
+          {manuscript.keywords?.slice(0, 4).map((keyword) => (
+            <Badge key={keyword} variant="outline" className="text-xs">{keyword}</Badge>
+          ))}
+          {manuscript.keywords?.length > 4 && (
+            <Badge variant="outline" className="text-xs text-slate-500">+{manuscript.keywords.length - 4}</Badge>
+          )}
+        </div>
 
-      <div className="flex items-center gap-4 text-xs text-slate-500 pt-2 border-t border-slate-100">
-        <div className="flex items-center gap-1">
-          <BookOpen className="w-3 h-3" />
-          <span>{journal?.title || 'Unknown Journal'}</span>
+        <div className="flex items-center gap-4 text-xs text-slate-500 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-1">
+            <BookOpen className="w-3 h-3" />
+            <span>{journal?.title || 'Unknown Journal'}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar className="w-3 h-3" />
+            <span>{manuscript.publication_date ? format(new Date(manuscript.publication_date), 'MMM yyyy') : 'Recently'}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <Calendar className="w-3 h-3" />
-          <span>{manuscript.publication_date ? format(new Date(manuscript.publication_date), 'MMM yyyy') : 'Recently'}</span>
+
+        {manuscript.doi && (
+          <a
+            href={`https://doi.org/${manuscript.doi}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-mono text-blue-600 hover:text-blue-800 hover:underline truncate block"
+          >
+            https://doi.org/{manuscript.doi}
+          </a>
+        )}
+
+        <div className="flex items-center gap-4 text-xs bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+          <div className="flex items-center gap-1 text-slate-600">
+            <Eye className="w-3 h-3 text-blue-500" />
+            <span className="font-semibold tabular-nums">{views.toLocaleString()}</span>
+            <span className="text-slate-400">views</span>
+          </div>
+          <div className="w-px h-3 bg-slate-200" />
+          <div className="flex items-center gap-1 text-slate-600">
+            <Download className="w-3 h-3 text-emerald-500" />
+            <span className="font-semibold tabular-nums">{downloads.toLocaleString()}</span>
+            <span className="text-slate-400">downloads</span>
+          </div>
+          {manuscript.citation_count > 0 && (
+            <>
+              <div className="w-px h-3 bg-slate-200" />
+              <div className="flex items-center gap-1 text-slate-600">
+                <TrendingUp className="w-3 h-3 text-amber-500" />
+                <span className="font-semibold tabular-nums">{manuscript.citation_count}</span>
+                <span className="text-slate-400">citations</span>
+              </div>
+            </>
+          )}
         </div>
-      </div>
-      {manuscript.doi && (
-        <a
-          href={`https://doi.org/${manuscript.doi}`}
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs font-mono text-blue-600 hover:text-blue-800 hover:underline truncate block"
-        >
-          https://doi.org/{manuscript.doi}
-        </a>
-      )}
-      <div className="flex items-center gap-4 text-xs bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
-        <div className="flex items-center gap-1 text-slate-600">
-          <Eye className="w-3 h-3 text-blue-500" />
-          <span className="font-semibold tabular-nums">{views.toLocaleString()}</span>
-          <span className="text-slate-400">views</span>
-        </div>
-        <div className="w-px h-3 bg-slate-200" />
-        <div className="flex items-center gap-1 text-slate-600">
-          <Download className="w-3 h-3 text-emerald-500" />
-          <span className="font-semibold tabular-nums">{downloads.toLocaleString()}</span>
-          <span className="text-slate-400">downloads</span>
-        </div>
-        {manuscript.citation_count > 0 && (
-          <>
-            <div className="w-px h-3 bg-slate-200" />
-            <div className="flex items-center gap-1 text-slate-600">
-              <TrendingUp className="w-3 h-3 text-amber-500" />
-              <span className="font-semibold tabular-nums">{manuscript.citation_count}</span>
-              <span className="text-slate-400">citations</span>
+
+        <div className="flex flex-col gap-3 pt-3">
+          {coverImage && (
+            <div className="rounded-lg overflow-hidden border border-slate-200">
+              <img src={coverImage} alt={manuscript.title} className="w-full h-32 object-cover" />
             </div>
-          </>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-3 pt-3">
-         {/* Cover image preview */}
-         {coverImage && (
-           <div className="rounded-lg overflow-hidden border border-slate-200">
-             <img 
-               src={coverImage} 
-               alt={manuscript.title}
-               className="w-full h-32 object-cover"
-             />
-           </div>
-         )}
-         <div className="flex flex-wrap gap-2">
-         <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>
-           <Button size="sm" variant="outline" className="text-xs">
-             View Details & Share
-           </Button>
-         </Link>
-         <Button
-           size="sm"
-           variant="outline"
-           className="text-xs border-blue-400 text-blue-700 hover:bg-blue-50"
-           onClick={handleAbstractPDF}
-         >
-           <Download className="w-3 h-3 mr-1" />
-           Abstract PDF
-         </Button>
-         {manuscript.manuscript_file_url && (
-           <>
-             <Button
-               size="sm"
-               className="text-xs bg-teal-600 hover:bg-teal-700 text-white"
-               onClick={handleOpenFullArticle}
-             >
-               <FileText className="w-3 h-3 mr-1" />
-               Read Full
-             </Button>
-             <Button
-               size="sm"
-               className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-               onClick={handleFullPDF}
-             >
-               <Download className="w-3 h-3 mr-1" />
-               Download
-             </Button>
-           </>
-           )}
-           </div>
-           </div>
-    </CardContent>
-  </Card>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>
+              <Button size="sm" variant="outline" className="text-xs">View Details & Share</Button>
+            </Link>
+            <Button size="sm" variant="outline" className="text-xs border-blue-400 text-blue-700 hover:bg-blue-50" onClick={handleAbstractPDF}>
+              <Download className="w-3 h-3 mr-1" />Abstract PDF
+            </Button>
+            {manuscript.manuscript_file_url && (
+              <>
+                <Button size="sm" className="text-xs bg-teal-600 hover:bg-teal-700 text-white" onClick={handleOpenFullArticle}>
+                  <FileText className="w-3 h-3 mr-1" />Read Full
+                </Button>
+                <Button size="sm" className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white" onClick={handleFullPDF}>
+                  <Download className="w-3 h-3 mr-1" />Download
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -338,6 +302,7 @@ export default function PublicationsPage() {
   const [sortBy, setSortBy] = useState('recent');
   const [filterJournal, setFilterJournal] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewingPdf, setViewingPdf] = useState(null); // { url, title, filename }
 
   useEffect(() => {
     loadData();
@@ -385,13 +350,28 @@ export default function PublicationsPage() {
     currentPage * PAGE_SIZE
   );
 
-  // Reset to page 1 when filters change
   const handleSearch = (val) => { setSearchQuery(val); setCurrentPage(1); };
   const handleSort = (val) => { setSortBy(val); setCurrentPage(1); };
   const handleJournal = (val) => { setFilterJournal(val); setCurrentPage(1); };
 
+  const handleReadFull = (manuscript) => {
+    setViewingPdf({
+      url: manuscript.manuscript_file_url,
+      title: manuscript.title,
+      filename: (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50) + "_full.pdf"
+    });
+  };
+
   return (
     <div className="p-6 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 min-h-screen">
+      {viewingPdf && (
+        <PDFViewerModal
+          url={viewingPdf.url}
+          title={viewingPdf.title}
+          filename={viewingPdf.filename}
+          onClose={() => setViewingPdf(null)}
+        />
+      )}
       <SEO
         title="Published Research — Peer-Reviewed African Scientific Articles"
         description="Browse thousands of peer-reviewed research articles published in AfriSci Nexus journals. Discover cutting-edge science, medicine, agriculture, and social research from African scholars."
@@ -407,7 +387,6 @@ export default function PublicationsPage() {
         }}
       />
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl flex items-center justify-center">
@@ -420,7 +399,6 @@ export default function PublicationsPage() {
           </p>
         </div>
 
-        {/* Stats Bar */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="border-0 bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-lg">
             <CardContent className="p-6 text-center">
@@ -452,7 +430,6 @@ export default function PublicationsPage() {
           </Card>
         </div>
 
-        {/* Search and Filters */}
         <Card className="border-0 bg-white/70 backdrop-blur-sm shadow-lg">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
@@ -482,9 +459,7 @@ export default function PublicationsPage() {
                 <SelectContent>
                   <SelectItem value="all">All Journals</SelectItem>
                   {journals.map((journal) => (
-                    <SelectItem key={journal.id} value={journal.id}>
-                      {journal.title}
-                    </SelectItem>
+                    <SelectItem key={journal.id} value={journal.id}>{journal.title}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -492,7 +467,6 @@ export default function PublicationsPage() {
           </CardContent>
         </Card>
 
-        {/* Results Count */}
         <div className="flex items-center justify-between">
           <p className="text-slate-600 font-medium">
             {isLoading ? (
@@ -506,7 +480,6 @@ export default function PublicationsPage() {
           </p>
         </div>
 
-        {/* Publications Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {isLoading ? (
             Array(6).fill(0).map((_, i) => (
@@ -533,6 +506,7 @@ export default function PublicationsPage() {
                 key={manuscript.id}
                 manuscript={manuscript}
                 journal={getJournalById(manuscript.journal_id)}
+                onReadFull={handleReadFull}
               />
             ))
           ) : (
@@ -541,9 +515,7 @@ export default function PublicationsPage() {
                 <FileText className="w-12 h-12 text-slate-400" />
               </div>
               <h3 className="text-xl font-semibold text-slate-900 mb-2">No articles found</h3>
-              <p className="text-slate-600 max-w-md mx-auto">
-                Try adjusting your search criteria or filters to find more articles
-              </p>
+              <p className="text-slate-600 max-w-md mx-auto">Try adjusting your search criteria or filters to find more articles</p>
             </div>
           )}
         </div>

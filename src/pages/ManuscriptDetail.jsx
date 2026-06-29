@@ -20,7 +20,8 @@ import {
 import { jsPDF } from "jspdf";
 import { stampAfriSciNexus } from "@/utils/pdfStamp";
 import { convertToAfriSciURL, getArticleReadOnlineURL } from "@/utils/afrisciLinks";
-import { openPDFInNewTab, downloadPDF } from "@/utils/pdfOpen";
+import { downloadPDF } from "@/utils/pdfOpen";
+import PDFViewerModal from "@/components/publication/PDFViewerModal";
 import { format } from "date-fns";
 import ProgressTracker from "../components/submission/ProgressTracker";
 import AISummary from "../components/publication/AISummary";
@@ -57,6 +58,7 @@ export default function ManuscriptDetail() {
   const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState(null);
   const [coverImage, setCoverImage] = useState(null);
+  const [pdfOpen, setPdfOpen] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -293,7 +295,7 @@ export default function ManuscriptDetail() {
   };
 
   const handleOpenFullArticle = () => {
-    openPDFInNewTab(manuscript.manuscript_file_url);
+    setPdfOpen(true);
     trackView(manuscript.id, "full_text", manuscript);
   };
 
@@ -404,6 +406,14 @@ export default function ManuscriptDetail() {
 
   return (
     <div className="p-6 bg-slate-50 min-h-screen">
+      {pdfOpen && manuscript?.manuscript_file_url && (
+        <PDFViewerModal
+          url={manuscript.manuscript_file_url}
+          title={manuscript.title}
+          filename={(manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50) + "_full.pdf"}
+          onClose={() => setPdfOpen(false)}
+        />
+      )}
       <ScholarMetaTags manuscript={manuscript} journal={journal} coverImage={coverImage || manuscript?.cover_image_url} />
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-3 gap-8">
