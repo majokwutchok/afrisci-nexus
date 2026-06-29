@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
 import { stampAfriSciNexus } from '@/utils/pdfStamp';
 import { convertToAfriSciURL } from '@/utils/afrisciLinks';
+import { openPDFInNewTab, downloadPDF } from '@/utils/pdfOpen';
 import { generateArticleCoverImage } from '@/utils/articleCoverGenerator';
 import { trackView } from '@/utils/trackEngagement';
 
@@ -180,25 +181,7 @@ const PublicationCard = ({ manuscript, journal }) => {
   const handleFullPDF = (e) => {
     e.preventDefault();
     if (manuscript.manuscript_file_url) {
-      const url = manuscript.manuscript_file_url;
-      let href;
-      if (url.startsWith("data:")) {
-        const [header, base64] = url.split(",");
-        const mime = header.match(/:(.*?);/)?.[1] || "application/pdf";
-        const bytes = atob(base64);
-        const arr = new Uint8Array(bytes.length);
-        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-        href = URL.createObjectURL(new Blob([arr], { type: mime }));
-      } else {
-        href = convertToAfriSciURL(url);
-      }
-      const link = document.createElement('a');
-      link.href = href;
-      link.download = fn + "_full.pdf";
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      downloadPDF(manuscript.manuscript_file_url, fn + "_full.pdf");
     } else {
       const doc = buildFullPDF(manuscript, journal);
       doc.save(`${fn}_full.pdf`);
@@ -209,20 +192,7 @@ const PublicationCard = ({ manuscript, journal }) => {
 
   const handleOpenFullArticle = (e) => {
     e.preventDefault();
-    if (manuscript.manuscript_file_url) {
-      const url = manuscript.manuscript_file_url;
-      if (url.startsWith("data:")) {
-        const [header, base64] = url.split(",");
-        const mime = header.match(/:(.*?);/)?.[1] || "application/pdf";
-        const bytes = atob(base64);
-        const arr = new Uint8Array(bytes.length);
-        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-        const blob = new Blob([arr], { type: mime });
-        window.open(URL.createObjectURL(blob), "_blank");
-      } else {
-        window.open(convertToAfriSciURL(url), "_blank");
-      }
-    }
+    openPDFInNewTab(manuscript.manuscript_file_url);
     setViews(v => v + 1);
     trackView(manuscript.id, "full_text", { ...manuscript, view_count: views });
   };

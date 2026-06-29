@@ -20,6 +20,7 @@ import {
 import { jsPDF } from "jspdf";
 import { stampAfriSciNexus } from "@/utils/pdfStamp";
 import { convertToAfriSciURL, getArticleReadOnlineURL } from "@/utils/afrisciLinks";
+import { openPDFInNewTab, downloadPDF } from "@/utils/pdfOpen";
 import { format } from "date-fns";
 import ProgressTracker from "../components/submission/ProgressTracker";
 import AISummary from "../components/publication/AISummary";
@@ -281,26 +282,8 @@ export default function ManuscriptDetail() {
 
   const handleDownloadFullPDF = () => {
     if (manuscript.manuscript_file_url) {
-      const url = manuscript.manuscript_file_url;
-      let href;
-      if (url.startsWith("data:")) {
-        const [header, base64] = url.split(",");
-        const mime = header.match(/:(.*?);/)?.[1] || "application/pdf";
-        const bytes = atob(base64);
-        const arr = new Uint8Array(bytes.length);
-        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-        href = URL.createObjectURL(new Blob([arr], { type: mime }));
-      } else {
-        href = convertToAfriSciURL(url);
-      }
-      const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
-      const link = document.createElement('a');
-      link.href = href;
-      link.download = fn + "_full.pdf";
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50) + "_full.pdf";
+      downloadPDF(manuscript.manuscript_file_url, fn);
     } else {
       const doc = buildPDF(manuscript);
       const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
@@ -310,22 +293,7 @@ export default function ManuscriptDetail() {
   };
 
   const handleOpenFullArticle = () => {
-    if (manuscript.manuscript_file_url) {
-      const url = manuscript.manuscript_file_url;
-      if (url.startsWith("data:")) {
-        // Base64 data URL — convert to Blob and open in new tab
-        const [header, base64] = url.split(",");
-        const mime = header.match(/:(.*?);/)?.[1] || "application/pdf";
-        const bytes = atob(base64);
-        const arr = new Uint8Array(bytes.length);
-        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-        const blob = new Blob([arr], { type: mime });
-        const blobUrl = URL.createObjectURL(blob);
-        window.open(blobUrl, "_blank");
-      } else {
-        window.open(convertToAfriSciURL(url), "_blank");
-      }
-    }
+    openPDFInNewTab(manuscript.manuscript_file_url);
     trackView(manuscript.id, "full_text", manuscript);
   };
 
