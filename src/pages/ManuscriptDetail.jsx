@@ -405,7 +405,7 @@ export default function ManuscriptDetail() {
   }
 
   return (
-    <div className="p-6 bg-slate-50 min-h-screen">
+    <div className="px-3 sm:px-6 py-4 sm:py-6 bg-slate-50 min-h-screen">
       {pdfOpen && manuscript?.manuscript_file_url && (
         <PDFViewerModal
           url={manuscript.manuscript_file_url}
@@ -416,67 +416,75 @@ export default function ManuscriptDetail() {
       )}
       <ScholarMetaTags manuscript={manuscript} journal={journal} coverImage={coverImage || manuscript?.cover_image_url} />
       <div className="max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
+
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-8">
             <Card className="bg-white shadow-lg">
-              <CardHeader>
-                <Badge className={`${statusColors[manuscript.status]} w-fit mb-4`}>
-                  Status: {manuscript.status.replace('_', ' ')}
+              <CardHeader className="px-4 sm:px-6 pb-2 sm:pb-4">
+                <Badge className={`${statusColors[manuscript.status]} w-fit mb-3`}>
+                  {manuscript.status.replace(/_/g, ' ')}
                 </Badge>
-                <CardTitle className="text-3xl font-bold text-slate-900">{manuscript.title}</CardTitle>
-                <div className="text-sm text-slate-500 flex items-center gap-6 pt-2">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" />
-                    <span>{journal?.title || 'Journal not available'}</span>
+                <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 leading-tight">
+                  {manuscript.title}
+                </CardTitle>
+                {/* Meta row — stacks on mobile */}
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-slate-500 pt-2">
+                  <div className="flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="line-clamp-1">{journal?.title || 'Journal not available'}</span>
                   </div>
                   {manuscript.submission_date && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
                       <span>Submitted: {format(new Date(manuscript.submission_date), 'MMM d, yyyy')}</span>
                     </div>
                   )}
                   {manuscript.review_type && (
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      <span>{manuscript.review_type.replace('_', ' ')} review</span>
+                    <div className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>{manuscript.review_type.replace(/_/g, ' ')} review</span>
                     </div>
                   )}
                 </div>
+                {/* DOI + Published date — wraps on mobile */}
                 {manuscript.doi && (
-                  <div className="flex items-center gap-3 pt-3 mt-2 border-t border-slate-100">
-                    <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-                      <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">DOI</span>
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 pt-3 mt-2 border-t border-slate-100">
+                    <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 min-w-0">
+                      <span className="text-xs font-bold text-blue-600 uppercase tracking-widest flex-shrink-0">DOI</span>
                       <a
                         href={`https://doi.org/${manuscript.doi}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-sm font-mono text-blue-700 hover:text-blue-900 hover:underline font-semibold"
+                        className="text-xs sm:text-sm font-mono text-blue-700 hover:text-blue-900 hover:underline font-semibold truncate"
                       >
                         https://doi.org/{manuscript.doi}
                       </a>
                     </div>
                     {manuscript.publication_date && (
-                      <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 font-medium">
-                        Published: {new Date(manuscript.publication_date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 font-medium self-start">
+                        Published: {new Date(manuscript.publication_date).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </span>
                     )}
                   </div>
                 )}
               </CardHeader>
-              <CardContent className="space-y-6">
+
+              <CardContent className="px-4 sm:px-6 space-y-5 sm:space-y-6">
                 {manuscript.authors && manuscript.authors.length > 0 && (
                   <div>
-                    <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2"><Users className="w-5 h-5"/>Authors</h3>
-                    <p className="text-slate-700">
-                      {manuscript.authors.map(a => `${a.name} (${a.affiliation || 'N/A'})`).join(', ')}
+                    <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2 text-sm sm:text-base">
+                      <Users className="w-4 h-4"/>Authors
+                    </h3>
+                    <p className="text-slate-700 text-sm leading-relaxed">
+                      {manuscript.authors.map(a => `${a.name}${a.affiliation ? ` (${a.affiliation})` : ''}`).join(', ')}
                     </p>
                   </div>
                 )}
                 <Separator />
                 <div>
-                  <h3 className="font-bold text-slate-800 mb-2">Abstract</h3>
-                  <p className="text-slate-700 leading-relaxed">{manuscript.abstract}</p>
+                  <h3 className="font-bold text-slate-800 mb-2 text-sm sm:text-base">Abstract</h3>
+                  <p className="text-slate-700 leading-relaxed text-sm sm:text-base">{manuscript.abstract}</p>
                   <div className="mt-4">
                     <AISummary title={manuscript.title} abstract={manuscript.abstract} />
                   </div>
@@ -485,62 +493,63 @@ export default function ManuscriptDetail() {
                   <>
                     <Separator />
                     <div>
-                      <h3 className="font-bold text-slate-800 mb-2">Keywords</h3>
+                      <h3 className="font-bold text-slate-800 mb-2 text-sm sm:text-base">Keywords</h3>
                       <div className="flex flex-wrap gap-2">
-                        {manuscript.keywords.map(kw => <Badge key={kw} variant="secondary">{kw}</Badge>)}
+                        {manuscript.keywords.map(kw => <Badge key={kw} variant="secondary" className="text-xs">{kw}</Badge>)}
                       </div>
                     </div>
                   </>
                 )}
                 <Separator />
-                {/* Full Article Body (formatted HTML from editor) */}
+
+                {/* Full Article Body */}
                 {manuscript.formatted_body ? (
                   <div>
-                    <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-indigo-500" /> Full Article
+                    <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm sm:text-base">
+                      <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" /> Full Article
                     </h3>
                     <div
-                      className="prose max-w-none p-6 bg-slate-50 rounded-xl border border-slate-200"
-                      style={{ fontFamily: "Times New Roman, serif", fontSize: "12pt", lineHeight: "1.8", color: "#1e293b" }}
+                      className="prose max-w-none p-4 sm:p-6 bg-slate-50 rounded-xl border border-slate-200 text-sm sm:text-base overflow-x-auto"
+                      style={{ fontFamily: "Times New Roman, serif", lineHeight: "1.8", color: "#1e293b" }}
                       dangerouslySetInnerHTML={{ __html: manuscript.formatted_body }}
                     />
                   </div>
                 ) : manuscript.manuscript_file_url ? (
                   <div>
-                    <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-indigo-500" /> Read Article
+                    <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm sm:text-base">
+                      <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" /> Read Article
                     </h3>
                     <AnnotatedPDFViewer fileUrl={manuscript.manuscript_file_url} manuscriptId={manuscript.id} />
                   </div>
                 ) : null}
+
                 <Separator />
+
+                {/* Action Buttons — full-width stacked on mobile */}
                 <div className="space-y-3">
-                   {/* Download Actions */}
-                   <div className="flex flex-wrap items-center gap-2">
-                     <Button onClick={handleDownloadAbstractPDF} variant="outline" className="border-blue-600 text-blue-700 hover:bg-blue-50">
-                       <Download className="w-4 h-4 mr-2"/>Abstract PDF
-                     </Button>
-                     {manuscript.manuscript_file_url && (
-                       <>
-                         <Button onClick={handleOpenFullArticle} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                           <FileText className="w-4 h-4 mr-2"/>Read Full Article
-                         </Button>
-                         <Button onClick={handleDownloadFullPDF} className="bg-blue-700 hover:bg-blue-800 text-white">
-                           <Download className="w-4 h-4 mr-2"/>Download Full PDF
-                         </Button>
-                       </>
-                     )}
-                   </div>
+                  <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2">
+                    <Button onClick={handleDownloadAbstractPDF} variant="outline" className="w-full sm:w-auto border-blue-600 text-blue-700 hover:bg-blue-50 text-sm">
+                      <Download className="w-4 h-4 mr-2"/>Abstract PDF
+                    </Button>
+                    {manuscript.manuscript_file_url && (
+                      <>
+                        <Button onClick={handleOpenFullArticle} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-sm">
+                          <FileText className="w-4 h-4 mr-2"/>Read Full Article
+                        </Button>
+                        <Button onClick={handleDownloadFullPDF} className="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white text-sm">
+                          <Download className="w-4 h-4 mr-2"/>Download PDF
+                        </Button>
+                      </>
+                    )}
+                  </div>
                   {/* Citation Export */}
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-slate-500 font-medium">Export citation:</span>
-                    <Button variant="outline" className="border-amber-500 text-amber-700 hover:bg-amber-50 gap-2" onClick={handleDownloadBibTeX}>
-                      <Download className="w-4 h-4" />
-                      BibTeX (.bib)
+                    <span className="text-xs text-slate-500 font-medium w-full sm:w-auto">Export citation:</span>
+                    <Button variant="outline" className="flex-1 sm:flex-none border-amber-500 text-amber-700 hover:bg-amber-50 gap-2 text-xs" onClick={handleDownloadBibTeX}>
+                      <Download className="w-3.5 h-3.5" />BibTeX
                     </Button>
-                    <Button variant="outline" className="border-slate-400 text-slate-700 hover:bg-slate-50 gap-2" onClick={handleDownloadRIS}>
-                      <Download className="w-4 h-4" />
-                      RIS / EndNote
+                    <Button variant="outline" className="flex-1 sm:flex-none border-slate-400 text-slate-700 hover:bg-slate-50 gap-2 text-xs" onClick={handleDownloadRIS}>
+                      <Download className="w-3.5 h-3.5" />RIS / EndNote
                     </Button>
                   </div>
                   {/* Share */}
@@ -562,28 +571,29 @@ export default function ManuscriptDetail() {
             {/* Comments Section */}
             {manuscript.status === 'published' && (
               <Card className="bg-white shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5"/> Discussion
+                <CardHeader className="px-4 sm:px-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5"/> Discussion
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
+                <CardContent className="px-4 sm:px-6 space-y-4 sm:space-y-6">
+                  <div className="space-y-3">
                     {comments.map(comment => (
                       <div key={comment.id} className="p-3 bg-slate-50 rounded-lg">
                         <p className="font-bold text-sm text-slate-800">{comment.author_name}</p>
-                        <p className="text-slate-700">{comment.content}</p>
+                        <p className="text-slate-700 text-sm">{comment.content}</p>
                       </div>
                     ))}
                   </div>
                   {currentUser && (
                     <div className="space-y-2">
-                      <Textarea 
+                      <Textarea
                         placeholder="Write a comment..."
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
+                        className="text-sm"
                       />
-                      <Button onClick={handlePostComment}>Post Comment</Button>
+                      <Button onClick={handlePostComment} className="w-full sm:w-auto">Post Comment</Button>
                     </div>
                   )}
                 </CardContent>
@@ -591,31 +601,20 @@ export default function ManuscriptDetail() {
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            <ProgressTracker
-              manuscript={manuscript}
-              showReviewDetails={true}
-            />
-            <DOIPanel
-              manuscript={manuscript}
-              journal={journal}
-              onDOIAssigned={handleDOIAssigned}
-            />
-            <CitationTracker
-              manuscript={manuscript}
-              journal={journal}
-              onCitationAdded={handleCitationAdded}
-            />
+          {/* Sidebar — appears below main content on mobile */}
+          <div className="lg:col-span-1 space-y-4 sm:space-y-6">
+            <ProgressTracker manuscript={manuscript} showReviewDetails={true} />
+            <DOIPanel manuscript={manuscript} journal={journal} onDOIAssigned={handleDOIAssigned} />
+            <CitationTracker manuscript={manuscript} journal={journal} onCitationAdded={handleCitationAdded} />
             <ArticleEngagementMetrics manuscript={manuscript} />
             <ArticleSubscribeWidget manuscript={manuscript} />
-            <ArticleSocialSharing 
-              manuscript={manuscript} 
+            <ArticleSocialSharing
+              manuscript={manuscript}
               journal={journal}
               coverImage={coverImage || manuscript?.cover_image_url}
             />
             <NewsletterSignup />
-            </div>
+          </div>
         </div>
       </div>
     </div>

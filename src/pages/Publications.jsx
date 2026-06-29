@@ -268,22 +268,24 @@ const PublicationCard = ({ manuscript, journal, onReadFull }) => {
               <img src={coverImage} alt={manuscript.title} className="w-full h-32 object-cover" />
             </div>
           )}
-          <div className="flex flex-wrap gap-2">
-            <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>
-              <Button size="sm" variant="outline" className="text-xs">View Details & Share</Button>
+          <div className="grid grid-cols-2 gap-2">
+            <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)} className="col-span-2">
+              <Button size="sm" variant="outline" className="text-xs w-full">View Details & Share</Button>
             </Link>
             <Button size="sm" variant="outline" className="text-xs border-blue-400 text-blue-700 hover:bg-blue-50" onClick={handleAbstractPDF}>
-              <Download className="w-3 h-3 mr-1" />Abstract PDF
+              <Download className="w-3 h-3 mr-1" />Abstract
             </Button>
-            {manuscript.manuscript_file_url && (
+            {manuscript.manuscript_file_url ? (
               <>
                 <Button size="sm" className="text-xs bg-teal-600 hover:bg-teal-700 text-white" onClick={handleOpenFullArticle}>
                   <FileText className="w-3 h-3 mr-1" />Read Full
                 </Button>
-                <Button size="sm" className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white" onClick={handleFullPDF}>
-                  <Download className="w-3 h-3 mr-1" />Download
+                <Button size="sm" className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white col-span-2" onClick={handleFullPDF}>
+                  <Download className="w-3 h-3 mr-1" />Download PDF
                 </Button>
               </>
+            ) : (
+              <div />
             )}
           </div>
         </div>
@@ -363,7 +365,7 @@ export default function PublicationsPage() {
   };
 
   return (
-    <div className="p-6 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 min-h-screen">
+    <div className="px-3 sm:px-6 py-4 sm:py-6 bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 min-h-screen">
       {viewingPdf && (
         <PDFViewerModal
           url={viewingPdf.url}
@@ -388,51 +390,51 @@ export default function PublicationsPage() {
       />
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl flex items-center justify-center">
-              <FileText className="w-6 h-6 text-white" />
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl flex items-center justify-center">
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-slate-900">Published Research</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Published Research</h1>
           </div>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-lg text-slate-600 max-w-2xl mx-auto">
             Explore the latest peer-reviewed scientific articles from across Africa
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
           <Card className="border-0 bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-lg">
-            <CardContent className="p-6 text-center">
-              <FileText className="w-8 h-8 mx-auto mb-2 text-blue-200" />
-              <p className="text-3xl font-bold mb-1">{manuscripts.length}</p>
-              <p className="text-sm text-blue-100">Total Articles</p>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <FileText className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-blue-200" />
+              <p className="text-2xl sm:text-3xl font-bold mb-0.5">{manuscripts.length}</p>
+              <p className="text-xs sm:text-sm text-blue-100">Total Articles</p>
             </CardContent>
           </Card>
           <Card className="border-0 bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-lg">
-            <CardContent className="p-6 text-center">
-              <BookOpen className="w-8 h-8 mx-auto mb-2 text-emerald-200" />
-              <p className="text-3xl font-bold mb-1">{journals.length}</p>
-              <p className="text-sm text-emerald-100">Journals</p>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-emerald-200" />
+              <p className="text-2xl sm:text-3xl font-bold mb-0.5">{journals.length}</p>
+              <p className="text-xs sm:text-sm text-emerald-100">Journals</p>
             </CardContent>
           </Card>
           <Card className="border-0 bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-lg">
-            <CardContent className="p-6 text-center">
-              <Users className="w-8 h-8 mx-auto mb-2 text-purple-200" />
-              <p className="text-3xl font-bold mb-1">{[...new Set(manuscripts.flatMap(m => m.authors?.map(a => a.email) || []))].length}</p>
-              <p className="text-sm text-purple-100">Authors</p>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <Users className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-purple-200" />
+              <p className="text-2xl sm:text-3xl font-bold mb-0.5">{[...new Set(manuscripts.flatMap(m => m.authors?.map(a => a.email) || []))].length}</p>
+              <p className="text-xs sm:text-sm text-purple-100">Authors</p>
             </CardContent>
           </Card>
           <Card className="border-0 bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg">
-            <CardContent className="p-6 text-center">
-              <TrendingUp className="w-8 h-8 mx-auto mb-2 text-amber-200" />
-              <p className="text-3xl font-bold mb-1">{manuscripts.reduce((sum, m) => sum + (m.citation_count || 0), 0)}</p>
-              <p className="text-sm text-amber-100">Total Citations</p>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-amber-200" />
+              <p className="text-2xl sm:text-3xl font-bold mb-0.5">{manuscripts.reduce((sum, m) => sum + (m.citation_count || 0), 0)}</p>
+              <p className="text-xs sm:text-sm text-amber-100">Total Citations</p>
             </CardContent>
           </Card>
         </div>
 
         <Card className="border-0 bg-white/70 backdrop-blur-sm shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-4">
+          <CardContent className="p-3 sm:p-6">
+            <div className="flex flex-col gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <Input
@@ -442,27 +444,29 @@ export default function PublicationsPage() {
                   className="pl-10 py-3 border-slate-200 focus:border-emerald-300 focus:ring-emerald-200 rounded-xl"
                 />
               </div>
-              <Select value={sortBy} onValueChange={handleSort}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Most Recent</SelectItem>
-                  <SelectItem value="citations">Most Cited</SelectItem>
-                  <SelectItem value="views">Most Viewed</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={filterJournal} onValueChange={handleJournal}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="All Journals" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Journals</SelectItem>
-                  {journals.map((journal) => (
-                    <SelectItem key={journal.id} value={journal.id}>{journal.title}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-3">
+                <Select value={sortBy} onValueChange={handleSort}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Most Recent</SelectItem>
+                    <SelectItem value="citations">Most Cited</SelectItem>
+                    <SelectItem value="views">Most Viewed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={filterJournal} onValueChange={handleJournal}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="All Journals" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Journals</SelectItem>
+                    {journals.map((journal) => (
+                      <SelectItem key={journal.id} value={journal.id}>{journal.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -480,7 +484,7 @@ export default function PublicationsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {isLoading ? (
             Array(6).fill(0).map((_, i) => (
               <Card key={i} className="border-0 bg-white/80">

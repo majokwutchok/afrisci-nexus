@@ -58,31 +58,33 @@ export default function PDFViewerModal({ url, title, filename, onClose }) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       {/* Toolbar */}
-      <div className="flex items-center justify-between bg-slate-900 text-white px-4 py-3 flex-shrink-0 shadow-xl">
-        <span className="font-semibold text-sm truncate max-w-lg text-slate-100">{title || "Article"}</span>
-        <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="flex items-center justify-between bg-slate-900 text-white px-3 sm:px-4 py-2 sm:py-3 flex-shrink-0 shadow-xl gap-2">
+        <span className="font-semibold text-xs sm:text-sm truncate flex-1 text-slate-100 min-w-0">{title || "Article"}</span>
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <Button
             size="sm"
             variant="ghost"
-            className="text-white hover:text-emerald-300 hover:bg-white/10"
+            className="text-white hover:text-emerald-300 hover:bg-white/10 px-2 sm:px-3"
             onClick={() => downloadPDF(url, filename || "article.pdf")}
           >
-            <Download className="w-4 h-4 mr-1" /> Download
+            <Download className="w-4 h-4 sm:mr-1" />
+            <span className="hidden sm:inline">Download</span>
           </Button>
           {!isBase64 && (
             <Button
               size="sm"
               variant="ghost"
-              className="text-white hover:text-sky-300 hover:bg-white/10"
+              className="text-white hover:text-sky-300 hover:bg-white/10 px-2 sm:px-3"
               onClick={handleOpenInNewTab}
             >
-              <ExternalLink className="w-4 h-4 mr-1" /> Open Tab
+              <ExternalLink className="w-4 h-4 sm:mr-1" />
+              <span className="hidden sm:inline">Open Tab</span>
             </Button>
           )}
           <Button
             size="sm"
             variant="ghost"
-            className="text-white hover:text-red-300 hover:bg-white/10"
+            className="text-white hover:text-red-300 hover:bg-white/10 px-2"
             onClick={onClose}
           >
             <X className="w-5 h-5" />
