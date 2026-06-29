@@ -150,6 +150,10 @@ function buildFullPDF(manuscript, journal) {
 
 const PublicationCard = ({ manuscript, journal }) => {
   const fn = (manuscript.title || "article").replace(/[^a-z0-9]/gi, "_").substring(0, 50);
+
+  // Live engagement counters — update optimistically on every interaction
+  const [views, setViews] = React.useState(manuscript.view_count || 0);
+  const [downloads, setDownloads] = React.useState(manuscript.download_count || 0);
   
   // Generate dynamic cover image for social media
   const [coverImage, setCoverImage] = React.useState(manuscript.cover_image_url);
@@ -160,11 +164,17 @@ const PublicationCard = ({ manuscript, journal }) => {
     }
   }, [manuscript, journal, coverImage]);
 
+  const handleTitleClick = () => {
+    setViews(v => v + 1);
+    trackView(manuscript.id, "abstract", { ...manuscript, view_count: views });
+  };
+
   const handleAbstractPDF = (e) => {
     e.preventDefault();
     const doc = buildAbstractPDF(manuscript, journal);
     doc.save(`${fn}_abstract.pdf`);
-    trackView(manuscript.id, "pdf_download", manuscript);
+    setDownloads(d => d + 1);
+    trackView(manuscript.id, "pdf_download", { ...manuscript, download_count: downloads });
   };
 
   const handleFullPDF = (e) => {
@@ -182,7 +192,8 @@ const PublicationCard = ({ manuscript, journal }) => {
       const doc = buildFullPDF(manuscript, journal);
       doc.save(`${fn}_full.pdf`);
     }
-    trackView(manuscript.id, "pdf_download", manuscript);
+    setDownloads(d => d + 1);
+    trackView(manuscript.id, "pdf_download", { ...manuscript, download_count: downloads });
   };
 
   const handleOpenFullArticle = (e) => {
@@ -191,7 +202,8 @@ const PublicationCard = ({ manuscript, journal }) => {
       const afrisciUrl = convertToAfriSciURL(manuscript.manuscript_file_url);
       window.open(afrisciUrl, '_blank');
     }
-    trackView(manuscript.id, "full_text", manuscript);
+    setViews(v => v + 1);
+    trackView(manuscript.id, "full_text", { ...manuscript, view_count: views });
   };
 
   return (
@@ -199,7 +211,7 @@ const PublicationCard = ({ manuscript, journal }) => {
     <CardHeader className="pb-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)}>
+          <Link to={createPageUrl(`ManuscriptDetail?id=${manuscript.id}`)} onClick={handleTitleClick}>
             <CardTitle className="text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight line-clamp-2">
               {manuscript.title}
             </CardTitle>
@@ -248,24 +260,27 @@ const PublicationCard = ({ manuscript, journal }) => {
           https://doi.org/{manuscript.doi}
         </a>
       )}
-      <div className="flex items-center gap-4 text-xs text-slate-500">
-        {(manuscript.view_count > 0) && (
-          <div className="flex items-center gap-1">
-            <Eye className="w-3 h-3" />
-            <span>{manuscript.view_count.toLocaleString()} views</span>
-          </div>
-        )}
-        {(manuscript.download_count > 0) && (
-          <div className="flex items-center gap-1">
-            <Download className="w-3 h-3" />
-            <span>{manuscript.download_count.toLocaleString()} downloads</span>
-          </div>
-        )}
+      <div className="flex items-center gap-4 text-xs bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+        <div className="flex items-center gap-1 text-slate-600">
+          <Eye className="w-3 h-3 text-blue-500" />
+          <span className="font-semibold tabular-nums">{views.toLocaleString()}</span>
+          <span className="text-slate-400">views</span>
+        </div>
+        <div className="w-px h-3 bg-slate-200" />
+        <div className="flex items-center gap-1 text-slate-600">
+          <Download className="w-3 h-3 text-emerald-500" />
+          <span className="font-semibold tabular-nums">{downloads.toLocaleString()}</span>
+          <span className="text-slate-400">downloads</span>
+        </div>
         {manuscript.citation_count > 0 && (
-          <div className="flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" />
-            <span>{manuscript.citation_count} citations</span>
-          </div>
+          <>
+            <div className="w-px h-3 bg-slate-200" />
+            <div className="flex items-center gap-1 text-slate-600">
+              <TrendingUp className="w-3 h-3 text-amber-500" />
+              <span className="font-semibold tabular-nums">{manuscript.citation_count}</span>
+              <span className="text-slate-400">citations</span>
+            </div>
+          </>
         )}
       </div>
 
