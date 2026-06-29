@@ -69,6 +69,8 @@ const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [pdfUploading, setPdfUploading] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [manualUrl, setManualUrl] = useState('');
   const pdfRef = useRef(null);
   
   const daysInReview = manuscript.submission_date 
@@ -135,13 +137,39 @@ const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
     if (!file) return;
     setPdfUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      let file_url;
+      try {
+        const result = await base44.integrations.Core.UploadFile({ file });
+        file_url = result.file_url;
+      } catch {
+        // Credits exhausted — create a local object URL as temporary preview
+        file_url = URL.createObjectURL(file);
+        setPdfUploading(false);
+        setShowUrlInput(true);
+        alert('Direct upload is unavailable (integration credits exhausted until 2026-07-25). Please paste a public link to your file instead.');
+        return;
+      }
       await base44.entities.Manuscript.update(manuscript.id, {
         manuscript_file_url: file_url,
         status: manuscript.status === 'draft' ? 'submitted' : manuscript.status
       });
       onRefresh();
     } catch (e) { alert('Upload failed: ' + (e?.message || e)); }
+    setPdfUploading(false);
+  };
+
+  const handleSaveUrl = async () => {
+    if (!manualUrl.trim()) return;
+    setPdfUploading(true);
+    try {
+      await base44.entities.Manuscript.update(manuscript.id, {
+        manuscript_file_url: manualUrl.trim(),
+        status: manuscript.status === 'draft' ? 'submitted' : manuscript.status
+      });
+      setShowUrlInput(false);
+      setManualUrl('');
+      onRefresh();
+    } catch (e) { alert('Failed to save URL: ' + (e?.message || e)); }
     setPdfUploading(false);
   };
 
@@ -239,17 +267,39 @@ const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
           </div>
 
           {/* PDF Upload for quick publish */}
-          <div className="pt-1 border-t border-slate-100">
-            <input ref={pdfRef} type="file" accept=".pdf" className="hidden"
+          <div className="pt-1 border-t border-slate-100 space-y-2">
+            <input ref={pdfRef} type="file" accept=".pdf,.doc,.docx,.odt,.tex" className="hidden"
               onChange={e => { const f = e.target.files[0]; if (f) handleUploadPDF(f); }} />
             <Button size="sm" variant="outline" className="w-full text-indigo-700 border-indigo-200 hover:bg-indigo-50"
               onClick={() => pdfRef.current?.click()} disabled={pdfUploading}>
               {pdfUploading
-                ? <><Loader2 className="w-3 h-3 animate-spin mr-1" /> Uploading...</>
-                : <><Upload className="w-3 h-3 mr-1" /> {manuscript.manuscript_file_url ? 'Replace PDF' : 'Upload Final PDF'}</>}
+                ? <><Loader2 className="w-3 h-3 animate-spin mr-1" /> Saving...</>
+                : <><Upload className="w-3 h-3 mr-1" /> {manuscript.manuscript_file_url ? 'Replace File' : 'Upload File (PDF/Word)'}</>}
             </Button>
-            {!manuscript.manuscript_file_url && (
-              <p className="text-xs text-slate-400 mt-1 text-center">Upload clean PDF for quick publication</p>
+            {showUrlInput && (
+              <div className="space-y-1">
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                  ⚠ File upload unavailable. Paste a public link (Google Drive, Dropbox, etc.)
+                </p>
+                <div className="flex gap-1">
+                  <input
+                    type="url"
+                    placeholder="https://drive.google.com/..."
+                    value={manualUrl}
+                    onChange={e => setManualUrl(e.target.value)}
+                    className="flex-1 text-xs border border-slate-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                  <Button size="sm" className="text-xs h-7 bg-indigo-600 hover:bg-indigo-700" onClick={handleSaveUrl} disabled={!manualUrl.trim() || pdfUploading}>
+                    Save
+                  </Button>
+                  <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => { setShowUrlInput(false); setManualUrl(''); }}>
+                    ✕
+                  </Button>
+                </div>
+              </div>
+            )}
+            {!manuscript.manuscript_file_url && !showUrlInput && (
+              <p className="text-xs text-slate-400 text-center">PDF, Word, or LaTeX files accepted</p>
             )}
           </div>
 

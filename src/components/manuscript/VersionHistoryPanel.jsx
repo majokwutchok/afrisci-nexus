@@ -131,6 +131,8 @@ export default function VersionHistoryPanel({ manuscript, open, onClose, onRefre
   const [changeSummary, setChangeSummary] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadError, setUploadError] = useState(null);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [manualUrl, setManualUrl] = useState("");
 
   const versions = [...(manuscript?.version_history || [])].sort((a, b) => b.version - a.version);
   const currentVersion = versions.find(v => v.is_current) || versions[0];
@@ -140,51 +142,57 @@ export default function VersionHistoryPanel({ manuscript, open, onClose, onRefre
     if (file) setSelectedFile(file);
   };
 
+  const saveVersion = async (file_url) => {
+    const user = await base44.auth.me();
+    const existingVersions = manuscript.version_history || [];
+    const nextVersion = existingVersions.length > 0
+      ? Math.max(...existingVersions.map(v => v.version || 0)) + 1
+      : 1;
+    const label = existingVersions.length === 0 ? "Initial Submission" : `Revision ${nextVersion - 1}`;
+    const updatedHistory = existingVersions.map(v => ({ ...v, is_current: false }));
+    updatedHistory.push({
+      version: nextVersion,
+      label,
+      file_url,
+      uploaded_by: user.email,
+      uploaded_by_name: user.full_name,
+      uploaded_at: new Date().toISOString(),
+      status_at_upload: manuscript.status,
+      change_summary: changeSummary.trim() || null,
+      is_current: true,
+    });
+    await base44.entities.Manuscript.update(manuscript.id, {
+      manuscript_file_url: file_url,
+      version_history: updatedHistory,
+    });
+    setSelectedFile(null);
+    setChangeSummary("");
+    setManualUrl("");
+    setShowUrlInput(false);
+    if (onRefresh) onRefresh();
+  };
+
   const handleUpload = async () => {
     if (!selectedFile) return;
     setUploading(true);
     setUploadError(null);
     try {
-      const user = await base44.auth.me();
-
-      // Upload file
       const { file_url } = await base44.integrations.Core.UploadFile({ file: selectedFile });
-
-      const existingVersions = manuscript.version_history || [];
-      const nextVersion = existingVersions.length > 0
-        ? Math.max(...existingVersions.map(v => v.version || 0)) + 1
-        : 1;
-
-      const isFirst = existingVersions.length === 0;
-      const label = isFirst
-        ? "Initial Submission"
-        : `Revision ${nextVersion - 1}`;
-
-      // Mark all previous as not current
-      const updatedHistory = existingVersions.map(v => ({ ...v, is_current: false }));
-
-      updatedHistory.push({
-        version: nextVersion,
-        label,
-        file_url,
-        uploaded_by: user.email,
-        uploaded_by_name: user.full_name,
-        uploaded_at: new Date().toISOString(),
-        status_at_upload: manuscript.status,
-        change_summary: changeSummary.trim() || null,
-        is_current: true,
-      });
-
-      await base44.entities.Manuscript.update(manuscript.id, {
-        manuscript_file_url: file_url,
-        version_history: updatedHistory,
-      });
-
-      setSelectedFile(null);
-      setChangeSummary("");
-      if (onRefresh) onRefresh();
+      await saveVersion(file_url);
     } catch {
-      setUploadError("Upload failed. Integration credits may be exhausted (resets 2026-05-25).");
+      setUploadError(null);
+      setShowUrlInput(true);
+    }
+    setUploading(false);
+  };
+
+  const handleUrlSave = async () => {
+    if (!manualUrl.trim()) return;
+    setUploading(true);
+    try {
+      await saveVersion(manualUrl.trim());
+    } catch (e) {
+      setUploadError("Failed to save: " + (e?.message || e));
     }
     setUploading(false);
   };
@@ -225,45 +233,95 @@ export default function VersionHistoryPanel({ manuscript, open, onClose, onRefre
           {canUpload && (
             <div className="rounded-lg border border-dashed border-teal-300 bg-teal-50/50 p-4 space-y-3">
               <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                <Upload className="w-4 h-4 text-teal-600" /> Upload New Version
+                <Upload className="w-4 h-4 text-teal-600" /> Add New Version
               </p>
-              <div>
-                <Label className="text-xs text-slate-600 mb-1 block">Select file (PDF, DOCX, etc.)</Label>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx,.odt,.tex"
-                  onChange={handleFileChange}
-                  className="block w-full text-sm text-slate-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border file:border-slate-300 file:text-xs file:bg-white file:text-slate-700 hover:file:bg-slate-50"
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-slate-600 mb-1 block">Summary of changes (optional)</Label>
-                <Textarea
-                  value={changeSummary}
-                  onChange={(e) => setChangeSummary(e.target.value)}
-                  placeholder="Briefly describe what changed in this version..."
-                  rows={3}
-                  className="text-sm bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
-                />
-              </div>
+
+              {!showUrlInput ? (
+                <>
+                  <div>
+                    <Label className="text-xs text-slate-600 mb-1 block">Select file (PDF, Word, LaTeX, etc.)</Label>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.odt,.tex"
+                      onChange={handleFileChange}
+                      className="block w-full text-sm text-slate-600 file:mr-3 file:py-1 file:px-3 file:rounded file:border file:border-slate-300 file:text-xs file:bg-white file:text-slate-700 hover:file:bg-slate-50"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-slate-600 mb-1 block">Summary of changes (optional)</Label>
+                    <Textarea
+                      value={changeSummary}
+                      onChange={(e) => setChangeSummary(e.target.value)}
+                      placeholder="Briefly describe what changed in this version..."
+                      rows={2}
+                      className="text-sm bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      disabled={!selectedFile || uploading}
+                      onClick={handleUpload}
+                      className="bg-teal-600 hover:bg-teal-700 text-white"
+                    >
+                      {uploading ? (
+                        <><Clock className="w-3 h-3 mr-1 animate-spin" /> Uploading…</>
+                      ) : (
+                        <><Upload className="w-3 h-3 mr-1" /> Upload Version</>
+                      )}
+                    </Button>
+                    <button className="text-xs text-slate-400 hover:text-slate-600 underline" onClick={() => setShowUrlInput(true)}>
+                      Paste URL instead
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
+                    ⚠ Direct upload unavailable (credits exhausted until 2026-07-25). Paste a public link to your file (Google Drive, Dropbox, OneDrive, etc.).
+                  </div>
+                  <div>
+                    <Label className="text-xs text-slate-600 mb-1 block">Public file URL</Label>
+                    <input
+                      type="url"
+                      placeholder="https://drive.google.com/file/..."
+                      value={manualUrl}
+                      onChange={e => setManualUrl(e.target.value)}
+                      className="block w-full text-sm border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-400 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-slate-600 mb-1 block">Summary of changes (optional)</Label>
+                    <Textarea
+                      value={changeSummary}
+                      onChange={(e) => setChangeSummary(e.target.value)}
+                      placeholder="Briefly describe what changed in this version..."
+                      rows={2}
+                      className="text-sm bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      disabled={!manualUrl.trim() || uploading}
+                      onClick={handleUrlSave}
+                      className="bg-teal-600 hover:bg-teal-700 text-white"
+                    >
+                      {uploading ? <><Clock className="w-3 h-3 mr-1 animate-spin" /> Saving…</> : <><CheckCircle className="w-3 h-3 mr-1" /> Save Version</>}
+                    </Button>
+                    <button className="text-xs text-slate-400 hover:text-slate-600 underline" onClick={() => setShowUrlInput(false)}>
+                      ← Try file upload
+                    </button>
+                  </div>
+                </>
+              )}
+
               {uploadError && (
-                <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 rounded p-2 border border-amber-200">
+                <div className="flex items-center gap-2 text-xs text-red-700 bg-red-50 rounded p-2 border border-red-200">
                   <AlertTriangle className="w-3 h-3 flex-shrink-0" />
                   {uploadError}
                 </div>
               )}
-              <Button
-                size="sm"
-                disabled={!selectedFile || uploading}
-                onClick={handleUpload}
-                className="bg-teal-600 hover:bg-teal-700 text-white"
-              >
-                {uploading ? (
-                  <><Clock className="w-3 h-3 mr-1 animate-spin" /> Uploading…</>
-                ) : (
-                  <><Upload className="w-3 h-3 mr-1" /> Upload Version</>
-                )}
-              </Button>
             </div>
           )}
 

@@ -146,13 +146,21 @@ function Step1Metadata({ data, onChange, journals }) {
 function Step2Files({ data, onChange }) {
   const [uploading, setUploading] = useState(false);
   const [suppUploading, setSuppUploading] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [manualUrl, setManualUrl] = useState('');
+  const [suppUrlInput, setSuppUrlInput] = useState('');
+  const [showSuppUrl, setShowSuppUrl] = useState(false);
 
   const handleManuscriptUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    onChange("manuscript_file_url", file_url);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      onChange("manuscript_file_url", file_url);
+    } catch {
+      setShowUrlInput(true);
+    }
     setUploading(false);
   };
 
@@ -160,25 +168,48 @@ function Step2Files({ data, onChange }) {
     const file = e.target.files[0];
     if (!file) return;
     setSuppUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    onChange("supplementary_files", [...data.supplementary_files, file_url]);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      onChange("supplementary_files", [...data.supplementary_files, file_url]);
+    } catch {
+      setShowSuppUrl(true);
+    }
     setSuppUploading(false);
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">Manuscript File * (PDF, DOCX)</label>
-        <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${data.manuscript_file_url ? "border-emerald-400 bg-emerald-50" : "border-slate-300 hover:border-blue-400"}`}>
-          {data.manuscript_file_url ? (
-            <div className="flex items-center justify-center gap-2 text-emerald-700">
-              <Check className="w-5 h-5" />
-              <span className="text-sm font-medium">Manuscript uploaded successfully</span>
-              <button onClick={() => onChange("manuscript_file_url", "")} className="ml-2 text-red-400 hover:text-red-600">
-                <Trash2 className="w-4 h-4" />
-              </button>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">Manuscript File (PDF, Word, LaTeX)</label>
+        {data.manuscript_file_url ? (
+          <div className="flex items-center gap-2 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700">
+            <Check className="w-5 h-5 flex-shrink-0" />
+            <span className="text-sm font-medium flex-1 truncate">{data.manuscript_file_url.startsWith('http') ? 'File linked' : 'File set'}</span>
+            <a href={data.manuscript_file_url} target="_blank" rel="noreferrer" className="text-xs text-emerald-600 underline mr-2">Preview</a>
+            <button onClick={() => { onChange("manuscript_file_url", ""); setShowUrlInput(false); }} className="text-red-400 hover:text-red-600">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ) : showUrlInput ? (
+          <div className="space-y-2 p-4 border border-amber-200 bg-amber-50 rounded-xl">
+            <p className="text-xs text-amber-700 font-medium">⚠ Direct upload unavailable (credits exhausted until 2026-07-25). Paste a public link to your file (Google Drive, Dropbox, OneDrive).</p>
+            <p className="text-xs text-slate-500">💡 For Google Drive: right-click file → "Get link" → set to "Anyone with the link"</p>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                placeholder="https://drive.google.com/file/..."
+                value={manualUrl}
+                onChange={e => setManualUrl(e.target.value)}
+                className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+              />
+              <Button size="sm" className="bg-blue-700 hover:bg-blue-800" onClick={() => { if (manualUrl.trim()) { onChange("manuscript_file_url", manualUrl.trim()); setShowUrlInput(false); } }}>
+                <Check className="w-4 h-4" />
+              </Button>
             </div>
-          ) : (
+            <button className="text-xs text-slate-400 underline hover:text-slate-600" onClick={() => setShowUrlInput(false)}>← Try file upload</button>
+          </div>
+        ) : (
+          <div className="border-2 border-dashed rounded-xl p-6 text-center border-slate-300 hover:border-blue-400 transition-colors">
             <label className="cursor-pointer block">
               {uploading ? (
                 <div className="flex items-center justify-center gap-2 text-blue-600">
@@ -188,14 +219,17 @@ function Step2Files({ data, onChange }) {
               ) : (
                 <>
                   <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                  <p className="text-sm text-slate-600">Click to upload or drag & drop</p>
-                  <p className="text-xs text-slate-400 mt-1">PDF, DOCX up to 50MB</p>
+                  <p className="text-sm text-slate-600">Click to upload</p>
+                  <p className="text-xs text-slate-400 mt-1">PDF, DOCX, ODT, LaTeX</p>
                 </>
               )}
-              <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={handleManuscriptUpload} disabled={uploading} />
+              <input type="file" className="hidden" accept=".pdf,.doc,.docx,.odt,.tex" onChange={handleManuscriptUpload} disabled={uploading} />
             </label>
-          )}
-        </div>
+            <button className="mt-2 text-xs text-blue-600 underline hover:text-blue-800" onClick={() => setShowUrlInput(true)}>
+              Or paste a file URL instead
+            </button>
+          </div>
+        )}
       </div>
 
       <div>
@@ -211,11 +245,28 @@ function Step2Files({ data, onChange }) {
             </div>
           ))}
         </div>
-        <label className={`flex items-center gap-2 px-4 py-2.5 border border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-blue-400 transition-colors w-fit ${suppUploading ? "opacity-60 pointer-events-none" : ""}`}>
-          {suppUploading ? <Loader2 className="w-4 h-4 animate-spin text-blue-600" /> : <Plus className="w-4 h-4 text-slate-500" />}
-          <span className="text-sm text-slate-600">{suppUploading ? "Uploading..." : "Add supplementary file"}</span>
-          <input type="file" className="hidden" onChange={handleSuppUpload} disabled={suppUploading} />
-        </label>
+        {showSuppUrl ? (
+          <div className="space-y-2 p-3 border border-amber-200 bg-amber-50 rounded-lg">
+            <p className="text-xs text-amber-700">Paste a public URL to your supplementary file:</p>
+            <div className="flex gap-2">
+              <input type="url" placeholder="https://..." value={suppUrlInput} onChange={e => setSuppUrlInput(e.target.value)}
+                className="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white" />
+              <Button size="sm" className="bg-blue-700 hover:bg-blue-800" onClick={() => { if (suppUrlInput.trim()) { onChange("supplementary_files", [...data.supplementary_files, suppUrlInput.trim()]); setSuppUrlInput(''); setShowSuppUrl(false); } }}>
+                <Check className="w-4 h-4" />
+              </Button>
+            </div>
+            <button className="text-xs text-slate-400 underline" onClick={() => setShowSuppUrl(false)}>← Try file upload</button>
+          </div>
+        ) : (
+          <label className={`flex items-center gap-2 px-4 py-2.5 border border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-blue-400 transition-colors w-fit ${suppUploading ? "opacity-60 pointer-events-none" : ""}`}>
+            {suppUploading ? <Loader2 className="w-4 h-4 animate-spin text-blue-600" /> : <Plus className="w-4 h-4 text-slate-500" />}
+            <span className="text-sm text-slate-600">{suppUploading ? "Uploading..." : "Add supplementary file"}</span>
+            <input type="file" className="hidden" onChange={handleSuppUpload} disabled={suppUploading} />
+          </label>
+        )}
+        <button className="mt-1 text-xs text-blue-600 underline hover:text-blue-800" onClick={() => setShowSuppUrl(true)}>
+          Or paste a URL
+        </button>
       </div>
     </div>
   );

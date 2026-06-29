@@ -72,6 +72,8 @@ export default function ReviewForm({ manuscript, review, onSubmit, onCancel }) {
   const [recommendation, setRecommendation] = useState(review?.recommendation || "");
   const [annotatedFile, setAnnotatedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [manualUrl, setManualUrl] = useState('');
   const [showAbstract, setShowAbstract] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -100,8 +102,12 @@ export default function ReviewForm({ manuscript, review, onSubmit, onCancel }) {
   const handleFileUpload = async (file) => {
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setAnnotatedFile(file_url);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setAnnotatedFile(file_url);
+    } catch {
+      setShowUrlInput(true);
+    }
     setUploading(false);
   };
 
@@ -254,28 +260,49 @@ export default function ReviewForm({ manuscript, review, onSubmit, onCancel }) {
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
             <Upload className="w-4 h-4 text-teal-600" />
-            Upload Annotated PDF (optional)
+            Upload Annotated File (optional)
           </CardTitle>
-          <p className="text-xs text-slate-500">Upload your annotated copy of the manuscript for the authors.</p>
+          <p className="text-xs text-slate-500">Upload your annotated copy of the manuscript (PDF or Word).</p>
         </CardHeader>
-        <CardContent>
-          <Input
-            type="file"
-            accept=".pdf"
-            onChange={(e) => handleFileUpload(e.target.files[0])}
-            disabled={uploading}
-          />
+        <CardContent className="space-y-3">
+          {!showUrlInput ? (
+            <Input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => handleFileUpload(e.target.files[0])}
+              disabled={uploading}
+            />
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
+                ⚠ Direct upload unavailable (credits exhausted until 2026-07-25). Paste a public link to your annotated file.
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  type="url"
+                  placeholder="https://drive.google.com/file/..."
+                  value={manualUrl}
+                  onChange={e => setManualUrl(e.target.value)}
+                  className="flex-1 text-sm"
+                />
+                <Button size="sm" className="bg-teal-600 hover:bg-teal-700" onClick={() => { if (manualUrl.trim()) { setAnnotatedFile(manualUrl.trim()); setShowUrlInput(false); } }}>
+                  Save
+                </Button>
+              </div>
+              <button className="text-xs text-slate-400 hover:text-slate-600" onClick={() => setShowUrlInput(false)}>← Try file upload instead</button>
+            </div>
+          )}
           {uploading && (
-            <div className="flex items-center gap-2 mt-2 text-sm text-teal-600">
+            <div className="flex items-center gap-2 text-sm text-teal-600">
               <div className="w-4 h-4 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
               Uploading file...
             </div>
           )}
           {annotatedFile && (
-            <Alert className="mt-2 bg-green-50 border-green-200">
+            <Alert className="bg-green-50 border-green-200">
               <Check className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800 text-sm">
-                Annotated PDF uploaded successfully.
+                Annotated file linked successfully.
               </AlertDescription>
             </Alert>
           )}
