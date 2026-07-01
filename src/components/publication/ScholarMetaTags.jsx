@@ -61,11 +61,13 @@ export default function ScholarMetaTags({ manuscript, journal, coverImage }) {
     add("citation_abstract_html_url", articleUrl);
     add("citation_fulltext_html_url", articleUrl);
 
-    if (manuscript.doi) {
-      add("citation_doi", manuscript.doi);
-      add("citation_pdf_url", `https://doi.org/${manuscript.doi}`);
-    } else if (manuscript.manuscript_file_url) {
+    if (manuscript.doi) add("citation_doi", manuscript.doi);
+    // Scholar requires citation_pdf_url to point directly at a crawlable PDF file,
+    // not a DOI resolver redirect — so always prefer the actual file URL.
+    if (manuscript.manuscript_file_url) {
       add("citation_pdf_url", manuscript.manuscript_file_url);
+    } else if (manuscript.doi) {
+      add("citation_pdf_url", `https://doi.org/${manuscript.doi}`);
     }
 
     (manuscript.authors || []).forEach(a => {
