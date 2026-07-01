@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { generateLocalNewsPost } from '@/utils/localNewsWriter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -155,36 +156,12 @@ export default function NewsManager() {
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
-  const handleAIWrite = async () => {
+  const handleAIWrite = () => {
     if (!aiPrompt.trim()) return;
     setAiGenerating(true);
     setAiError('');
-    const catLabel = CATEGORIES.find(c => c.value === form.category)?.label || form.category;
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are a professional science communications editor for AfriSci Nexus, an African open-access research publisher. Write a complete, SEO-optimised news post based on the following topic and category.
-
-Category: ${catLabel}
-Topic / Brief: ${aiPrompt}
-
-Return:
-- title: a compelling, keyword-rich headline (max 80 chars)
-- summary: 1–2 sentence meta description (120–160 chars, SEO-optimised)
-- content: full body text (4–6 paragraphs, include relevant context, details, calls to action, and use clear headings where helpful)
-- tags: 6–10 comma-separated SEO keywords relevant to African research, the discipline, and the topic
-
-Be professional, factual, and relevant to African scientific publishing.`,
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          title: { type: 'string' },
-          summary: { type: 'string' },
-          content: { type: 'string' },
-          tags: { type: 'array', items: { type: 'string' } }
-        }
-      }
-    }).catch(e => { setAiError('AI generation failed. Please try again.'); return null; });
-
-    if (result) {
+    try {
+      const result = generateLocalNewsPost({ category: form.category, prompt: aiPrompt });
       setForm(f => ({
         ...f,
         title: result.title || f.title,
@@ -192,9 +169,9 @@ Be professional, factual, and relevant to African scientific publishing.`,
         content: result.content || f.content,
         slug: generateSlug(result.title || f.title),
       }));
-      const rawTags = result.tags;
-      const tagsArr = Array.isArray(rawTags) ? rawTags : typeof rawTags === 'string' ? rawTags.split(',').map(t => t.trim()).filter(Boolean) : [];
-      setTagsInput(tagsArr.join(', '));
+      setTagsInput(result.tags.join(', '));
+    } catch (e) {
+      setAiError('Generation failed. Please try again.');
     }
     setAiGenerating(false);
   };
@@ -373,7 +350,7 @@ Be professional, factual, and relevant to African scientific publishing.`,
               <h3 className="text-sm font-bold text-teal-700 flex items-center gap-2">
                 <Sparkles className="w-4 h-4" /> AI News Writer
               </h3>
-              <p className="text-xs text-teal-600">Describe what you want to announce in a sentence or two. The AI will generate the full post — title, summary, body, and SEO tags.</p>
+              <p className="text-xs text-teal-600">Describe what you want to announce in a sentence or two. Generates the full post instantly — title, summary, body, and SEO tags — no integration credits required.</p>
               <div className="flex gap-2">
                 <Textarea
                   className="flex-1 border-teal-200 bg-white resize-none text-sm focus:border-teal-400"
