@@ -9,7 +9,7 @@ import { useEffect } from "react";
  */
 export default function ScholarMetaTags({ manuscript, journal, coverImage }) {
   useEffect(() => {
-    if (!manuscript || manuscript.status !== "published") return;
+    if (!manuscript || !["published", "online_first"].includes(manuscript.status)) return;
 
     // ── Page title & static OG tag update (for JS-capable crawlers / link previews) ──
     const prevTitle = document.title;

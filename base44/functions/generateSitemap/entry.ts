@@ -6,11 +6,13 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Fetch all published manuscripts and active journals in parallel
-    const [manuscripts, journals] = await Promise.all([
+    // Fetch all publicly-visible manuscripts (published + online_first) and active journals in parallel
+    const [publishedMs, onlineFirstMs, journals] = await Promise.all([
       base44.asServiceRole.entities.Manuscript.filter({ status: "published" }),
+      base44.asServiceRole.entities.Manuscript.filter({ status: "online_first" }),
       base44.asServiceRole.entities.Journal.filter({ status: "active" }),
     ]);
+    const manuscripts = [...publishedMs, ...onlineFirstMs];
 
     const today = new Date().toISOString().split("T")[0];
 

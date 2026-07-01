@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const SITEMAP_URL = "https://afriscinexus.com/sitemap.xml";
+const SITEMAP_URL = "https://afriscinexus.com/api/functions/generateSitemap";
 
 Deno.serve(async (req) => {
   try {
