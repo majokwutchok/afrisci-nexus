@@ -18,6 +18,16 @@ async function registerWithCrossref(base44, manuscript_id) {
   }
 }
 
+async function notifyGoogle(base44) {
+  try {
+    const res = await base44.functions.invoke('notifyGoogleIndexing', {});
+    return res;
+  } catch (e) {
+    console.error('Google indexing notification error (non-fatal):', e.message);
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -70,6 +80,9 @@ Deno.serve(async (req) => {
     // Immediately register with Crossref
     const crossrefResult = await registerWithCrossref(base44, manuscript_id);
 
+    // Notify Google Search Console so it discovers the new article faster
+    const googleResult = await notifyGoogle(base44);
+
     return Response.json({
       success: true,
       doi,
@@ -77,6 +90,7 @@ Deno.serve(async (req) => {
       publication_date: today,
       crossref_registered: crossrefResult?.success === true,
       crossref_batch_id: crossrefResult?.batch_id || null,
+      google_notified: googleResult?.success === true,
     });
 
   } catch (error) {

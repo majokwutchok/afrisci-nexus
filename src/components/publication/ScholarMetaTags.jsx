@@ -94,6 +94,28 @@ export default function ScholarMetaTags({ manuscript, journal, coverImage }) {
     // Highwire Press
     add("HW.identifier", manuscript.doi ? `https://doi.org/${manuscript.doi}` : articleUrl);
 
+    // ── JSON-LD structured data for Google Search (ScholarlyArticle) ──
+    const jsonLd = document.createElement("script");
+    jsonLd.type = "application/ld+json";
+    jsonLd.setAttribute("data-scholar-tag", "true");
+    jsonLd.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ScholarlyArticle",
+      "headline": manuscript.title,
+      "abstract": manuscript.abstract,
+      "datePublished": pubDate,
+      "author": (manuscript.authors || []).map(a => ({ "@type": "Person", "name": a.name })),
+      "publisher": { "@type": "Organization", "name": "AfriSci Nexus" },
+      "isPartOf": journal?.title ? { "@type": "Periodical", "name": journal.title, "issn": journal.issn } : undefined,
+      "keywords": (manuscript.keywords || []).join(", "),
+      "url": articleUrl,
+      "mainEntityOfPage": articleUrl,
+      "identifier": manuscript.doi ? `https://doi.org/${manuscript.doi}` : undefined,
+      "image": imageToUse,
+    });
+    document.head.appendChild(jsonLd);
+    tags.push(jsonLd);
+
     // Additional dynamic OG/Twitter tags (added as extra elements for maximum coverage)
     const og = (property, content) => {
       if (!content) return;
