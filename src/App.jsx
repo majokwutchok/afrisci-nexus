@@ -19,8 +19,8 @@ import AuthorProfile from './pages/AuthorProfile';
 import Editorial from './pages/Editorial';
 import Submit from './pages/Submit';
 import QuickSubmit from './pages/QuickSubmit';
-import News from './pages/News';
-import NewsDetail from './pages/NewsDetail';
+import NewsAnnouncements from './pages/NewsAnnouncements';
+import NewsPostDetail from './pages/NewsPostDetail';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -86,8 +86,8 @@ const AuthenticatedApp = () => {
       <Route path="/ResearcherDirectory" element={<LayoutWrapper currentPageName="ResearcherDirectory"><ResearcherDirectory /></LayoutWrapper>} />
       <Route path="/ResearcherProfile" element={<LayoutWrapper currentPageName="ResearcherProfile"><ResearcherProfile /></LayoutWrapper>} />
       <Route path="/QuickSubmit" element={<LayoutWrapper currentPageName="QuickSubmit"><QuickSubmit /></LayoutWrapper>} />
-      <Route path="/News" element={<LayoutWrapper currentPageName="News"><News /></LayoutWrapper>} />
-      <Route path="/NewsDetail" element={<LayoutWrapper currentPageName="NewsDetail"><NewsDetail /></LayoutWrapper>} />
+      <Route path="/NewsAnnouncements" element={<LayoutWrapper currentPageName="NewsAnnouncements"><NewsAnnouncements /></LayoutWrapper>} />
+      <Route path="/NewsPostDetail" element={<LayoutWrapper currentPageName="NewsPostDetail"><NewsPostDetail /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

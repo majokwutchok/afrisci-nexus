@@ -18,7 +18,7 @@ const CATEGORY_CONFIG = {
   partnership: { label: 'Partnership', icon: Handshake, color: 'bg-green-100 text-green-800 border-green-200' },
 };
 
-export default function NewsDetailPage() {
+export default function NewsPostDetail() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
   const [post, setPost] = useState(null);
@@ -57,7 +57,7 @@ export default function NewsDetailPage() {
         <Megaphone className="w-16 h-16 text-slate-200 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-slate-900 mb-2">News Post Not Found</h2>
         <p className="text-slate-600 mb-6">This post doesn't exist or is no longer available.</p>
-        <Link to={createPageUrl('News')}>
+        <Link to={createPageUrl('NewsAnnouncements')}>
           <Button>Back to News</Button>
         </Link>
       </div>
@@ -72,12 +72,12 @@ export default function NewsDetailPage() {
       <SEO
         title={post.title}
         description={post.summary}
-        canonicalPath={`/NewsDetail?id=${post.id}`}
+        canonicalPath={`/NewsPostDetail?id=${post.id}`}
         ogImage={post.cover_image_url || undefined}
       />
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-        <Link to={createPageUrl('News')} className="inline-flex items-center gap-2 text-slate-500 hover:text-teal-600 text-sm font-medium mb-6">
+        <Link to={createPageUrl('NewsAnnouncements')} className="inline-flex items-center gap-2 text-slate-500 hover:text-teal-600 text-sm font-medium mb-6">
           <ArrowLeft className="w-4 h-4" /> Back to News
         </Link>
 
@@ -137,7 +137,7 @@ export default function NewsDetailPage() {
             <h3 className="font-bold text-slate-900 text-lg mb-4">More in {cfg.label}</h3>
             <div className="space-y-3">
               {related.map(r => (
-                <Link key={r.id} to={createPageUrl(`NewsDetail?id=${r.id}`)} className="block p-4 bg-white rounded-xl border border-slate-200 hover:border-teal-300 hover:shadow-sm transition-all">
+                <Link key={r.id} to={createPageUrl(`NewsPostDetail?id=${r.id}`)} className="block p-4 bg-white rounded-xl border border-slate-200 hover:border-teal-300 hover:shadow-sm transition-all">
                   <p className="font-semibold text-slate-900 hover:text-teal-700 transition-colors">{r.title}</p>
                   <p className="text-sm text-slate-500 line-clamp-1 mt-1">{r.summary}</p>
                 </Link>

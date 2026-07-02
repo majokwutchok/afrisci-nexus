@@ -145,7 +145,7 @@ export default function NewsSection() {
             Stay updated with calls for papers, indexing milestones, conferences, and platform news from AfriSci Nexus.
           </p>
         </div>
-        <Link to={createPageUrl('News')} className="hidden md:inline-flex items-center gap-2 text-teal-600 hover:text-teal-800 font-semibold text-sm transition-colors">
+        <Link to={createPageUrl('NewsAnnouncements')} className="hidden md:inline-flex items-center gap-2 text-teal-600 hover:text-teal-800 font-semibold text-sm transition-colors">
           All News <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
@@ -169,7 +169,7 @@ export default function NewsSection() {
       )}
 
       <div className="mt-8 text-center md:hidden">
-        <Link to={createPageUrl('News')} className="inline-flex items-center gap-2 text-teal-600 font-semibold text-sm">
+        <Link to={createPageUrl('NewsAnnouncements')} className="inline-flex items-center gap-2 text-teal-600 font-semibold text-sm">
           View All News <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
