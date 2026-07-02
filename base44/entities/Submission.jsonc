@@ -49,6 +49,11 @@
     "editor_notes": {
       "type": "string",
       "description": "Internal notes from the editorial team"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional additional description for this submission"
     }
   },
   "required": [
@@ -74,10 +79,12 @@
         },
         {
           "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "editor"
           }
         }
       ]
@@ -89,10 +96,12 @@
         },
         {
           "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "editor"
           }
         }
       ]
