@@ -29,6 +29,13 @@ const INSTITUTION_TYPES = [
   { value: "professional_association", label: "Professional Associations" },
 ];
 
+// Free web-fetch discovery currently only covers these types (no AI/credits used)
+const FETCHABLE_INSTITUTION_TYPES = [
+  { value: "university", label: "Universities & Colleges" },
+  { value: "hospital", label: "Hospitals & Medical Schools" },
+  { value: "research_institute", label: "Research Institutes" },
+];
+
 const STATUS_COLORS = {
   new: "bg-blue-100 text-blue-800",
   emailed: "bg-amber-100 text-amber-800",
@@ -40,7 +47,7 @@ const PAGE_SIZE = 50;
 
 export default function EmailProspector() {
   const [country, setCountry] = useState("Nigeria");
-  const [institutionType, setInstitutionType] = useState("university");
+  const [institutionType, setInstitutionType] = useState(FETCHABLE_INSTITUTION_TYPES[0].value);
   const [fetchPage, setFetchPage] = useState(1);
   const [isFetching, setIsFetching] = useState(false);
   const [fetchResult, setFetchResult] = useState(null);
@@ -120,7 +127,7 @@ export default function EmailProspector() {
         <Mail className="w-7 h-7 text-teal-600" />
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Email Prospector</h2>
-          <p className="text-sm text-slate-500">AI-powered contact discovery from African institutions for partnership outreach</p>
+          <p className="text-sm text-slate-500">Credit-free contact discovery from African institutions for partnership outreach</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <Badge className="bg-teal-100 text-teal-800">{storedEmails.length} stored</Badge>
@@ -157,11 +164,11 @@ export default function EmailProspector() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Institution Type</label>
                 <select value={institutionType} onChange={e => setInstitutionType(e.target.value)}
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300">
-                  {INSTITUTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  {FETCHABLE_INSTITUTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Page (50 emails each)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Page (batch of institutions)</label>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={() => setFetchPage(p => Math.max(1, p - 1))} disabled={fetchPage === 1}>-</Button>
                   <span className="text-sm font-semibold w-8 text-center">{fetchPage}</span>
@@ -170,18 +177,18 @@ export default function EmailProspector() {
               </div>
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
-              <strong>⚠️ Note:</strong> This uses AI web search (Gemini Pro) to find real institutional emails. Each fetch searches for 50 unique emails and skips duplicates already in the database. This uses integration credits.
+            <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 text-sm text-teal-800">
+              <strong>✅ Credit-free:</strong> No AI is used. Each fetch reads Wikipedia's public directory of institutions, visits each institution's real website, and extracts published contact emails directly — completely free.
             </div>
 
             <Button onClick={handleFetch} disabled={isFetching} className="bg-teal-600 hover:bg-teal-700 text-white px-8">
-              {isFetching ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Searching the web...</> : <><Search className="w-4 h-4 mr-2" /> Fetch 50 Emails</>}
+              {isFetching ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Fetching institutions...</> : <><Search className="w-4 h-4 mr-2" /> Fetch Emails</>}
             </Button>
 
             {isFetching && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
                 <Loader2 className="w-4 h-4 inline animate-spin mr-2" />
-                Searching websites, directories, Google Scholar pages, and institutional sites in {country}... This may take 30–60 seconds.
+                Visiting institutional websites in {country} and reading their public contact pages... This may take up to 15 seconds.
               </div>
             )}
 

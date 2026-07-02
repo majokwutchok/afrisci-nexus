@@ -1,135 +1,220 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const AFRICAN_COUNTRIES = [
-  "Nigeria","Kenya","South Africa","Ghana","Ethiopia","Tanzania","Uganda","Rwanda","Senegal",
-  "Cameroon","Ivory Coast","Zambia","Zimbabwe","Mozambique","Angola","Sudan","Egypt","Morocco",
-  "Algeria","Tunisia","Libya","Botswana","Namibia","Malawi","Lesotho","Eswatini","Sierra Leone",
-  "Liberia","Guinea","Mali","Burkina Faso","Niger","Chad","Central African Republic","Congo",
-  "DR Congo","Gabon","Equatorial Guinea","Djibouti","Somalia","Eritrea","South Sudan",
-  "Burundi","Comoros","Mauritius","Madagascar","Cape Verde","Sao Tome and Principe",
-  "Seychelles","Gambia","Benin","Togo"
-];
+// Free, credit-free contact discovery: uses Wikipedia's public institution
+// directory pages + direct HTTP fetches of institution websites. No AI/LLM
+// integrations are used, so this never consumes integration credits.
 
-const CATEGORY_LABELS = {
-  university: "universities and colleges — faculty emails, department heads, research offices",
-  hospital: "hospitals and medical schools — research departments, clinical staff, directors",
-  school: "secondary schools and international schools — principals, heads of science departments",
-  research_institute: "research institutes and think tanks — researchers, directors, coordinators",
-  ngo: "NGOs and development organizations — program managers, directors, education officers",
-  government: "government ministries of education, science and health — officials and directors",
-  professional_association: "professional associations for academics, scientists and doctors — secretariat emails"
+const WIKI_LIST_TITLES = {
+  university: (country) => [`List of universities and colleges in ${country}`, `List of universities in ${country}`],
+  hospital: (country) => [`List of hospitals in ${country}`],
+  research_institute: (country) => [`List of research institutes in ${country}`],
 };
 
-Deno.serve(async (req) => {
-  const base44 = createClientFromRequest(req);
-  const user = await base44.auth.me();
-  if (!user || user.role !== 'admin') {
-    return Response.json({ error: 'Admin access required' }, { status: 403 });
+const EMAIL_REGEX = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
+const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+const IGNORED_DOMAINS = [
+  'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com', 'aol.com', 'icloud.com',
+  'example.com', 'sentry.io', 'wixpress.com', 'wix.com', 'godaddy.com'
+];
+const WIKIMEDIA_FAMILY = [
+  'wikipedia.org', 'wikimedia.org', 'wikimediafoundation.org', 'mediawiki.org', 'wikidata.org',
+  'wikibooks.org', 'wikinews.org', 'wikiquote.org', 'wikisource.org', 'wikiversity.org',
+  'wikivoyage.org', 'wiktionary.org', 'archive.org'
+];
+const BANNED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.ico', '.css', '.js'];
+
+async function fetchWithTimeout(url, ms = 4000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AfriSciNexusBot/1.0; +https://afriscinexus.com)' }
+    });
+    if (!res.ok) return null;
+    return await res.text();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
   }
-
-  const { country, institution_type, page = 1 } = await req.json();
-
-  if (!country || !AFRICAN_COUNTRIES.includes(country)) {
-    return Response.json({ error: 'Invalid African country' }, { status: 400 });
-  }
-
-  const categoryDesc = CATEGORY_LABELS[institution_type] || "academic and research institutions";
-  const offset = (page - 1) * 50;
-
-  const prompt = `You are a research assistant helping find professional contact emails for academic outreach in Africa.
-
-Search the web and find REAL, VERIFIED email addresses from ${categoryDesc} in ${country}.
-
-Requirements:
-- Find exactly 50 unique, valid email addresses (skip results ${offset + 1}-${offset + 50} to paginate)
-- Each email must be a real institutional/professional email (not gmail/yahoo/hotmail personal emails unless they are official contact emails)
-- Include the person's name, institution name, department if available, and the source URL
-- Validate email format strictly (must contain @ and proper domain)
-- No duplicates
-- Focus on: contact pages, faculty directories, staff listings, Google Scholar profiles, ResearchGate, LinkedIn, official websites, social media institutional pages
-
-Return a JSON object with this exact structure:
-{
-  "emails": [
-    {
-      "email": "string",
-      "contact_name": "string or null",
-      "institution": "string",
-      "department": "string or null",
-      "source_url": "string or null"
-    }
-  ],
-  "total_found": number,
-  "country": "${country}",
-  "institution_type": "${institution_type}"
 }
 
-Return only the 50 best verified emails. If you cannot find 50, return as many as you can find.`;
+const SKIP_TITLE_PATTERNS = [
+  'list of', 'category:', 'template:', 'wikipedia:', 'help:', 'portal:', 'file:',
+  'education in', 'higher education', 'international standard', 'national universities commission',
+  'ministry of'
+];
 
-  const result = await base44.integrations.Core.InvokeLLM({
-    prompt,
-    add_context_from_internet: true,
-    model: "gemini_3_1_pro",
-    response_json_schema: {
-      type: "object",
-      properties: {
-        emails: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              email: { type: "string" },
-              contact_name: { type: "string" },
-              institution: { type: "string" },
-              department: { type: "string" },
-              source_url: { type: "string" }
-            }
-          }
-        },
-        total_found: { type: "number" },
-        country: { type: "string" },
-        institution_type: { type: "string" }
-      }
-    }
-  });
+const KEYWORDS_BY_TYPE = {
+  university: ['university', 'college', 'polytechnic', 'institute of technology'],
+  hospital: ['hospital', 'medical centre', 'medical center', 'clinic', 'health centre', 'health center'],
+  research_institute: ['institute', 'research', 'centre for', 'center for'],
+};
 
-  // Validate emails strictly
-  const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+function extractInstitutionArticles(html, institutionType) {
+  const contentStart = html.indexOf('id="mw-content-text"');
+  const content = contentStart >= 0 ? html.slice(contentStart) : html;
+  const linkRegex = /<a href="\/wiki\/([^":#]+)"[^>]*title="([^"]+)">([^<]*)<\/a>/g;
+  const keywords = KEYWORDS_BY_TYPE[institutionType] || [];
+  const found = [];
+  const seenTitles = new Set();
+  let m;
+  while ((m = linkRegex.exec(content)) !== null && found.length < 40) {
+    const articlePath = m[1];
+    const title = m[2].replace(/&amp;/g, '&').trim();
+    const lower = title.toLowerCase();
+    if (seenTitles.has(title)) continue;
+    if (SKIP_TITLE_PATTERNS.some(p => lower.includes(p))) continue;
+    if (keywords.length > 0 && !keywords.some(k => lower.includes(k))) continue;
+    seenTitles.add(title);
+    found.push({ articlePath, title });
+  }
+  return found;
+}
+
+async function resolveInstitutionWebsite(articlePath) {
+  const html = await fetchWithTimeout(`https://en.wikipedia.org/wiki/${articlePath}`, 5000);
+  if (!html) return null;
+  const infoboxMatch = html.match(/(?:Website|Official website)<\/th>\s*<td[^>]*>[\s\S]{0,300}?href="(https?:\/\/[^"]+)"/i);
+  if (!infoboxMatch) return null;
+  try {
+    const domain = new URL(infoboxMatch[1]).hostname.replace(/^www\./, '');
+    if (WIKIMEDIA_FAMILY.some(d => domain === d || domain.endsWith(`.${d}`))) return null;
+    return domain;
+  } catch {
+    return null;
+  }
+}
+
+function extractEmailsFromHtml(html, institutionDomain) {
+  const results = [];
   const seen = new Set();
-  const validEmails = (result.emails || []).filter(entry => {
-    if (!entry.email || !emailRegex.test(entry.email)) return false;
-    if (seen.has(entry.email.toLowerCase())) return false;
-    seen.add(entry.email.toLowerCase());
-    return true;
-  });
 
-  // Deduplicate against already stored emails for this country
-  const existing = await base44.asServiceRole.entities.ProspectEmail.filter({ country });
-  const existingSet = new Set(existing.map(e => e.email.toLowerCase()));
-  const newEmails = validEmails.filter(e => !existingSet.has(e.email.toLowerCase()));
-
-  // Save new emails to DB
-  if (newEmails.length > 0) {
-    await base44.asServiceRole.entities.ProspectEmail.bulkCreate(
-      newEmails.map(e => ({
-        email: e.email,
-        contact_name: e.contact_name || null,
-        institution: e.institution || null,
-        department: e.department || null,
-        institution_type,
-        country,
-        source_url: e.source_url || null,
-        campaign_status: "new"
-      }))
-    );
+  const mailtoRegex = /<a[^>]+href="mailto:([^"?]+)"[^>]*>([^<]*)<\/a>/g;
+  let m;
+  while ((m = mailtoRegex.exec(html)) !== null) {
+    const email = m[1].trim().toLowerCase();
+    if (!seen.has(email)) { seen.add(email); results.push({ email, name: m[2].trim() || null }); }
   }
 
-  return Response.json({
-    emails: newEmails,
-    saved_count: newEmails.length,
-    duplicates_skipped: validEmails.length - newEmails.length,
-    invalid_skipped: (result.emails?.length || 0) - validEmails.length,
-    country,
-    institution_type
+  const matches = html.match(EMAIL_REGEX) || [];
+  for (const raw of matches) {
+    const email = raw.toLowerCase();
+    if (!seen.has(email)) { seen.add(email); results.push({ email, name: null }); }
+  }
+
+  return results.filter(r => {
+    const domain = r.email.split('@')[1] || '';
+    if (IGNORED_DOMAINS.includes(domain)) return false;
+    if (BANNED_EXTENSIONS.some(ext => domain.endsWith(ext))) return false;
+    // Only keep emails that actually belong to this institution's own domain
+    return domain === institutionDomain || domain.endsWith(`.${institutionDomain}`);
   });
+}
+
+async function scanInstitution(inst) {
+  const domain = await resolveInstitutionWebsite(inst.articlePath);
+  if (!domain) return [];
+
+  const paths = ['', '/contact', '/contact-us'];
+  for (const path of paths) {
+    const html = await fetchWithTimeout(`https://${domain}${path}`, 4000);
+    if (!html) continue;
+    const emails = extractEmailsFromHtml(html, domain);
+    if (emails.length > 0) {
+      return emails.map(e => ({
+        email: e.email,
+        contact_name: e.name,
+        institution: inst.title,
+        department: null,
+        source_url: `https://${domain}${path}`
+      }));
+    }
+  }
+  return [];
+}
+
+Deno.serve(async (req) => {
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user || user.role !== 'admin') {
+      return Response.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
+    const { country, institution_type, page = 1 } = await req.json();
+    if (!country) return Response.json({ error: 'Country is required' }, { status: 400 });
+
+    const titleFn = WIKI_LIST_TITLES[institution_type];
+    if (!titleFn) {
+      return Response.json({
+        error: `Free web discovery currently covers "university", "hospital" and "research_institute" only. "${institution_type}" isn't supported yet.`
+      }, { status: 400 });
+    }
+
+    let html = null;
+    for (const title of titleFn(country)) {
+      html = await fetchWithTimeout(`https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`, 6000);
+      if (html) break;
+    }
+    if (!html) {
+      return Response.json({ error: `No public institution directory found for ${country}. Try a different country.` }, { status: 404 });
+    }
+
+    const allInstitutions = extractInstitutionArticles(html, institution_type);
+    const PAGE_SIZE = 5;
+    const offset = (page - 1) * PAGE_SIZE;
+    const institutions = allInstitutions.slice(offset, offset + PAGE_SIZE);
+
+    if (institutions.length === 0) {
+      return Response.json({
+        emails: [], saved_count: 0, duplicates_skipped: 0, invalid_skipped: 0,
+        country, institution_type,
+        note: 'No more institutions found on this page. Try page 1 or a different country.'
+      });
+    }
+
+    const scanResults = await Promise.all(institutions.map(inst => scanInstitution(inst)));
+    const foundEmails = scanResults.flat();
+
+    const seen = new Set();
+    const validEmails = foundEmails.filter(entry => {
+      if (!entry.email || !STRICT_EMAIL_REGEX.test(entry.email)) return false;
+      if (seen.has(entry.email)) return false;
+      seen.add(entry.email);
+      return true;
+    });
+
+    const existing = await base44.asServiceRole.entities.ProspectEmail.filter({ country });
+    const existingSet = new Set(existing.map(e => e.email.toLowerCase()));
+    const newEmails = validEmails.filter(e => !existingSet.has(e.email));
+
+    if (newEmails.length > 0) {
+      await base44.asServiceRole.entities.ProspectEmail.bulkCreate(
+        newEmails.map(e => ({
+          email: e.email,
+          contact_name: e.contact_name || null,
+          institution: e.institution || null,
+          department: e.department || null,
+          institution_type,
+          country,
+          source_url: e.source_url || null,
+          campaign_status: 'new'
+        }))
+      );
+    }
+
+    return Response.json({
+      emails: newEmails,
+      saved_count: newEmails.length,
+      duplicates_skipped: validEmails.length - newEmails.length,
+      invalid_skipped: foundEmails.length - validEmails.length,
+      institutions_scanned: institutions.map(i => i.title),
+      country,
+      institution_type
+    });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 });
