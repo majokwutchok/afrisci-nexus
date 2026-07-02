@@ -68,6 +68,11 @@
     "from_name": {
       "type": "string",
       "default": "AfriSci Nexus Editorial Team"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional internal notes about this campaign"
     }
   },
   "required": [

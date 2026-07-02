@@ -44,6 +44,11 @@
       "type": "boolean",
       "default": false,
       "description": "Whether the author has read this notification"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional additional notes about this notification"
     }
   },
   "required": [

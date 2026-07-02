@@ -73,6 +73,11 @@
     },
     "admin_notes": {
       "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional additional description for this outreach"
     }
   },
   "required": [
