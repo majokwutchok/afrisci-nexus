@@ -85,6 +85,11 @@
     "reminder_count": {
       "type": "number",
       "default": 0
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional additional notes about this review invitation"
     }
   },
   "required": [
@@ -94,12 +99,18 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "editor"
+          }
+        }
+      ]
     },
     "read": {
       "$or": [
@@ -111,10 +122,12 @@
         },
         {
           "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "editor"
           }
         }
       ]
@@ -126,21 +139,29 @@
         },
         {
           "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "editor"
           }
         }
       ]
     },
     "delete": {
-      "user_condition": {
-        "role": [
-          "admin",
-          "editor"
-        ]
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "editor"
+          }
+        }
+      ]
     }
   }
 }
