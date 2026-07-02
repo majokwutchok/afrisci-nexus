@@ -81,6 +81,11 @@
       "type": "string",
       "format": "date",
       "description": "When the application was reviewed"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional additional description for this application"
     }
   },
   "required": [
@@ -101,10 +106,12 @@
         },
         {
           "user_condition": {
-            "role": [
-              "admin",
-              "editor"
-            ]
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "editor"
           }
         }
       ]
