@@ -65,6 +65,11 @@
       "type": "number",
       "default": 0,
       "description": "Number of replies to this annotation"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional additional description for this annotation"
     }
   },
   "required": [
@@ -75,12 +80,18 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "role": [
-          "user",
-          "admin"
-        ]
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "read": {
       "$or": [
