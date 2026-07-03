@@ -29,11 +29,15 @@ const INSTITUTION_TYPES = [
   { value: "professional_association", label: "Professional Associations" },
 ];
 
-// Free web-fetch discovery currently only covers these types (no AI/credits used)
+// Free web-fetch discovery covers these types (no AI/credits used)
 const FETCHABLE_INSTITUTION_TYPES = [
   { value: "university", label: "Universities & Colleges" },
   { value: "hospital", label: "Hospitals & Medical Schools" },
   { value: "research_institute", label: "Research Institutes" },
+  { value: "school", label: "Secondary Schools" },
+  { value: "ngo", label: "NGOs & Development Orgs" },
+  { value: "government", label: "Government Ministries" },
+  { value: "professional_association", label: "Professional Associations" },
 ];
 
 const STATUS_COLORS = {
@@ -178,7 +182,7 @@ export default function EmailProspector() {
             </div>
 
             <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 text-sm text-teal-800">
-              <strong>✅ Credit-free:</strong> No AI is used. Each fetch reads Wikipedia's public directory of institutions, visits each institution's real website, and extracts published contact emails directly — completely free.
+              <strong>✅ Credit-free:</strong> No AI/LLM is used. Each fetch reads Wikipedia's public directory of institutions, visits each institution's real website, and extracts published contact emails directly — both institutional-domain emails and personal ones (Gmail, Yahoo, Hotmail, Outlook) published for individual staff — for any country worldwide, completely free.
             </div>
 
             <Button onClick={handleFetch} disabled={isFetching} className="bg-teal-600 hover:bg-teal-700 text-white px-8">

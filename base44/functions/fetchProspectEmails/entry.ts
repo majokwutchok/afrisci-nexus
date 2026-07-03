@@ -8,12 +8,16 @@ const WIKI_LIST_TITLES = {
   university: (country) => [`List of universities and colleges in ${country}`, `List of universities in ${country}`],
   hospital: (country) => [`List of hospitals in ${country}`],
   research_institute: (country) => [`List of research institutes in ${country}`],
+  school: (country) => [`List of schools in ${country}`, `List of secondary schools in ${country}`],
+  ngo: (country) => [`List of non-governmental organisations in ${country}`, `List of non-profit organizations in ${country}`],
+  government: (country) => [`List of government ministries of ${country}`, `Cabinet of ${country}`],
+  professional_association: (country) => [`List of professional associations in ${country}`],
 };
 
 const EMAIL_REGEX = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
 const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
 const IGNORED_DOMAINS = [
-  'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com', 'aol.com', 'icloud.com',
+  'aol.com', 'icloud.com',
   'example.com', 'sentry.io', 'wixpress.com', 'wix.com', 'godaddy.com'
 ];
 const WIKIMEDIA_FAMILY = [
@@ -50,7 +54,15 @@ const KEYWORDS_BY_TYPE = {
   university: ['university', 'college', 'polytechnic', 'institute of technology'],
   hospital: ['hospital', 'medical centre', 'medical center', 'clinic', 'health centre', 'health center'],
   research_institute: ['institute', 'research', 'centre for', 'center for'],
+  school: ['school', 'academy', 'college'],
+  ngo: ['foundation', 'trust', 'association', 'ngo', 'organisation', 'organization', 'network', 'alliance'],
+  government: ['ministry', 'department', 'commission', 'authority', 'agency', 'bureau'],
+  professional_association: ['association', 'society', 'institute', 'council', 'federation', 'union'],
 };
+
+// Personal free-mail providers we now also capture as individual contacts,
+// separate from an institution's own domain emails.
+const PERSONAL_EMAIL_PROVIDERS = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com'];
 
 function extractInstitutionArticles(html, institutionType) {
   const contentStart = html.indexOf('id="mw-content-text"');
@@ -108,8 +120,10 @@ function extractEmailsFromHtml(html, institutionDomain) {
     const domain = r.email.split('@')[1] || '';
     if (IGNORED_DOMAINS.includes(domain)) return false;
     if (BANNED_EXTENSIONS.some(ext => domain.endsWith(ext))) return false;
-    // Only keep emails that actually belong to this institution's own domain
-    return domain === institutionDomain || domain.endsWith(`.${institutionDomain}`);
+    // Keep emails on the institution's own domain, plus personal-provider
+    // addresses (gmail/yahoo/hotmail/etc.) published for individual contacts.
+    if (domain === institutionDomain || domain.endsWith(`.${institutionDomain}`)) return true;
+    return PERSONAL_EMAIL_PROVIDERS.includes(domain);
   });
 }
 
@@ -149,7 +163,7 @@ Deno.serve(async (req) => {
     const titleFn = WIKI_LIST_TITLES[institution_type];
     if (!titleFn) {
       return Response.json({
-        error: `Free web discovery currently covers "university", "hospital" and "research_institute" only. "${institution_type}" isn't supported yet.`
+        error: `Free web discovery currently covers "university", "hospital", "research_institute", "school", "ngo", "government" and "professional_association". "${institution_type}" isn't supported yet.`
       }, { status: 400 });
     }
 
