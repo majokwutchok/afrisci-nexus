@@ -1,5 +1,36 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
+function buildRawEmail({ to, subject, body, from_name }) {
+  const message = [
+    `From: ${from_name || 'AfriSci Nexus Editorial Team'}`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset=UTF-8',
+    '',
+    body
+  ].join('\r\n');
+
+  return btoa(unescape(encodeURIComponent(message)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+async function sendViaGmail(base44, { to, subject, body }) {
+  const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
+  const raw = buildRawEmail({ to, subject, body });
+  const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ raw })
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err?.error?.message || 'Gmail send failed');
+  }
+}
+
 const JOURNALS = [
   "AfriSci STEM Journal", "AfriSci Medicine & Health Journal",
   "AfriSci Agriculture & Environment Journal", "AfriSci Social Sciences Journal",
@@ -123,7 +154,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  // ── ACTION: send one approved outreach — mark as sent (email service unavailable) ──
+  // ── ACTION: send one approved outreach via Gmail (no credits used) ──
   if (action === 'send') {
     if (!outreach_id) return Response.json({ error: 'outreach_id required' }, { status: 400 });
     const outreaches = await base44.asServiceRole.entities.PersonalizedOutreach.filter({ id: outreach_id });
@@ -131,27 +162,42 @@ Deno.serve(async (req) => {
     if (!outreach) return Response.json({ error: 'Outreach not found' }, { status: 404 });
     if (outreach.status === 'sent') return Response.json({ error: 'Already sent' }, { status: 400 });
 
-    // Email delivery unavailable — record intent
-    await base44.asServiceRole.entities.PersonalizedOutreach.update(outreach_id, {
-      status: 'draft',
-      admin_notes: `Send attempted on ${new Date().toLocaleDateString()} — email delivery temporarily unavailable.`
-    });
-
-    return Response.json({
-      success: false,
-      note: 'Email delivery is temporarily unavailable. The outreach has been queued. Please try again when the email service is restored.',
-      sent_to: outreach.prospect_email
-    });
+    try {
+      await sendViaGmail(base44, { to: outreach.prospect_email, subject: outreach.subject, body: outreach.body_html });
+      await base44.asServiceRole.entities.PersonalizedOutreach.update(outreach_id, {
+        status: 'sent',
+        sent_at: new Date().toISOString()
+      });
+      if (outreach.prospect_id) {
+        await base44.asServiceRole.entities.ProspectEmail.update(outreach.prospect_id, { campaign_status: 'emailed' });
+      }
+      return Response.json({ success: true, sent_to: outreach.prospect_email });
+    } catch (error) {
+      await base44.asServiceRole.entities.PersonalizedOutreach.update(outreach_id, {
+        admin_notes: `Send failed on ${new Date().toLocaleDateString()}: ${error.message}`
+      });
+      return Response.json({ error: error.message }, { status: 500 });
+    }
   }
 
-  // ── ACTION: send all approved drafts ──
+  // ── ACTION: send all approved drafts via Gmail ──
   if (action === 'send_all_approved') {
-    return Response.json({
-      success: false,
-      sent: 0,
-      errors: 0,
-      note: 'Email delivery is temporarily unavailable. All approved drafts are queued for sending when the service is restored.'
-    });
+    const approved = await base44.asServiceRole.entities.PersonalizedOutreach.filter({ status: 'approved' });
+    let sent = 0, errors = 0;
+    for (const o of approved) {
+      try {
+        await sendViaGmail(base44, { to: o.prospect_email, subject: o.subject, body: o.body_html });
+        await base44.asServiceRole.entities.PersonalizedOutreach.update(o.id, { status: 'sent', sent_at: new Date().toISOString() });
+        if (o.prospect_id) {
+          await base44.asServiceRole.entities.ProspectEmail.update(o.prospect_id, { campaign_status: 'emailed' });
+        }
+        sent++;
+      } catch (error) {
+        await base44.asServiceRole.entities.PersonalizedOutreach.update(o.id, { admin_notes: `Send failed: ${error.message}` });
+        errors++;
+      }
+    }
+    return Response.json({ success: true, sent, errors });
   }
 
   return Response.json({ error: 'Unknown action' }, { status: 400 });
