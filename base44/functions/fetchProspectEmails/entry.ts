@@ -86,7 +86,7 @@ function extractInstitutionArticles(html, institutionType) {
 }
 
 async function resolveInstitutionWebsite(articlePath) {
-  const html = await fetchWithTimeout(`https://en.wikipedia.org/wiki/${articlePath}`, 5000);
+  const html = await fetchWithTimeout(`https://en.wikipedia.org/wiki/${articlePath}`, 8000);
   if (!html) return null;
   const infoboxMatch = html.match(/(?:Website|Official website)<\/th>\s*<td[^>]*>[\s\S]{0,300}?href="(https?:\/\/[^"]+)"/i);
   if (!infoboxMatch) return null;
@@ -133,7 +133,7 @@ async function scanInstitution(inst) {
 
   const paths = ['', '/contact', '/contact-us'];
   for (const path of paths) {
-    const html = await fetchWithTimeout(`https://${domain}${path}`, 4000);
+    const html = await fetchWithTimeout(`https://${domain}${path}`, 6000);
     if (!html) continue;
     const emails = extractEmailsFromHtml(html, domain);
     if (emails.length > 0) {
@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
 
     let html = null;
     for (const title of titleFn(country)) {
-      html = await fetchWithTimeout(`https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`, 6000);
+      html = await fetchWithTimeout(`https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`, 8000);
       if (html) break;
     }
     if (!html) {
