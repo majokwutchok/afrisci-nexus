@@ -11,6 +11,7 @@ import {
   ExternalLink, Building2, GraduationCap
 } from 'lucide-react';
 import OrcidBadge from '@/components/OrcidBadge';
+import SEO from '@/components/SEO';
 
 const GRAD_COLORS = [
   'from-teal-500 to-emerald-600',
@@ -134,6 +135,11 @@ export default function EditorialBoardPage() {
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-100 min-h-screen">
+      <SEO
+        title="Editorial Board"
+        description="Meet the distinguished international editorial board of AfriSci Nexus, committed to advancing African scientific research through rigorous peer review."
+        canonicalPath="/Editorial"
+      />
       {/* Hero */}
       <div className="text-center py-24 px-4 bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white">
         <Users className="w-16 h-16 mx-auto mb-6 text-sky-200" />

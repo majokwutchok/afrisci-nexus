@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import SEO from '@/components/SEO';
 import {
   FileText,
   Upload,
@@ -40,6 +41,11 @@ const StepCard = ({ number, title, icon: Icon, children }) => (
 export default function GuidelinesPage() {
   return (
     <div className="bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-100 min-h-screen">
+      <SEO
+        title="Submission Guidelines for Authors"
+        description="Your complete guide to submitting manuscripts to AfriSci Nexus journals — formatting requirements, peer review process, and publication policies."
+        canonicalPath="/Guidelines"
+      />
       {/* Hero Section */}
       <div className="text-center py-24 px-4 bg-gradient-to-r from-emerald-700 via-teal-600 to-cyan-600 text-white">
         <FileText className="w-16 h-16 mx-auto mb-6 text-emerald-100" />

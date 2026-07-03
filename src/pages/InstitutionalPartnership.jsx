@@ -12,6 +12,7 @@ import {
   CheckCircle, Star, ArrowRight, Sparkles, Handshake,
   GraduationCap, Award, Zap, MapPin, FileText, DollarSign
 } from "lucide-react";
+import SEO from '@/components/SEO';
 
 const tiers = [
   {
@@ -170,6 +171,11 @@ ${form.message}
 
   return (
     <div className="bg-slate-50 min-h-screen">
+      <SEO
+        title="Institutional Partnerships"
+        description="Partner your university or research institution with AfriSci Nexus — affordable publishing agreements giving 10-50 authors global research visibility."
+        canonicalPath="/InstitutionalPartnership"
+      />
       {/* Hero */}
       <div className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-teal-800 text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 30% 50%, #14B8A6 0%, transparent 60%), radial-gradient(circle at 80% 20%, #38BDF8 0%, transparent 50%)" }} />

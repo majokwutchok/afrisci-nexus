@@ -10,6 +10,7 @@ import {
   Lightbulb, Zap, Award, X, Download, ExternalLink,
   ChevronRight, Clock, Users, Star
 } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 // --- Resource Panel Content ---
 const RESOURCE_CONTENT = {
@@ -379,6 +380,11 @@ export default function AuthorResources() {
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-100 min-h-screen">
+      <SEO
+        title="Author Resources & Writing Tools"
+        description="Manuscript templates, submission checklists, style guides, and webinars to help you successfully publish your research with AfriSci Nexus."
+        canonicalPath="/AuthorResources"
+      />
       {/* Panel overlay */}
       {activePanel && (
         <ResourcePanel resourceKey={activePanel} onClose={() => setActivePanel(null)} />

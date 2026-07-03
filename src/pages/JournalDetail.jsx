@@ -17,6 +17,7 @@ import JournalMetrics from '../components/journal/JournalMetrics';
 import { jsPDF } from 'jspdf';
 import { stampAfriSciNexus } from '@/utils/pdfStamp';
 import { trackView } from '@/utils/trackEngagement';
+import SEO from '@/components/SEO';
 
 const categoryLabels = {
   stem: "STEM",
@@ -407,6 +408,18 @@ export default function JournalDetailPage() {
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-100 min-h-screen">
+      <SEO
+        title={journal.title}
+        description={journal.description?.slice(0, 160)}
+        canonicalPath={`/JournalDetail?id=${journal.id}`}
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "Periodical",
+          "name": journal.title,
+          "description": journal.description,
+          "publisher": { "@type": "Organization", "name": "AfriSci Nexus" }
+        }}
+      />
       {/* Hero Cover */}
       {(() => {
         const cover = coverDesigns[journal.category] || coverDesigns.interdisciplinary;

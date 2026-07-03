@@ -8,6 +8,7 @@ import {
   CheckCircle, Clock, Target, Globe, Shield, BookOpen,
   ExternalLink, Star, Award, TrendingUp, Users, Zap
 } from "lucide-react";
+import SEO from '@/components/SEO';
 
 const STATUS = {
   achieved: { label: "Achieved", color: "bg-emerald-100 text-emerald-800 border-emerald-200", icon: CheckCircle, iconColor: "text-emerald-600" },
@@ -262,6 +263,11 @@ export default function Accreditations() {
 
   return (
     <div className="bg-slate-50 min-h-screen">
+      <SEO
+        title="Accreditations & Indexing Roadmap"
+        description="AfriSci Nexus's roadmap to registering with every major international indexing body, including DOAJ, Scopus, Web of Science, and Google Scholar."
+        canonicalPath="/Accreditations"
+      />
       {/* Hero */}
       <div className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 30% 50%, #14B8A6 0%, transparent 60%), radial-gradient(circle at 80% 20%, #818CF8 0%, transparent 50%)" }} />

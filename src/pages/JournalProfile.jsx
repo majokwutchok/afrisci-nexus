@@ -13,6 +13,7 @@ import {
   TrendingUp, Star, Rss
 } from "lucide-react";
 import { format } from "date-fns";
+import SEO from '@/components/SEO';
 
 const categoryLabels = {
   stem: "STEM",
@@ -178,6 +179,11 @@ export default function JournalProfile() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <SEO
+        title={journal.title}
+        description={journal.description?.slice(0, 160)}
+        canonicalPath={`/JournalProfile?id=${journal.id}`}
+      />
 
       {/* ── HERO BANNER ── */}
       <div className={`relative bg-gradient-to-r ${gradient} text-white overflow-hidden`}>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import SEO from '@/components/SEO';
 
 const ValueCard = ({ icon: Icon, title, description, color }) => (
   <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group">
@@ -44,6 +45,11 @@ const TimelineItem = ({ year, title, description, icon: Icon }) => (
 export default function AboutPage() {
   return (
     <div className="bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-100">
+      <SEO
+        title="About Us — African Scientific Publishing Platform"
+        description="Learn about AfriSci Nexus, Africa's leading open-access academic publishing platform serving 54 African countries with 10,000+ published research articles."
+        canonicalPath="/About"
+      />
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white">
         <div className="absolute inset-0 opacity-10">

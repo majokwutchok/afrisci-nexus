@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import SEO from '@/components/SEO';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -56,6 +57,11 @@ ${formData.message}`
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-100 min-h-screen">
+      <SEO
+        title="Contact Us"
+        description="Get in touch with the AfriSci Nexus editorial team for submission assistance, peer review questions, or partnership opportunities."
+        canonicalPath="/Contact"
+      />
       {/* Hero Section */}
       <div className="text-center py-24 px-4 bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white">
         <Mail className="w-16 h-16 mx-auto mb-6 text-sky-200" />

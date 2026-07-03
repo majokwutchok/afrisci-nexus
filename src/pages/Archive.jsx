@@ -26,6 +26,7 @@ import {
   Users,
   BarChart3
 } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 const categoryLabels = {
   stem: "STEM",
@@ -287,6 +288,11 @@ export default function Archive() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+      <SEO
+        title="Research Archive"
+        description="Browse AfriSci Nexus's comprehensive archive of published, peer-reviewed research articles across all disciplines and years."
+        canonicalPath="/Archive"
+      />
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">

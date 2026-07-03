@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import SEO from '@/components/SEO';
 
 const BenefitCard = ({ icon: Icon, title, description, color }) => (
   <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
@@ -20,6 +21,11 @@ const BenefitCard = ({ icon: Icon, title, description, color }) => (
 export default function OpenAccessPage() {
   return (
     <div className="bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 min-h-screen">
+      <SEO
+        title="Open Access Policy"
+        description="AfriSci Nexus is committed to open access — all published articles are freely available under CC BY 4.0, with fee waivers for authors in need."
+        canonicalPath="/OpenAccess"
+      />
       {/* Hero Section */}
       <div className="text-center py-24 px-4 bg-gradient-to-r from-emerald-700 via-teal-600 to-cyan-600 text-white">
         <Globe className="w-16 h-16 mx-auto mb-6 text-emerald-100" />
