@@ -92,13 +92,13 @@ export default function LinkedInProfileAgent() {
         </div>
         <div>
           <h2 className="text-2xl font-bold text-slate-900">LinkedIn Profile Agent</h2>
-          <p className="text-sm text-slate-500">AI agent that discovers and links active LinkedIn academic profiles to your ProspectEmail database</p>
+          <p className="text-sm text-slate-500">Discovers and links active LinkedIn academic profiles to your ProspectEmail database</p>
         </div>
       </div>
 
       {/* Disclaimer */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
-        <strong>ℹ️ How it works:</strong> This agent uses Gemini Pro with live web search to find LinkedIn profiles by searching Google, LinkedIn public pages, institutional websites, Google Scholar, and ResearchGate. It does not use LinkedIn's API or scrape private data — only publicly discoverable profile information.
+      <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 text-sm text-teal-800">
+        <strong>✅ Credit-free:</strong> No AI/LLM is used. This agent runs public web searches (DuckDuckGo) to find LinkedIn profiles, Google Scholar pages, and ResearchGate profiles across LinkedIn public pages, institutional websites, and search engines. It does not use LinkedIn's API or scrape private data — only publicly discoverable profile information.
       </div>
 
       {/* Tabs */}
@@ -215,7 +215,7 @@ export default function LinkedInProfileAgent() {
               <div className="flex items-center gap-2 mb-2 font-semibold">
                 <Loader2 className="w-4 h-4 animate-spin" /> Agent searching LinkedIn profiles in {country}...
               </div>
-              <p>Searching LinkedIn, Google, ResearchGate, institutional websites, and Google Scholar. This uses Gemini Pro with live web access and may take 30–90 seconds.</p>
+              <p>Searching LinkedIn, Google, ResearchGate, and Google Scholar via public web search — credit-free. This may take up to a minute.</p>
             </div>
           )}
 
