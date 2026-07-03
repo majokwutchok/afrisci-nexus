@@ -9,13 +9,41 @@ import { useEffect } from "react";
  */
 export default function ScholarMetaTags({ manuscript, journal, coverImage }) {
   useEffect(() => {
-    if (!manuscript || !["published", "online_first"].includes(manuscript.status)) return;
+    if (!manuscript) return;
+
+    const articleUrl = `${window.location.origin}/ManuscriptDetail?id=${manuscript.id}`;
+    const isPublic = ["published", "online_first"].includes(manuscript.status);
+
+    // ── Canonical URL — always set so every article has its own indexable URL ──
+    let canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement("link");
+      canonicalEl.setAttribute("rel", "canonical");
+      document.head.appendChild(canonicalEl);
+    }
+    const prevCanonical = canonicalEl.getAttribute("href");
+    canonicalEl.setAttribute("href", articleUrl);
+
+    // ── Robots — only allow indexing of publicly readable articles ──
+    let robotsEl = document.querySelector('meta[name="robots"]');
+    if (!robotsEl) {
+      robotsEl = document.createElement("meta");
+      robotsEl.setAttribute("name", "robots");
+      document.head.appendChild(robotsEl);
+    }
+    const prevRobots = robotsEl.getAttribute("content");
+    robotsEl.setAttribute("content", isPublic ? "index, follow, max-image-preview:large, max-snippet:-1" : "noindex, nofollow");
+
+    if (!isPublic) {
+      return () => {
+        canonicalEl.setAttribute("href", prevCanonical || `${window.location.origin}/`);
+        robotsEl.setAttribute("content", prevRobots || "index, follow");
+      };
+    }
 
     // ── Page title & static OG tag update (for JS-capable crawlers / link previews) ──
     const prevTitle = document.title;
     document.title = `${manuscript.title} — AfriSci Nexus`;
-
-    const articleUrl = `${window.location.origin}/ManuscriptDetail?id=${manuscript.id}`;
     const imageToUse = coverImage || manuscript.cover_image_url ||
       "https://media.base44.com/images/public/689712620d81bb990dd76bb3/21f8643a1_generated_image.png";
     const descSnippet = (manuscript.abstract || "").substring(0, 280);
@@ -162,6 +190,8 @@ export default function ScholarMetaTags({ manuscript, journal, coverImage }) {
       setMeta('meta[property="og:description"]', "content", "Africa's leading open-access academic publishing platform.");
       setMeta('meta[property="og:type"]', "content", "website");
       setMeta('meta[property="og:url"]', "content", "https://afriscinexus.com/");
+      canonicalEl.setAttribute("href", prevCanonical || `${window.location.origin}/`);
+      robotsEl.setAttribute("content", prevRobots || "index, follow");
     };
   }, [manuscript?.id, manuscript?.status, journal?.id, coverImage]);
 
