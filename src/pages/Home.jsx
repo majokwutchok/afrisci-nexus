@@ -27,13 +27,13 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+    const fetchData = async (isInitial) => {
+      if (isInitial) setIsLoading(true);
       try {
         const [journalData, publicationData, readershipData, reviewerData] = await Promise.all([
           base44.entities.Journal.filter({ status: 'active' }, '-created_date', 500),
           base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 500),
-          base44.entities.ReadershipStats.list('-view_date', 2000),
+          base44.entities.ReadershipStats.list('-created_date', 2000),
           base44.entities.ReviewerProfile.filter({ status: 'active' }, '-created_date', 500),
         ]);
         setData({
@@ -45,10 +45,13 @@ export default function HomePage() {
       } catch (error) {
         console.error("Failed to fetch homepage data:", error);
       }
-      setIsLoading(false);
+      if (isInitial) setIsLoading(false);
     };
 
-    fetchData();
+    fetchData(true);
+    // Keep in sync with the live traffic numbers shown in the Admin Dashboard analytics
+    const interval = setInterval(() => fetchData(false), 30000);
+    return () => clearInterval(interval);
   }, []);
   
   const platformStats = {
