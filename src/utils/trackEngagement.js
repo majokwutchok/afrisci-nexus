@@ -32,6 +32,7 @@ export async function trackView(manuscriptId, viewType, manuscript) {
   // Write ReadershipStats record (fire and forget)
   base44.entities.ReadershipStats.create({
     manuscript_id: manuscriptId,
+    page_title: manuscript?.title || "Untitled Article",
     journal_id: manuscript?.journal_id || null,
     country: "Unknown",       // geo not available client-side without IP lookup
     view_date: today,
