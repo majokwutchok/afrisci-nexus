@@ -27,8 +27,52 @@ export default function AIReviewerMatcher({ manuscript, allUsers, onSelectReview
   const runMatching = async () => {
     if (reviewerProfiles.length === 0) return;
     setLoading(true);
-    setSuggestions([]);
     setExpanded(true);
+
+    const manuscriptKeywords = (manuscript.keywords || []).map(k => k.toLowerCase().trim());
+    const abstractText = (manuscript.abstract || "").toLowerCase();
+    const authorAffiliations = (manuscript.authors || [])
+      .map(a => a.affiliation?.toLowerCase().trim())
+      .filter(Boolean);
+
+    const scored = reviewerProfiles.map(r => {
+      const expertise = (r.expertise || []).map(e => e.toLowerCase().trim());
+
+      // Count keyword overlaps
+      const matchedTags = expertise.filter(tag =>
+        manuscriptKeywords.some(k => k === tag || k.includes(tag) || tag.includes(k)) ||
+        (tag.length > 3 && abstractText.includes(tag))
+      );
+
+      const overlapScore = manuscriptKeywords.length > 0
+        ? Math.round((matchedTags.length / Math.max(manuscriptKeywords.length, expertise.length || 1)) * 100)
+        : 0;
+
+      const match_score = Math.min(95, Math.max(matchedTags.length > 0 ? 40 + matchedTags.length * 15 : overlapScore, overlapScore));
+
+      const conflict_risk = r.affiliation && authorAffiliations.includes(r.affiliation.toLowerCase().trim())
+        ? "high"
+        : "low";
+
+      const match_reason = matchedTags.length > 0
+        ? `Expertise overlap on: ${matchedTags.slice(0, 3).join(", ")}`
+        : "No direct keyword overlap found — general subject area match only.";
+
+      return {
+        email: r.email,
+        full_name: r.full_name,
+        match_score,
+        conflict_risk,
+        match_reason,
+      };
+    });
+
+    const ranked = scored
+      .filter(s => s.match_score > 0)
+      .sort((a, b) => b.match_score - a.match_score)
+      .slice(0, 8);
+
+    setSuggestions(ranked);
     setLoading(false);
   };
 
