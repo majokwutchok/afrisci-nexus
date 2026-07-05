@@ -13,7 +13,6 @@ import LatestPublications from '../components/home/LatestPublications';
 import DisciplineExplorer from '../components/home/DisciplineExplorer';
 import ReviewerCTA from '../components/home/ReviewerCTA';
 import ReadershipMap from '../components/home/ReadershipMap';
-import ImpactMetrics from '../components/home/ImpactMetrics';
 import NewsSection from '../components/home/NewsSection';
 import HomeSidebar from '../components/home/HomeSidebar';
 import GlobalResearchMap from '../components/home/GlobalResearchMap';
@@ -111,7 +110,6 @@ export default function HomePage() {
                 <WhyNexus />
                 <LatestPublications publications={data.publications} journals={data.journals} isLoading={isLoading} />
                 <DisciplineExplorer />
-                <ImpactMetrics />
                 <GlobalResearchMap />
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                   <ReadershipMap stats={data.stats} isLoading={isLoading} />
