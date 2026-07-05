@@ -1,4 +1,21 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+
+function buildRawEmail({ to, subject, body }) {
+  const message = [
+    `From: AfriSci Nexus Discovery`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset=UTF-8',
+    '',
+    body
+  ].join('\r\n');
+
+  return btoa(unescape(encodeURIComponent(message)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
 
 Deno.serve(async (req) => {
   try {
@@ -26,18 +43,46 @@ Deno.serve(async (req) => {
     const manuscriptIdToUse = isNewComment ? data?.manuscript_id : manuscriptId;
     if (!manuscriptIdToUse) return Response.json({ skipped: true });
 
-    const [subscriptions] = await Promise.all([
-      base44.asServiceRole.entities.ArticleSubscription.filter({ manuscript_id: manuscriptIdToUse }),
-    ]);
+    const subscriptions = await base44.asServiceRole.entities.ArticleSubscription.filter({ manuscript_id: manuscriptIdToUse });
 
     if (!subscriptions.length) {
       return Response.json({ skipped: true, reason: 'No subscribers' });
     }
 
-    // Email service is not available — log notification count only
-    console.log(`[Article Notification] ${subscriptions.length} subscriber(s) would be notified for manuscript ${manuscriptIdToUse}. Email service temporarily unavailable.`);
+    const manuscripts = await base44.asServiceRole.entities.Manuscript.filter({ id: manuscriptIdToUse });
+    const manuscript = manuscripts[0];
+    const title = manuscript?.title || 'an article you follow';
 
-    return Response.json({ success: true, note: 'Subscribers noted. Email notifications skipped (service temporarily unavailable).', subscriber_count: subscriptions.length });
+    const eventLabel = isNewComment ? 'a new comment' : 'a new citation';
+    const subject = `Update on "${title}"`;
+    const html = `<p>Hello,</p>
+<p>There's ${eventLabel} on an article you're subscribed to: <strong>"${title}"</strong>.</p>
+<p>Visit AfriSci Nexus Discovery to view the update.</p>
+<p>Best regards,<br>AfriSci Nexus Discovery</p>`;
+
+    let sent = 0, errors = 0;
+    try {
+      const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
+      for (const sub of subscriptions) {
+        if (!sub.subscriber_email) continue;
+        try {
+          const raw = buildRawEmail({ to: sub.subscriber_email, subject, body: html });
+          const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ raw })
+          });
+          if (res.ok) sent++; else errors++;
+        } catch (_e) {
+          errors++;
+        }
+      }
+    } catch (e) {
+      console.log(`[Article Notification] Gmail connection failed: ${e.message}`);
+      return Response.json({ success: false, note: 'Gmail not connected', subscriber_count: subscriptions.length });
+    }
+
+    return Response.json({ success: true, subscriber_count: subscriptions.length, sent, errors });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
