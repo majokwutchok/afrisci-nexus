@@ -6,6 +6,10 @@
       "type": "string",
       "description": "ID of the manuscript"
     },
+    "page_title": {
+      "type": "string",
+      "description": "Title of the page/article that was viewed, for display in analytics"
+    },
     "journal_id": {
       "type": "string",
       "description": "ID of the journal"
@@ -84,7 +88,11 @@
         "role": "admin"
       }
     },
-    "update": false,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "delete": {
       "user_condition": {
         "role": "admin"
