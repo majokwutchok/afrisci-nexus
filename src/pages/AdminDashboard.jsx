@@ -36,6 +36,7 @@ import PersonalizedOutreachEngine from "../components/admin/PersonalizedOutreach
 import InboundReplyMonitor from "../components/admin/InboundReplyMonitor";
 import ExecutiveBusinessCard from "../components/admin/ExecutiveBusinessCard";
 import BulkManuscriptActions from "../components/editor/BulkManuscriptActions";
+import PlatformAnalyticsDashboard from "../components/admin/PlatformAnalyticsDashboard";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -154,6 +155,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="applications" className="text-blue-700 font-semibold">📋 Applications</TabsTrigger>
             <TabsTrigger value="news" className="text-teal-700 font-semibold">📰 News Manager</TabsTrigger>
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="platform_analytics" className="text-emerald-700 font-semibold">📊 Platform Analytics</TabsTrigger>
             <TabsTrigger value="revenue">Revenue & Analytics</TabsTrigger>
             <TabsTrigger value="journals">Journal Management</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
@@ -203,6 +205,10 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="platform_analytics" className="mt-6">
+            <PlatformAnalyticsDashboard />
           </TabsContent>
 
           <TabsContent value="applications" className="mt-6">
