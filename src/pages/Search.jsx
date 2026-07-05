@@ -175,6 +175,14 @@ export default function SearchPage() {
       setIsLoading(false);
     };
     load();
+
+    // Prefill and auto-run search when arriving with a ?q= param (e.g. from the homepage search bar)
+    const urlParams = new URLSearchParams(window.location.search);
+    const q = urlParams.get('q');
+    if (q && q.trim()) {
+      setQuery(q);
+      setHasSearched(true);
+    }
   }, []);
 
   // Parse search terms once

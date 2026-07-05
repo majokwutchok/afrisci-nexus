@@ -1,11 +1,19 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, ArrowRight, ShieldCheck, Globe, BookOpen } from 'lucide-react';
 
 export default function HeroSection() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    navigate(`${createPageUrl("Search")}?q=${encodeURIComponent(searchQuery.trim())}`);
+  };
+
   return (
     <div className="relative bg-blue-900 text-white overflow-hidden">
       <div
@@ -23,13 +31,14 @@ export default function HeroSection() {
         </p>
         
         <div className="mt-10 max-w-xl mx-auto">
-          <form className="relative">
+          <form className="relative" onSubmit={handleSearch}>
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-sky-300" />
             <Input
               type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search for articles, authors, or journals..."
               className="w-full pl-12 pr-4 py-3 h-14 rounded-full bg-white/10 border-white/20 text-white placeholder:text-sky-200 backdrop-blur-sm focus:bg-white/20 focus:ring-2 focus:ring-teal-400" />
-
           </form>
         </div>
         
