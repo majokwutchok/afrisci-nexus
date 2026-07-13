@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { UserPlus, Loader2, CheckCircle } from 'lucide-react';
+import PhotoCaptureInput from './PhotoCaptureInput';
 
 const EMPTY_FORM = {
   full_name: '',
@@ -68,8 +69,11 @@ export default function AddEditorProfile({ onAdded }) {
           <Input placeholder="Affiliation / Institution *" value={form.affiliation} onChange={handleChange('affiliation')} required />
           <Input placeholder="Country *" value={form.country} onChange={handleChange('country')} required />
           <Input placeholder="ORCID (optional)" value={form.orcid} onChange={handleChange('orcid')} />
-          <Input placeholder="Profile photo URL (optional)" value={form.profile_photo_url} onChange={handleChange('profile_photo_url')} />
           <Input placeholder="Google Scholar URL (optional)" value={form.google_scholar_url} onChange={handleChange('google_scholar_url')} />
+          <PhotoCaptureInput
+            value={form.profile_photo_url}
+            onChange={(dataUrl) => setForm(f => ({ ...f, profile_photo_url: dataUrl }))}
+          />
           <Input
             className="md:col-span-2"
             placeholder="Research specialties, comma separated (e.g. Public Health, Genomics)"
