@@ -81,6 +81,18 @@ const mainMenuItems = [
         icon: Target
       },
       { 
+        title: "Archiving Policy", 
+        url: createPageUrl("ArchivingPolicy"), 
+        description: "Long-term preservation of published articles",
+        icon: ArchiveIcon
+      },
+      { 
+        title: "Repository Policy", 
+        url: createPageUrl("RepositoryPolicy"), 
+        description: "Self-archiving & institutional repository deposit rights",
+        icon: Handshake
+      },
+      { 
         title: "Contact Us", 
         url: createPageUrl("Contact"), 
         description: "Get in touch with our editorial team",

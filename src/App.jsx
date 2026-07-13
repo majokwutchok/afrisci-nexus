@@ -22,6 +22,8 @@ import QuickSubmit from './pages/QuickSubmit';
 import NewsAnnouncements from './pages/NewsAnnouncements';
 import NewsPostDetail from './pages/NewsPostDetail';
 import FeesWaiverPolicy from './pages/FeesWaiverPolicy';
+import ArchivingPolicy from './pages/ArchivingPolicy';
+import RepositoryPolicy from './pages/RepositoryPolicy';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -90,6 +92,8 @@ const AuthenticatedApp = () => {
       <Route path="/NewsAnnouncements" element={<LayoutWrapper currentPageName="NewsAnnouncements"><NewsAnnouncements /></LayoutWrapper>} />
       <Route path="/NewsPostDetail" element={<LayoutWrapper currentPageName="NewsPostDetail"><NewsPostDetail /></LayoutWrapper>} />
       <Route path="/FeesWaiverPolicy" element={<LayoutWrapper currentPageName="FeesWaiverPolicy"><FeesWaiverPolicy /></LayoutWrapper>} />
+      <Route path="/ArchivingPolicy" element={<LayoutWrapper currentPageName="ArchivingPolicy"><ArchivingPolicy /></LayoutWrapper>} />
+      <Route path="/RepositoryPolicy" element={<LayoutWrapper currentPageName="RepositoryPolicy"><RepositoryPolicy /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

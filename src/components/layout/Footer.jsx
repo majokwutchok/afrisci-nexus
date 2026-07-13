@@ -33,6 +33,8 @@ export default function Footer() {
     { title: "Editorial Board", url: createPageUrl("Editorial") },
     { title: "Open Access Policy", url: createPageUrl("OpenAccess") },
     { title: "Accreditations & Indexing", url: createPageUrl("Accreditations") },
+    { title: "Archiving Policy", url: createPageUrl("ArchivingPolicy") },
+    { title: "Repository Policy", url: createPageUrl("RepositoryPolicy") },
     { title: "Contact Us", url: createPageUrl("Contact") },
   ];
 
