@@ -29,6 +29,18 @@
       "type": "string",
       "description": "Google Scholar profile URL"
     },
+    "facebook_url": {
+      "type": "string",
+      "description": "Facebook profile URL"
+    },
+    "linkedin_url": {
+      "type": "string",
+      "description": "LinkedIn profile URL"
+    },
+    "x_url": {
+      "type": "string",
+      "description": "X (Twitter) profile URL"
+    },
     "reviewer_status": {
       "type": "string",
       "enum": [

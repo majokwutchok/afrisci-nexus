@@ -119,6 +119,9 @@ export default function Profile() {
         research_interests: [],
         academic_title: "",
         google_scholar_url: "",
+        facebook_url: "",
+        linkedin_url: "",
+        x_url: "",
         reviewer_status: "inactive",
         editor_roles: [],
         languages: ["English"],
@@ -192,6 +195,9 @@ export default function Profile() {
         research_interests: user.research_interests,
         academic_title: user.academic_title,
         google_scholar_url: user.google_scholar_url,
+        facebook_url: user.facebook_url,
+        linkedin_url: user.linkedin_url,
+        x_url: user.x_url,
         reviewer_status: user.reviewer_status,
         languages: user.languages,
         career_stage: user.career_stage
@@ -411,6 +417,39 @@ export default function Profile() {
                   value={user.google_scholar_url || ""}
                   onChange={(e) => handleInputChange('google_scholar_url', e.target.value)}
                   placeholder="https://scholar.google.com/citations?user=..."
+                  className="mt-2"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <Label htmlFor="facebook_url">Facebook URL</Label>
+                <Input
+                  id="facebook_url"
+                  value={user.facebook_url || ""}
+                  onChange={(e) => handleInputChange('facebook_url', e.target.value)}
+                  placeholder="https://facebook.com/..."
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="linkedin_url">LinkedIn URL</Label>
+                <Input
+                  id="linkedin_url"
+                  value={user.linkedin_url || ""}
+                  onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
+                  placeholder="https://linkedin.com/in/..."
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="x_url">X (Twitter) URL</Label>
+                <Input
+                  id="x_url"
+                  value={user.x_url || ""}
+                  onChange={(e) => handleInputChange('x_url', e.target.value)}
+                  placeholder="https://x.com/..."
                   className="mt-2"
                 />
               </div>

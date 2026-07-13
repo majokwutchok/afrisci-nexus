@@ -97,7 +97,8 @@ export default function Apply() {
   const [form, setForm] = useState({
     full_name: "", affiliation: "", country: "", academic_title: "",
     orcid: "", google_scholar_url: "", motivation: "",
-    research_interests: "", cv_url: "", credentials_url: ""
+    research_interests: "", cv_url: "", credentials_url: "",
+    facebook_url: "", linkedin_url: "", x_url: ""
   });
   const [orcidError, setOrcidError] = useState('');
 
@@ -113,6 +114,9 @@ export default function Apply() {
           academic_title: u.academic_title || "",
           orcid: u.orcid || "",
           google_scholar_url: u.google_scholar_url || "",
+          facebook_url: u.facebook_url || "",
+          linkedin_url: u.linkedin_url || "",
+          x_url: u.x_url || "",
           research_interests: (u.research_interests || []).join(", ")
         }));
       }
@@ -161,6 +165,9 @@ export default function Apply() {
       academic_title: form.academic_title,
       orcid: form.orcid,
       google_scholar_url: form.google_scholar_url,
+      facebook_url: form.facebook_url,
+      linkedin_url: form.linkedin_url,
+      x_url: form.x_url,
       motivation: form.motivation,
       cv_url: form.cv_url,
       credentials_url: form.credentials_url,
@@ -406,6 +413,21 @@ export default function Apply() {
             <div>
               <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5 block">Google Scholar URL</label>
               <Input value={form.google_scholar_url} onChange={e => setForm(f => ({ ...f, google_scholar_url: e.target.value }))} placeholder="https://scholar.google.com/..." />
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5 block">Facebook URL</label>
+                <Input value={form.facebook_url} onChange={e => setForm(f => ({ ...f, facebook_url: e.target.value }))} placeholder="https://facebook.com/..." />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5 block">LinkedIn URL</label>
+                <Input value={form.linkedin_url} onChange={e => setForm(f => ({ ...f, linkedin_url: e.target.value }))} placeholder="https://linkedin.com/in/..." />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5 block">X (Twitter) URL</label>
+                <Input value={form.x_url} onChange={e => setForm(f => ({ ...f, x_url: e.target.value }))} placeholder="https://x.com/..." />
+              </div>
             </div>
 
             <div>

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import {
   BookOpen, Globe, Mail, Award, Download, Eye,
   ExternalLink, Building2, Calendar, Quote, User as UserIcon,
-  UserPlus, UserCheck, Microscope, Users
+  UserPlus, UserCheck, Microscope, Users, Facebook, Linkedin, Twitter
 } from 'lucide-react';
 
 function StatCard({ icon: Icon, value, label, color }) {
@@ -300,6 +300,25 @@ export default function AuthorProfile() {
                       className="inline-flex items-center gap-1.5 mt-3 text-xs text-blue-600 hover:underline">
                       <ExternalLink className="w-3 h-3" /> Google Scholar
                     </a>
+                  )}
+                  {(roleProfile?.facebook_url || roleProfile?.linkedin_url || roleProfile?.x_url) && (
+                    <div className="flex items-center gap-3 mt-3">
+                      {roleProfile?.facebook_url && (
+                        <a href={roleProfile.facebook_url} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-blue-600 transition-colors">
+                          <Facebook className="w-4 h-4" />
+                        </a>
+                      )}
+                      {roleProfile?.linkedin_url && (
+                        <a href={roleProfile.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-sky-600 transition-colors">
+                          <Linkedin className="w-4 h-4" />
+                        </a>
+                      )}
+                      {roleProfile?.x_url && (
+                        <a href={roleProfile.x_url} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors">
+                          <Twitter className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
                   )}
                 </CardContent>
               </Card>

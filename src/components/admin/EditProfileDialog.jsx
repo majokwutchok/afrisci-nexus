@@ -22,6 +22,9 @@ export default function EditProfileDialog({ app, open, onOpenChange, onSaved }) 
         profile_photo_url: app.profile_photo_url || '',
         orcid: app.orcid || '',
         google_scholar_url: app.google_scholar_url || '',
+        facebook_url: app.facebook_url || '',
+        linkedin_url: app.linkedin_url || '',
+        x_url: app.x_url || '',
         motivation: app.motivation || '',
       });
     }
@@ -42,6 +45,9 @@ export default function EditProfileDialog({ app, open, onOpenChange, onSaved }) 
       profile_photo_url: form.profile_photo_url,
       orcid: form.orcid,
       google_scholar_url: form.google_scholar_url,
+      facebook_url: form.facebook_url,
+      linkedin_url: form.linkedin_url,
+      x_url: form.x_url,
       motivation: form.motivation,
     });
     setSaving(false);
@@ -62,6 +68,9 @@ export default function EditProfileDialog({ app, open, onOpenChange, onSaved }) 
           <Input placeholder="Country" value={form.country} onChange={handleChange('country')} />
           <Input placeholder="ORCID" value={form.orcid} onChange={handleChange('orcid')} />
           <Input placeholder="Google Scholar URL" value={form.google_scholar_url} onChange={handleChange('google_scholar_url')} />
+          <Input placeholder="Facebook URL" value={form.facebook_url} onChange={handleChange('facebook_url')} />
+          <Input placeholder="LinkedIn URL" value={form.linkedin_url} onChange={handleChange('linkedin_url')} />
+          <Input placeholder="X (Twitter) URL" value={form.x_url} onChange={handleChange('x_url')} />
           <PhotoCaptureInput
             value={form.profile_photo_url}
             onChange={(dataUrl) => setForm(f => ({ ...f, profile_photo_url: dataUrl }))}
