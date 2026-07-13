@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Loader2, Check, X, AlertCircle, User, Eye, Edit3, 
-  FileText, ExternalLink, ChevronDown, ChevronUp, Clock, Filter
+  FileText, ExternalLink, ChevronDown, ChevronUp, Clock, Filter, Pencil
 } from 'lucide-react';
+import EditProfileDialog from './EditProfileDialog';
 
 const ROLE_CONFIG = {
   author: { label: 'Author', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', badgeBg: 'bg-emerald-500', icon: '✍️' },
@@ -97,9 +98,10 @@ function ApplicationCard({ app, isProcessing, onApprove, onDecline }) {
   );
 }
 
-function ReviewedCard({ app, status }) {
+function ReviewedCard({ app, status, onEdit }) {
   const cfg = ROLE_CONFIG[app.role] || ROLE_CONFIG.author;
   const isApproved = status === 'approved';
+  const canEdit = isApproved && (app.role === 'editor' || app.role === 'reviewer');
   return (
     <div className={`flex items-center gap-4 p-4 rounded-xl border ${isApproved ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${cfg.color} border`}>{cfg.icon}</div>
@@ -111,6 +113,11 @@ function ReviewedCard({ app, status }) {
         <p className="text-sm text-slate-600">{app.affiliation}{app.country ? ` · ${app.country}` : ''}</p>
         <p className="text-xs text-slate-500">{app.applicant_email}</p>
       </div>
+      {canEdit && (
+        <Button variant="outline" size="sm" onClick={() => onEdit(app)}>
+          <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+        </Button>
+      )}
       <Badge className={isApproved ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}>
         {isApproved ? '✓ Approved' : '✗ Declined'}
       </Badge>
@@ -123,6 +130,7 @@ export default function AllApplications() {
   const [isLoading, setIsLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
   const [roleFilter, setRoleFilter] = useState('all');
+  const [editingApp, setEditingApp] = useState(null);
 
   const loadApplications = async () => {
     setIsLoading(true);
@@ -245,7 +253,7 @@ export default function AllApplications() {
                   <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-40" />
                   <p>No approved applications yet</p>
                 </div>
-              ) : filterByRole(approved).map(app => <ReviewedCard key={app.id} app={app} status="approved" />)}
+              ) : filterByRole(approved).map(app => <ReviewedCard key={app.id} app={app} status="approved" onEdit={setEditingApp} />)}
             </TabsContent>
 
             <TabsContent value="declined" className="space-y-3">
@@ -259,6 +267,15 @@ export default function AllApplications() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {editingApp && (
+        <EditProfileDialog
+          app={editingApp}
+          open={!!editingApp}
+          onOpenChange={(open) => !open && setEditingApp(null)}
+          onSaved={loadApplications}
+        />
+      )}
     </div>
   );
 }
