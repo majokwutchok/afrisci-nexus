@@ -75,6 +75,12 @@ const mainMenuItems = [
         badge: "Roadmap"
       },
       { 
+        title: "APC & Fee Waiver Policy", 
+        url: createPageUrl("FeesWaiverPolicy"), 
+        description: "Publishing fees, waivers & institutional subsidies",
+        icon: Target
+      },
+      { 
         title: "Contact Us", 
         url: createPageUrl("Contact"), 
         description: "Get in touch with our editorial team",
