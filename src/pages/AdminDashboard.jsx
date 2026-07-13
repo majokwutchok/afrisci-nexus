@@ -26,6 +26,7 @@ import MarketingDocuments from "../components/admin/MarketingDocuments";
 import PaymentManagement from "../components/admin/PaymentManagement";
 import AllApplications from "../components/admin/AllApplications";
 import AddEditorProfile from "../components/admin/AddEditorProfile";
+import BulkEditorImport from "../components/admin/BulkEditorImport";
 import NewsManager from "../components/admin/NewsManager";
 import AdminProfileSetup from "../components/admin/AdminProfileSetup";
 import AdminManuscriptAccelerator from "../components/admin/AdminManuscriptAccelerator";
@@ -217,8 +218,9 @@ export default function AdminDashboard() {
             <AllApplications />
           </TabsContent>
 
-          <TabsContent value="add_editor" className="mt-6">
+          <TabsContent value="add_editor" className="mt-6 space-y-6">
             <AddEditorProfile />
+            <BulkEditorImport />
           </TabsContent>
 
           <TabsContent value="news" className="mt-6">
