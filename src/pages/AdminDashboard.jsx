@@ -25,6 +25,7 @@ import ComplianceTracker from "../components/admin/ComplianceTracker";
 import MarketingDocuments from "../components/admin/MarketingDocuments";
 import PaymentManagement from "../components/admin/PaymentManagement";
 import AllApplications from "../components/admin/AllApplications";
+import AddEditorProfile from "../components/admin/AddEditorProfile";
 import NewsManager from "../components/admin/NewsManager";
 import AdminProfileSetup from "../components/admin/AdminProfileSetup";
 import AdminManuscriptAccelerator from "../components/admin/AdminManuscriptAccelerator";
@@ -153,6 +154,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="accelerator" className="text-amber-700 font-semibold">⚡ Manuscript Accelerator</TabsTrigger>
             <TabsTrigger value="oai_pmh" className="text-purple-700 font-semibold">📡 OAI-PMH Monitor</TabsTrigger>
             <TabsTrigger value="applications" className="text-blue-700 font-semibold">📋 Applications</TabsTrigger>
+            <TabsTrigger value="add_editor" className="text-amber-700 font-semibold">➕ Add Editor</TabsTrigger>
             <TabsTrigger value="news" className="text-teal-700 font-semibold">📰 News Manager</TabsTrigger>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="platform_analytics" className="text-emerald-700 font-semibold">📊 Platform Analytics</TabsTrigger>
@@ -213,6 +215,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="applications" className="mt-6">
             <AllApplications />
+          </TabsContent>
+
+          <TabsContent value="add_editor" className="mt-6">
+            <AddEditorProfile />
           </TabsContent>
 
           <TabsContent value="news" className="mt-6">
