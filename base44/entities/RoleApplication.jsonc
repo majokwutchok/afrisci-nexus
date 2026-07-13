@@ -97,7 +97,16 @@
   ],
   "rls": {
     "create": {
-      "data.applicant_email": "{{user.email}}"
+      "$or": [
+        {
+          "data.applicant_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "read": {
       "$or": [
