@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (user && user.role !== 'admin' && user.role !== 'editor') {
+    if (!user || (user.role !== 'admin' && user.role !== 'editor')) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
