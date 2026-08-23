@@ -418,7 +418,7 @@
     "read": {
       "$or": [
         {
-          "created_by": "{{user.email}}"
+          "created_by_id": "{{user.id}}"
         },
         {
           "user_condition": {
@@ -426,17 +426,9 @@
           }
         },
         {
-          "user.editor_roles": {
-            "$in": [
-              "{{data.journal_id}}"
-            ]
+          "user_condition": {
+            "role": "editor"
           }
-        },
-        {
-          "data.status": "published"
-        },
-        {
-          "data.status": "online_first"
         }
       ]
     },
