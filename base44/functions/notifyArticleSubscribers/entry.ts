@@ -22,26 +22,44 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
 
-    const { event, data, old_data } = body;
+    const { event, old_data } = body;
 
+    // Only act on genuine entity automation events for known entities.
     if (event?.type !== 'update' && event?.type !== 'create') {
       return Response.json({ skipped: true });
     }
+    if (event?.entity_name !== 'Manuscript' && event?.entity_name !== 'Comment') {
+      return Response.json({ skipped: true });
+    }
 
-    const manuscriptId = event?.entity_id;
-    if (!manuscriptId) return Response.json({ skipped: true });
-
-    const newCitationCount = data?.citation_count || 0;
-    const oldCitationCount = old_data?.citation_count || 0;
-    const isCitationIncrease = event.type === 'update' && newCitationCount > oldCitationCount;
     const isNewComment = event.entity_name === 'Comment' && event.type === 'create';
+    const isManuscriptUpdate = event.entity_name === 'Manuscript' && event.type === 'update';
+
+    // Resolve the manuscript ID from trusted DB records, not the request body,
+    // so a forged payload cannot trigger notifications on arbitrary data.
+    let manuscriptIdToUse = null;
+    let newCitationCount = 0;
+    let oldCitationCount = 0;
+
+    if (isNewComment) {
+      const comment = await base44.asServiceRole.entities.Comment.get(event.entity_id);
+      if (!comment) return Response.json({ skipped: true, reason: 'comment not found' });
+      manuscriptIdToUse = comment.manuscript_id;
+    } else if (isManuscriptUpdate) {
+      const manuscript = await base44.asServiceRole.entities.Manuscript.get(event.entity_id);
+      if (!manuscript) return Response.json({ skipped: true, reason: 'manuscript not found' });
+      manuscriptIdToUse = manuscript.id;
+      newCitationCount = manuscript.citation_count || 0;
+      oldCitationCount = old_data?.citation_count || 0;
+    }
+
+    if (!manuscriptIdToUse) return Response.json({ skipped: true });
+
+    const isCitationIncrease = isManuscriptUpdate && newCitationCount > oldCitationCount;
 
     if (!isCitationIncrease && !isNewComment) {
       return Response.json({ skipped: true, reason: 'No relevant change' });
     }
-
-    const manuscriptIdToUse = isNewComment ? data?.manuscript_id : manuscriptId;
-    if (!manuscriptIdToUse) return Response.json({ skipped: true });
 
     const subscriptions = await base44.asServiceRole.entities.ArticleSubscription.filter({ manuscript_id: manuscriptIdToUse });
 

@@ -22,16 +22,20 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
 
-    const { event, data } = body;
+    const { event } = body;
 
-    if (event?.type !== 'create') {
+    // Only act on genuine Manuscript create automation events.
+    if (event?.type !== 'create' || event?.entity_name !== 'Manuscript') {
       return Response.json({ skipped: true });
     }
 
-    const manuscript = data;
-    if (!manuscript || !manuscript.id) {
-      return Response.json({ error: 'No manuscript data' }, { status: 400 });
-    }
+    const manuscriptId = event?.entity_id;
+    if (!manuscriptId) return Response.json({ skipped: true });
+
+    // Do NOT trust the request body's `data` — fetch the real record from the DB
+    // so a forged payload cannot send emails to arbitrary recipients.
+    const manuscript = await base44.asServiceRole.entities.Manuscript.get(manuscriptId);
+    if (!manuscript) return Response.json({ skipped: true, reason: 'manuscript not found' });
 
     if (manuscript.status !== 'submitted') {
       return Response.json({ skipped: true, reason: 'Not a submitted manuscript' });

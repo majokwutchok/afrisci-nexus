@@ -68,9 +68,20 @@ Deno.serve(async (req) => {
     });
   }
 
-  // For click events: redirect to actual URL
+  // For click events: redirect only to allowed AfriSci Nexus hosts (prevent open redirect)
   if (event === 'click' && link_url) {
-    return Response.redirect(decodeURIComponent(link_url), 302);
+    try {
+      const decoded = decodeURIComponent(link_url);
+      const target = new URL(decoded);
+      const allowed = ['afriscinexus.com', 'afriscinexus.org'];
+      const host = target.hostname.replace(/^www\./, '');
+      if (!allowed.includes(host)) {
+        return Response.json({ error: 'Redirect not allowed' }, { status: 400 });
+      }
+      return Response.redirect(decoded, 302);
+    } catch {
+      return Response.json({ error: 'Invalid redirect URL' }, { status: 400 });
+    }
   }
 
   return Response.json({ ok: true });

@@ -30,20 +30,16 @@ const FOLLOW_UP_TEMPLATE = (name, institution) => `
   </div>
 </div>`;
 
-const AUTOMATION_SECRET = 'asx_followup_9kPm3qR7vW2xL8nT';
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json().catch(() => ({}));
 
-    // Allow scheduled automation (shared secret in function_args) or an admin user.
-    // Blocks unauthenticated external callers from triggering follow-up campaigns.
+    // Require an authenticated admin to prevent unauthenticated callers from
+    // triggering follow-up email campaigns. (Run manually from the admin
+    // dashboard; unattended scheduled runs would need a shared secret.)
     let user = null;
     try { user = await base44.auth.me(); } catch (_) {}
-    const isAdmin = user && user.role === 'admin';
-    const hasSecret = body && body.secret === AUTOMATION_SECRET;
-    if (!isAdmin && !hasSecret) {
+    if (!user || user.role !== 'admin') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 

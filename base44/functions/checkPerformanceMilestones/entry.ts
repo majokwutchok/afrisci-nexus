@@ -8,20 +8,15 @@ function crossedMilestone(milestones, current, previous) {
   return milestones.find(m => current >= m && previous < m) || null;
 }
 
-const AUTOMATION_SECRET = 'asx_milestones_7wQk2pL8mN4xR1vT9b';
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json().catch(() => ({}));
 
-    // Allow scheduled automation (shared secret in function_args) or an admin user.
-    // Blocks unauthenticated external callers from triggering milestone processing.
+    // Require an authenticated admin to prevent unauthenticated callers from
+    // triggering milestone processing and notification creation.
     let user = null;
     try { user = await base44.auth.me(); } catch (_) {}
-    const isAdmin = user && user.role === 'admin';
-    const hasSecret = body && body.secret === AUTOMATION_SECRET;
-    if (!isAdmin && !hasSecret) {
+    if (!user || user.role !== 'admin') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 

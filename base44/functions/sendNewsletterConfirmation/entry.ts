@@ -25,6 +25,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing email or confirmation token' }, { status: 400 });
     }
 
+    // Validate email format to prevent header/recipient injection.
+    const EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    if (!EMAIL_RE.test(email)) {
+      return Response.json({ error: 'Invalid email' }, { status: 400 });
+    }
+
     const base44 = createClientFromRequest(req);
 
     const subscribers = await base44.asServiceRole.entities.NewsletterSubscriber.filter({
@@ -32,17 +38,25 @@ Deno.serve(async (req) => {
       confirmation_token: confirmationToken
     });
 
-    if (subscribers.length > 0) {
-      await base44.asServiceRole.entities.NewsletterSubscriber.update(subscribers[0].id, {
-        is_confirmed: true
-      });
+    // Only send the welcome email when the email + token match a real subscriber.
+    // This prevents the endpoint from acting as an open mail relay.
+    if (subscribers.length === 0) {
+      return Response.json({ success: false, message: 'Invalid email or confirmation token' });
     }
+
+    await base44.asServiceRole.entities.NewsletterSubscriber.update(subscribers[0].id, {
+      is_confirmed: true
+    });
+
+    // Escape the user-supplied name to prevent HTML injection in the email body.
+    const escapeHtml = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const displayName = escapeHtml(name) || 'Reader';
 
     let emailSent = false;
     try {
       const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
       const subject = 'Welcome to AfriSci Nexus Discovery Newsletter';
-      const html = `<p>Dear ${name || 'Reader'},</p>
+      const html = `<p>Dear ${displayName},</p>
 <p>Your subscription to the AfriSci Nexus Discovery newsletter is now confirmed. You'll receive updates on newly published research across our 12 journals.</p>
 <p>Best regards,<br>AfriSci Nexus Discovery</p>`;
       const raw = buildRawEmail({ to: email, subject, body: html });
