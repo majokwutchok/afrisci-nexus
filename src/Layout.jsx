@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { base44 } from "@/api/base44Client";
 import { 
   BookOpen, 
   FileText, 
@@ -32,16 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Footer from "./components/layout/Footer"; // Import the new Footer component
 
-// Mock User service for demonstration
-const User = {
-  me: () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ role: 'admin', full_name: 'Dr. Amara Okafor', editor_roles: ['1', '2'] });
-      }, 100);
-    });
-  },
-};
+// Current user is fetched via real auth (base44.auth.me())
 
 const mainMenuItems = [
   {
@@ -417,7 +409,7 @@ export default function Layout({ children, currentPageName }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
-    User.me().then(setUser).catch(() => setUser(null));
+    base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
   if (currentPageName === 'Home') {

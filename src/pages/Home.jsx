@@ -50,7 +50,7 @@ export default function HomePage() {
 
     fetchData(true);
     // Keep in sync with the live traffic numbers shown in the Admin Dashboard analytics
-    const interval = setInterval(() => fetchData(false), 30000);
+    const interval = setInterval(() => fetchData(false), 120000);
     return () => clearInterval(interval);
   }, []);
   
@@ -74,10 +74,10 @@ export default function HomePage() {
     "@type": "WebPage",
     "name": "AfriSci Nexus — African Open Access Peer-Reviewed Journals",
     "description": "Africa's leading open-access academic publishing platform. Submit manuscripts, discover peer-reviewed research across 54 African countries.",
-    "url": "https://afrisco-nexus.base44.app/",
+    "url": "https://afriscinexus.com/",
     "breadcrumb": {
       "@type": "BreadcrumbList",
-      "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://afrisco-nexus.base44.app/"}]
+      "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://afriscinexus.com/"}]
     }
   };
 
