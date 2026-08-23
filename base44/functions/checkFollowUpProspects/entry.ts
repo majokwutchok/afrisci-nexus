@@ -30,15 +30,21 @@ const FOLLOW_UP_TEMPLATE = (name, institution) => `
   </div>
 </div>`;
 
+const AUTOMATION_SECRET = 'asx_followup_9kPm3qR7vW2xL8nT';
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const body = await req.json().catch(() => ({}));
 
-    // Allow scheduled automation (no user) or admin
+    // Allow scheduled automation (shared secret in function_args) or an admin user.
+    // Blocks unauthenticated external callers from triggering follow-up campaigns.
     let user = null;
     try { user = await base44.auth.me(); } catch (_) {}
-    if (user && user.role !== 'admin') {
-      return Response.json({ error: 'Admin only' }, { status: 403 });
+    const isAdmin = user && user.role === 'admin';
+    const hasSecret = body && body.secret === AUTOMATION_SECRET;
+    if (!isAdmin && !hasSecret) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
