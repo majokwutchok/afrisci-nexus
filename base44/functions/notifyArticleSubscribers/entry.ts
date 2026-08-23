@@ -22,6 +22,12 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
 
+    // Verify the caller is our own automation (shared secret), not a stranger hitting the public URL.
+    const SHARED_SECRET = "afrisci_notify_subscribers_2026";
+    if (body.secret !== SHARED_SECRET) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { event, old_data } = body;
 
     // Only act on genuine entity automation events for known entities.
