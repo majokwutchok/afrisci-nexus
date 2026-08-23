@@ -77,6 +77,13 @@ function analyzeSentiment(text, subject) {
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
   const body = await req.json();
+
+  // Verify the caller is our own automation (shared secret), not a stranger hitting the public URL.
+  const SHARED_SECRET = "afrisci_inbound_replies_2026";
+  if (body.secret !== SHARED_SECRET) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const messageIds = body.data?.new_message_ids ?? [];
 
   if (!messageIds.length) {
