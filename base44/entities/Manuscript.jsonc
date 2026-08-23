@@ -418,6 +418,12 @@
     "read": {
       "$or": [
         {
+          "data.status": "published"
+        },
+        {
+          "data.status": "online_first"
+        },
+        {
           "created_by_id": "{{user.id}}"
         },
         {
