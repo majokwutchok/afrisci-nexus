@@ -16,13 +16,20 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
 
-    const { event, data } = body;
+    const { event } = body;
 
-    // Only act on update events
-    if (event?.type !== 'update') return Response.json({ skipped: true });
+    // Only act on genuine Manuscript update automation events
+    if (event?.type !== 'update' || event?.entity_name !== 'Manuscript') {
+      return Response.json({ skipped: true });
+    }
 
-    const manuscript = data;
-    if (!manuscript) return Response.json({ skipped: 'no data' });
+    const manuscriptId = event?.entity_id;
+    if (!manuscriptId) return Response.json({ skipped: 'no entity_id' });
+
+    // Do NOT trust the request body's `data` — fetch the real record from the DB
+    // so a forged payload cannot trigger DOI assignment on an arbitrary manuscript.
+    const manuscript = await base44.asServiceRole.entities.Manuscript.get(manuscriptId);
+    if (!manuscript) return Response.json({ skipped: 'manuscript not found' });
 
     const isEligible = ['accepted', 'published', 'online_first'].includes(manuscript.status);
     if (!isEligible) return Response.json({ skipped: 'not accepted/published' });
