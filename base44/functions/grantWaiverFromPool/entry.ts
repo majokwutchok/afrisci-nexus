@@ -13,7 +13,8 @@ export default async function(req) {
       return Response.json({ error: 'pool_id and manuscript_id are required' }, { status: 400 });
     }
 
-    const pool = await base44.asServiceRole.entities.WaiverPool.get(pool_id);
+    let pool;
+    try { pool = await base44.asServiceRole.entities.WaiverPool.get(pool_id); } catch { return Response.json({ error: 'Pool not found' }, { status: 404 }); }
     if (!pool) return Response.json({ error: 'Pool not found' }, { status: 404 });
     if (pool.status !== 'active') return Response.json({ error: 'Pool is not active' }, { status: 400 });
 

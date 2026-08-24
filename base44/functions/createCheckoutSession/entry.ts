@@ -11,10 +11,12 @@ export default async function(req) {
     const { subscription_id, customer_email, success_url, cancel_url } = body;
     if (!subscription_id) return Response.json({ error: 'subscription_id is required' }, { status: 400 });
 
-    const sub = await base44.asServiceRole.entities.Subscription.get(subscription_id);
+    let sub;
+    try { sub = await base44.asServiceRole.entities.Subscription.get(subscription_id); } catch { return Response.json({ error: 'Subscription not found' }, { status: 404 }); }
     if (!sub) return Response.json({ error: 'Subscription not found' }, { status: 404 });
 
-    const plan = await base44.asServiceRole.entities.Plan.get(sub.plan_id);
+    let plan;
+    try { plan = await base44.asServiceRole.entities.Plan.get(sub.plan_id); } catch { return Response.json({ error: 'Plan not found' }, { status: 404 }); }
     if (!plan) return Response.json({ error: 'Plan not found' }, { status: 404 });
 
     const amount = Math.round((plan.price || 0) * 100);
