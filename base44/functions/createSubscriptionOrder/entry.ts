@@ -12,7 +12,12 @@ export default async function(req) {
       return Response.json({ error: 'plan_id and institution_name are required' }, { status: 400 });
     }
 
-    const plan = await base44.asServiceRole.entities.Plan.get(plan_id);
+    let plan;
+    try {
+      plan = await base44.asServiceRole.entities.Plan.get(plan_id);
+    } catch {
+      return Response.json({ error: 'Plan not found' }, { status: 404 });
+    }
     if (!plan || !plan.is_active) {
       return Response.json({ error: 'Plan not found or inactive' }, { status: 404 });
     }
