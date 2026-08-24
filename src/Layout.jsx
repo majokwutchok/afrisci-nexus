@@ -264,6 +264,20 @@ const mainMenuItems = [
         description: "Submit your partnership application",
         icon: Upload,
         badge: "Apply Now"
+      },
+      {
+        title: "Membership Plans",
+        url: createPageUrl("Memberships"),
+        description: "Annual institutional memberships with waived publishing",
+        icon: Star,
+        featured: true,
+        badge: "New"
+      },
+      {
+        title: "My Institution Dashboard",
+        url: createPageUrl("InstitutionDashboard"),
+        description: "Manage your membership and entitlements",
+        icon: BarChart3
       }
     ]
   }
@@ -486,6 +500,9 @@ export default function Layout({ children, currentPageName }) {
                       </div>
                       <span className="text-teal-200 text-xs sm:text-sm font-medium truncate max-w-[80px] sm:max-w-[120px]">{user.full_name}</span>
                       {user.role === 'admin' && <Badge className="bg-red-500 text-white text-xs hidden sm:flex">Admin</Badge>}
+                      {user.role === 'admin' && (
+                        <Link to={createPageUrl("SubscriptionAdmin")} className="text-amber-200 hover:text-amber-100 text-xs sm:text-sm font-medium hidden sm:inline">Subscriptions</Link>
+                      )}
                       {user.editor_roles?.length > 0 && <Badge className="bg-sky-500 text-white text-xs hidden sm:flex">Editor</Badge>}
                     </div>
                   ) : (
@@ -643,6 +660,14 @@ export default function Layout({ children, currentPageName }) {
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Admin Dashboard
+                        </Link>
+                      )}
+                      {userRoles.includes('admin') && (
+                        <Link to={createPageUrl("SubscriptionAdmin")}
+                          className="block text-slate-300 hover:text-teal-300 text-sm transition-colors py-1"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Subscription Admin
                         </Link>
                       )}
                     </div>

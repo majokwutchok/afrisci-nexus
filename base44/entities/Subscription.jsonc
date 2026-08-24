@@ -1,0 +1,160 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string",
+      "description": "Linked Organization ID"
+    },
+    "organization_name": {
+      "type": "string",
+      "description": "Denormalized organization name"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Purchasing user ID"
+    },
+    "plan_id": {
+      "type": "string",
+      "description": "Linked Plan ID"
+    },
+    "plan_name": {
+      "type": "string",
+      "description": "Denormalized plan name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "pending_payment",
+        "active",
+        "past_due",
+        "canceled",
+        "expired"
+      ],
+      "default": "pending_payment",
+      "description": "Subscription lifecycle status"
+    },
+    "stripe_customer_id": {
+      "type": "string"
+    },
+    "stripe_subscription_id": {
+      "type": "string"
+    },
+    "stripe_checkout_session_id": {
+      "type": "string"
+    },
+    "seats": {
+      "type": "number",
+      "default": 0
+    },
+    "entitlements_snapshot": {
+      "type": "object",
+      "description": "Entitlements copied from the Plan at purchase time",
+      "properties": {
+        "waived_publishing": {
+          "type": "boolean",
+          "default": false
+        },
+        "discounted_publishing_pct": {
+          "type": "number",
+          "default": 0
+        },
+        "author_slots": {
+          "type": "number",
+          "default": 0
+        },
+        "expedited_review": {
+          "type": "boolean",
+          "default": false
+        },
+        "directory_analytics": {
+          "type": "boolean",
+          "default": false
+        },
+        "job_post_credits": {
+          "type": "number",
+          "default": 0
+        },
+        "data_subscription": {
+          "type": "boolean",
+          "default": false
+        },
+        "premium_researcher": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "default": {}
+    },
+    "current_period_start": {
+      "type": "string"
+    },
+    "current_period_end": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string"
+    },
+    "canceled_at": {
+      "type": "string"
+    },
+    "payment_provider": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "paystack",
+        "flutterwave",
+        "manual",
+        "waiver"
+      ],
+      "default": "manual"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "plan_id",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

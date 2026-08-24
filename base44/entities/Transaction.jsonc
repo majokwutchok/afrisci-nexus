@@ -1,0 +1,91 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string"
+    },
+    "subscription_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "plan_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount in the transaction currency"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "transaction_type": {
+      "type": "string",
+      "enum": [
+        "payment",
+        "refund",
+        "waiver_grant",
+        "adjustment",
+        "payout"
+      ],
+      "default": "payment"
+    },
+    "payment_provider": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "paystack",
+        "flutterwave",
+        "manual",
+        "waiver"
+      ],
+      "default": "manual"
+    },
+    "provider_transaction_id": {
+      "type": "string",
+      "description": "External transaction / invoice reference"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed",
+        "refunded"
+      ],
+      "default": "pending"
+    },
+    "description": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "transaction_type",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": false
+  }
+}

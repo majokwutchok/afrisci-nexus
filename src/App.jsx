@@ -25,6 +25,9 @@ import FeesWaiverPolicy from './pages/FeesWaiverPolicy';
 import ArchivingPolicy from './pages/ArchivingPolicy';
 import RepositoryPolicy from './pages/RepositoryPolicy';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import Memberships from './pages/Memberships';
+import InstitutionDashboard from './pages/InstitutionDashboard';
+import SubscriptionAdmin from './pages/SubscriptionAdmin';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -94,6 +97,9 @@ const AuthenticatedApp = () => {
       <Route path="/FeesWaiverPolicy" element={<LayoutWrapper currentPageName="FeesWaiverPolicy"><FeesWaiverPolicy /></LayoutWrapper>} />
       <Route path="/ArchivingPolicy" element={<LayoutWrapper currentPageName="ArchivingPolicy"><ArchivingPolicy /></LayoutWrapper>} />
       <Route path="/RepositoryPolicy" element={<LayoutWrapper currentPageName="RepositoryPolicy"><RepositoryPolicy /></LayoutWrapper>} />
+      <Route path="/Memberships" element={<LayoutWrapper currentPageName="Memberships"><Memberships /></LayoutWrapper>} />
+      <Route path="/InstitutionDashboard" element={<LayoutWrapper currentPageName="InstitutionDashboard"><InstitutionDashboard /></LayoutWrapper>} />
+      <Route path="/SubscriptionAdmin" element={<LayoutWrapper currentPageName="SubscriptionAdmin"><SubscriptionAdmin /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

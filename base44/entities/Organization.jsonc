@@ -1,0 +1,97 @@
+{
+  "name": "Organization",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Organization name"
+    },
+    "org_type": {
+      "type": "string",
+      "enum": [
+        "institution",
+        "funder",
+        "employer",
+        "advertiser",
+        "service_provider",
+        "other"
+      ],
+      "default": "institution",
+      "description": "Type of organization"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country of the organization"
+    },
+    "email_domains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Email domains whose users are affiliated (e.g. univ.edu.ng)"
+    },
+    "website": {
+      "type": "string",
+      "description": "Organization website URL"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "Logo image URL"
+    },
+    "description": {
+      "type": "string",
+      "description": "Organization description / scope"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Primary contact name"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Primary contact email"
+    },
+    "admin_user_id": {
+      "type": "string",
+      "description": "User ID of the organization's admin/owner"
+    }
+  },
+  "required": [
+    "name",
+    "org_type"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.admin_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

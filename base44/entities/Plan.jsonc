@@ -1,0 +1,135 @@
+{
+  "name": "Plan",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Plan name"
+    },
+    "product_type": {
+      "type": "string",
+      "enum": [
+        "membership",
+        "service",
+        "job_pack",
+        "course",
+        "ad_placement",
+        "waiver_pool",
+        "data_subscription",
+        "premium_researcher"
+      ],
+      "default": "membership",
+      "description": "What this plan sells"
+    },
+    "tier": {
+      "type": "string",
+      "description": "Tier label e.g. Bronze / Silver / Gold"
+    },
+    "price": {
+      "type": "number",
+      "default": 0,
+      "description": "Price in the plan currency (whole currency units)"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD",
+      "description": "ISO currency code"
+    },
+    "billing_interval": {
+      "type": "string",
+      "enum": [
+        "one_time",
+        "monthly",
+        "annual"
+      ],
+      "default": "annual"
+    },
+    "description": {
+      "type": "string",
+      "description": "Marketing description"
+    },
+    "entitlements": {
+      "type": "object",
+      "description": "Entitlements granted by this plan",
+      "properties": {
+        "waived_publishing": {
+          "type": "boolean",
+          "default": false
+        },
+        "discounted_publishing_pct": {
+          "type": "number",
+          "default": 0
+        },
+        "author_slots": {
+          "type": "number",
+          "default": 0
+        },
+        "expedited_review": {
+          "type": "boolean",
+          "default": false
+        },
+        "directory_analytics": {
+          "type": "boolean",
+          "default": false
+        },
+        "job_post_credits": {
+          "type": "number",
+          "default": 0
+        },
+        "data_subscription": {
+          "type": "boolean",
+          "default": false
+        },
+        "premium_researcher": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "default": {}
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Bulleted feature list for display"
+    },
+    "seats": {
+      "type": "number",
+      "default": 0,
+      "description": "Author slots included (memberships)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "product_type",
+    "price"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
