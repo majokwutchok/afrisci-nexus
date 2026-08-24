@@ -390,6 +390,11 @@
           "description": "ISO timestamp of when screen was run"
         }
       }
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional additional description or summary for this manuscript"
     }
   },
   "required": [

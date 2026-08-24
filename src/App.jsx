@@ -19,8 +19,8 @@ import AuthorProfile from './pages/AuthorProfile';
 import Editorial from './pages/Editorial';
 import Submit from './pages/Submit';
 import QuickSubmit from './pages/QuickSubmit';
-import NewsAnnouncements from './pages/NewsAnnouncements';
-import NewsPostDetail from './pages/NewsPostDetail';
+import NewsAndAnnouncements from './pages/NewsAndAnnouncements';
+import NewsArticleDetail from './pages/NewsArticleDetail';
 import FeesWaiverPolicy from './pages/FeesWaiverPolicy';
 import ArchivingPolicy from './pages/ArchivingPolicy';
 import RepositoryPolicy from './pages/RepositoryPolicy';
@@ -89,8 +89,8 @@ const AuthenticatedApp = () => {
       <Route path="/ResearcherDirectory" element={<LayoutWrapper currentPageName="ResearcherDirectory"><ResearcherDirectory /></LayoutWrapper>} />
       <Route path="/ResearcherProfile" element={<LayoutWrapper currentPageName="ResearcherProfile"><ResearcherProfile /></LayoutWrapper>} />
       <Route path="/QuickSubmit" element={<LayoutWrapper currentPageName="QuickSubmit"><QuickSubmit /></LayoutWrapper>} />
-      <Route path="/NewsAnnouncements" element={<LayoutWrapper currentPageName="NewsAnnouncements"><NewsAnnouncements /></LayoutWrapper>} />
-      <Route path="/NewsPostDetail" element={<LayoutWrapper currentPageName="NewsPostDetail"><NewsPostDetail /></LayoutWrapper>} />
+      <Route path="/NewsAndAnnouncements" element={<LayoutWrapper currentPageName="NewsAndAnnouncements"><NewsAndAnnouncements /></LayoutWrapper>} />
+      <Route path="/NewsArticleDetail" element={<LayoutWrapper currentPageName="NewsArticleDetail"><NewsArticleDetail /></LayoutWrapper>} />
       <Route path="/FeesWaiverPolicy" element={<LayoutWrapper currentPageName="FeesWaiverPolicy"><FeesWaiverPolicy /></LayoutWrapper>} />
       <Route path="/ArchivingPolicy" element={<LayoutWrapper currentPageName="ArchivingPolicy"><ArchivingPolicy /></LayoutWrapper>} />
       <Route path="/RepositoryPolicy" element={<LayoutWrapper currentPageName="RepositoryPolicy"><RepositoryPolicy /></LayoutWrapper>} />
