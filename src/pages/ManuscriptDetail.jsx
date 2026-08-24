@@ -23,6 +23,7 @@ import { convertToAfriSciURL, getArticleReadOnlineURL } from "@/utils/afrisciLin
 import { downloadPDF } from "@/utils/pdfOpen";
 import PDFViewerModal from "@/components/publication/PDFViewerModal";
 import { format } from "date-fns";
+import DOMPurify from "dompurify";
 import ProgressTracker from "../components/submission/ProgressTracker";
 import AISummary from "../components/publication/AISummary";
 import InlinePDFViewer from "../components/publication/InlinePDFViewer";
@@ -511,7 +512,7 @@ export default function ManuscriptDetail() {
                     <div
                       className="prose max-w-none p-4 sm:p-6 bg-slate-50 rounded-xl border border-slate-200 text-sm sm:text-base overflow-x-auto"
                       style={{ fontFamily: "Times New Roman, serif", lineHeight: "1.8", color: "#1e293b" }}
-                      dangerouslySetInnerHTML={{ __html: manuscript.formatted_body }}
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(manuscript.formatted_body) }}
                     />
                   </div>
                 ) : manuscript.manuscript_file_url ? (
