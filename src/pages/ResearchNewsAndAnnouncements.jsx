@@ -22,7 +22,7 @@ function NewsCard({ post }) {
   const Icon = cfg.icon;
   return (
     <article className="group bg-white rounded-xl border border-slate-200 hover:border-teal-300 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
-      <Link to={createPageUrl(`NewsArticleDetail?id=${post.id}`)} className="flex flex-col flex-1">
+      <Link to={createPageUrl(`ResearchNewsArticle?id=${post.id}`)} className="flex flex-col flex-1">
         {post.cover_image_url && (
           <img src={post.cover_image_url} alt={post.title} className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-500" />
         )}
@@ -50,7 +50,7 @@ function NewsCard({ post }) {
   );
 }
 
-export default function NewsAndAnnouncements() {
+export default function ResearchNewsAndAnnouncements() {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -76,7 +76,7 @@ export default function NewsAndAnnouncements() {
       <SEO
         title="News & Announcements"
         description="Stay updated with calls for papers, indexing milestones, conferences, and platform news from AfriSci Nexus."
-        canonicalPath="/NewsAndAnnouncements"
+        canonicalPath="/ResearchNewsAndAnnouncements"
       />
 
       {/* Header */}

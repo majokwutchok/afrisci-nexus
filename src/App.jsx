@@ -19,8 +19,8 @@ import AuthorProfile from './pages/AuthorProfile';
 import Editorial from './pages/Editorial';
 import Submit from './pages/Submit';
 import QuickSubmit from './pages/QuickSubmit';
-import NewsAndAnnouncements from './pages/NewsAndAnnouncements';
-import NewsArticleDetail from './pages/NewsArticleDetail';
+import ResearchNewsAndAnnouncements from './pages/ResearchNewsAndAnnouncements';
+import ResearchNewsArticle from './pages/ResearchNewsArticle';
 import FeesWaiverPolicy from './pages/FeesWaiverPolicy';
 import ArchivingPolicy from './pages/ArchivingPolicy';
 import RepositoryPolicy from './pages/RepositoryPolicy';
@@ -89,8 +89,8 @@ const AuthenticatedApp = () => {
       <Route path="/ResearcherDirectory" element={<LayoutWrapper currentPageName="ResearcherDirectory"><ResearcherDirectory /></LayoutWrapper>} />
       <Route path="/ResearcherProfile" element={<LayoutWrapper currentPageName="ResearcherProfile"><ResearcherProfile /></LayoutWrapper>} />
       <Route path="/QuickSubmit" element={<LayoutWrapper currentPageName="QuickSubmit"><QuickSubmit /></LayoutWrapper>} />
-      <Route path="/NewsAndAnnouncements" element={<LayoutWrapper currentPageName="NewsAndAnnouncements"><NewsAndAnnouncements /></LayoutWrapper>} />
-      <Route path="/NewsArticleDetail" element={<LayoutWrapper currentPageName="NewsArticleDetail"><NewsArticleDetail /></LayoutWrapper>} />
+      <Route path="/ResearchNewsAndAnnouncements" element={<LayoutWrapper currentPageName="ResearchNewsAndAnnouncements"><ResearchNewsAndAnnouncements /></LayoutWrapper>} />
+      <Route path="/ResearchNewsArticle" element={<LayoutWrapper currentPageName="ResearchNewsArticle"><ResearchNewsArticle /></LayoutWrapper>} />
       <Route path="/FeesWaiverPolicy" element={<LayoutWrapper currentPageName="FeesWaiverPolicy"><FeesWaiverPolicy /></LayoutWrapper>} />
       <Route path="/ArchivingPolicy" element={<LayoutWrapper currentPageName="ArchivingPolicy"><ArchivingPolicy /></LayoutWrapper>} />
       <Route path="/RepositoryPolicy" element={<LayoutWrapper currentPageName="RepositoryPolicy"><RepositoryPolicy /></LayoutWrapper>} />
