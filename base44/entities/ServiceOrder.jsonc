@@ -1,0 +1,109 @@
+{
+  "name": "ServiceOrder",
+  "type": "object",
+  "properties": {
+    "manuscript_id": {
+      "type": "string",
+      "description": "Manuscript the service is for"
+    },
+    "manuscript_title": {
+      "type": "string",
+      "description": "Denormalized manuscript title"
+    },
+    "plan_id": {
+      "type": "string",
+      "description": "Service Plan ID"
+    },
+    "service_name": {
+      "type": "string",
+      "description": "Denormalized service name"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Author user ID"
+    },
+    "author_email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "completed",
+        "canceled"
+      ],
+      "default": "pending"
+    },
+    "payment_provider": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "paystack",
+        "flutterwave",
+        "manual",
+        "waiver"
+      ],
+      "default": "manual"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "assigned_provider": {
+      "type": "string",
+      "description": "Service provider name/email"
+    },
+    "completed_at": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "plan_id",
+    "service_name",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { activateSubscription, cancelSubscription } from '../../shared/subscriptionLifecycle.ts';
 
 export default async function(req) {
   try {
@@ -16,37 +17,8 @@ export default async function(req) {
     const subscription = await base44.asServiceRole.entities.Subscription.get(subscription_id);
     if (!subscription) return Response.json({ error: 'Subscription not found' }, { status: 404 });
 
-    const now = new Date().toISOString();
-    const oneYear = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
-
-    if (action === 'activate') {
-      await base44.asServiceRole.entities.Subscription.update(subscription_id, {
-        status: 'active',
-        current_period_start: now,
-        current_period_end: oneYear
-      });
-      const txs = await base44.asServiceRole.entities.Transaction.filter({ subscription_id });
-      for (const t of txs) {
-        if (t.status === 'pending') {
-          await base44.asServiceRole.entities.Transaction.update(t.id, { status: 'completed' });
-        }
-      }
-      return Response.json({ ok: true, status: 'active' });
-    }
-
-    if (action === 'cancel') {
-      await base44.asServiceRole.entities.Subscription.update(subscription_id, {
-        status: 'canceled',
-        canceled_at: now
-      });
-      const txs = await base44.asServiceRole.entities.Transaction.filter({ subscription_id });
-      for (const t of txs) {
-        if (t.status === 'pending') {
-          await base44.asServiceRole.entities.Transaction.update(t.id, { status: 'failed' });
-        }
-      }
-      return Response.json({ ok: true, status: 'canceled' });
-    }
+    if (action === 'activate') return Response.json(await activateSubscription(base44, subscription_id));
+    if (action === 'cancel') return Response.json(await cancelSubscription(base44, subscription_id));
 
     return Response.json({ error: 'Unknown action' }, { status: 400 });
   } catch (error) {
