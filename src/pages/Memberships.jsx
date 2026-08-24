@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { createSubscriptionOrder } from "@/functions/createSubscriptionOrder";
+import { createCheckoutSession } from "@/functions/createCheckoutSession";
 import { createPageUrl } from "@/utils";
 import SEO from "@/components/SEO";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle, Building2, Users, Sparkles, ArrowRight, Loader2, Star } from "lucide-react";
+import { CheckCircle, Building2, Users, Sparkles, ArrowRight, Loader2, Star, CreditCard } from "lucide-react";
 
 const fmtMoney = (n, currency = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(n || 0);
@@ -67,6 +68,47 @@ export default function Memberships() {
       setSelectedPlan(null);
     } catch (err) {
       setError(err?.message || "Failed to submit order. Please try again.");
+    }
+    setSubmitting(false);
+  };
+
+  const handlePayByCard = async (e) => {
+    e.preventDefault();
+    if (!user) return;
+    if (!form.institution_name) {
+      setError("Institution name is required.");
+      return;
+    }
+    if (window.self !== window.top) {
+      setError("Card checkout works only from the published app. Please open the app in a new tab.");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      const orderRes = await createSubscriptionOrder({
+        plan_id: selectedPlan.id,
+        institution_name: form.institution_name,
+        country: form.country,
+        contact_email: form.contact_email,
+        email_domains: form.email_domains,
+        notes: ""
+      });
+      const orderData = orderRes?.data || orderRes;
+      const subscriptionId = orderData?.subscription_id;
+      if (!subscriptionId) throw new Error("Could not create order.");
+      const checkoutRes = await createCheckoutSession({
+        subscription_id: subscriptionId,
+        customer_email: user.email || form.contact_email || "",
+        success_url: window.location.origin + "/InstitutionDashboard?stripe=success",
+        cancel_url: window.location.origin + "/Memberships?stripe=canceled"
+      });
+      const checkoutData = checkoutRes?.data || checkoutRes;
+      const url = checkoutData?.url;
+      if (!url) throw new Error("Could not start card checkout.");
+      window.location.href = url;
+    } catch (err) {
+      setError(err?.message || "Card payment failed.");
     }
     setSubmitting(false);
   };
@@ -197,11 +239,15 @@ export default function Memberships() {
                   <p className="text-xs text-slate-500 mt-1">Your own email domain is included automatically. Researchers at these domains get waived publishing.</p>
                 </div>
                 {error && <p className="text-sm text-red-600">{error}</p>}
-                <DialogFooter>
+                <DialogFooter className="flex-col sm:flex-row gap-2">
                   <Button type="button" variant="outline" onClick={() => setSelectedPlan(null)}>Cancel</Button>
-                  <Button type="submit" disabled={submitting} className="bg-teal-600 hover:bg-teal-700 text-white">
+                  <Button type="submit" disabled={submitting} variant="outline">
                     {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                    Submit order
+                    Submit order (invoice)
+                  </Button>
+                  <Button type="button" disabled={submitting} onClick={handlePayByCard} className="bg-teal-600 hover:bg-teal-700 text-white">
+                    {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />}
+                    Pay by card
                   </Button>
                 </DialogFooter>
               </form>

@@ -25,7 +25,8 @@ import {
   Target,
   Phone,
   Archive as ArchiveIcon,
-  Handshake
+  Handshake,
+  Wrench
 } from "lucide-react";
 import AfriSciLogo from "./components/brand/AfriSciLogo";
 
@@ -175,6 +176,13 @@ const mainMenuItems = [
         url: createPageUrl("ManuscriptEditor"), 
         description: "Create and format manuscripts with ease",
         icon: FileText,
+        badge: "New"
+      },
+      { 
+        title: "Author Services", 
+        url: createPageUrl("AuthorServices"), 
+        description: "Optional editing, translation & stats add-ons",
+        icon: Wrench,
         badge: "New"
       }
     ]
@@ -503,6 +511,12 @@ export default function Layout({ children, currentPageName }) {
                       {user.role === 'admin' && (
                         <Link to={createPageUrl("SubscriptionAdmin")} className="text-amber-200 hover:text-amber-100 text-xs sm:text-sm font-medium hidden sm:inline">Subscriptions</Link>
                       )}
+                      {user.role === 'admin' && (
+                        <Link to={createPageUrl("WaiverPools")} className="text-amber-200 hover:text-amber-100 text-xs sm:text-sm font-medium hidden sm:inline">Waivers</Link>
+                      )}
+                      {user.role === 'admin' && (
+                        <Link to={createPageUrl("ServiceOrdersAdmin")} className="text-amber-200 hover:text-amber-100 text-xs sm:text-sm font-medium hidden sm:inline">Services</Link>
+                      )}
                       {user.editor_roles?.length > 0 && <Badge className="bg-sky-500 text-white text-xs hidden sm:flex">Editor</Badge>}
                     </div>
                   ) : (
@@ -668,6 +682,22 @@ export default function Layout({ children, currentPageName }) {
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Subscription Admin
+                        </Link>
+                      )}
+                      {userRoles.includes('admin') && (
+                        <Link to={createPageUrl("WaiverPools")}
+                          className="block text-slate-300 hover:text-teal-300 text-sm transition-colors py-1"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Waiver Pools
+                        </Link>
+                      )}
+                      {userRoles.includes('admin') && (
+                        <Link to={createPageUrl("ServiceOrdersAdmin")}
+                          className="block text-slate-300 hover:text-teal-300 text-sm transition-colors py-1"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Service Orders
                         </Link>
                       )}
                     </div>

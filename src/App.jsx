@@ -28,6 +28,9 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Memberships from './pages/Memberships';
 import InstitutionDashboard from './pages/InstitutionDashboard';
 import SubscriptionAdmin from './pages/SubscriptionAdmin';
+import AuthorServices from './pages/AuthorServices';
+import WaiverPools from './pages/WaiverPools';
+import ServiceOrdersAdmin from './pages/ServiceOrdersAdmin';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -100,6 +103,9 @@ const AuthenticatedApp = () => {
       <Route path="/Memberships" element={<LayoutWrapper currentPageName="Memberships"><Memberships /></LayoutWrapper>} />
       <Route path="/InstitutionDashboard" element={<LayoutWrapper currentPageName="InstitutionDashboard"><InstitutionDashboard /></LayoutWrapper>} />
       <Route path="/SubscriptionAdmin" element={<LayoutWrapper currentPageName="SubscriptionAdmin"><SubscriptionAdmin /></LayoutWrapper>} />
+      <Route path="/AuthorServices" element={<LayoutWrapper currentPageName="AuthorServices"><AuthorServices /></LayoutWrapper>} />
+      <Route path="/WaiverPools" element={<LayoutWrapper currentPageName="WaiverPools"><WaiverPools /></LayoutWrapper>} />
+      <Route path="/ServiceOrdersAdmin" element={<LayoutWrapper currentPageName="ServiceOrdersAdmin"><ServiceOrdersAdmin /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
