@@ -56,8 +56,8 @@ Deno.serve(async (req) => {
 
     const articleEntries = manuscripts.map(m => `
   <url>
-    <loc>${BASE_URL}/ManuscriptDetail?id=${m.id}</loc>
-    <lastmod>${(m.publication_date || m.updated_date || today).split("T")[0]}</lastmod>
+    <loc>${BASE_URL}/functions/articleCrawlerPage?id=${m.id}</loc>
+    <lastmod>${(m.publication_date || m.online_first_date || m.updated_date || today).split("T")[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>`).join("");

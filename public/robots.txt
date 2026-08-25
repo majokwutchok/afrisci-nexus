@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://afriscinexus.com/api/functions/generateSitemap
+Sitemap: https://afriscinexus.com/functions/generateSitemap

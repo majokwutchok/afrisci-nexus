@@ -341,11 +341,7 @@ export default function ManuscriptDetail() {
   };
 
   const getShareableLink = () => {
-    // Create shareable link using afriscinexus.com domain
-    if (manuscript.doi) {
-      return `https://afriscinexus.com/article/${manuscript.doi}`;
-    }
-    return `https://afriscinexus.com/article/${manuscript.id}`;
+    return `https://afriscinexus.com/ManuscriptDetail?id=${manuscript.id}`;
   };
 
   const shareOnTwitter = () => {

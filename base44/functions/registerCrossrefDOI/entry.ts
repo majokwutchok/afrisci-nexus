@@ -1,6 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const DOI_PREFIX = "10.55490";
 const CROSSREF_DEPOSIT_URL = "https://doi.crossref.org/servlet/deposit";
 
 /**
@@ -69,7 +68,7 @@ function buildCrossrefXML(manuscript, journal, doi, batchId, depositorEmail) {
 
   const journalTitle = journal?.title || 'AfriSci Nexus Journal';
   const journalISSN = journal?.issn || '';
-  const articleUrl = `https://afriscinexus.org/article/${manuscript.id}`;
+  const articleUrl = `https://afriscinexus.com/functions/articleCrawlerPage?id=${manuscript.id}`;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <doi_batch xmlns="http://www.crossref.org/schema/5.3.1"
