@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 import { activateSubscription } from '../../shared/subscriptionLifecycle.ts';
-import { fulfillJobPost, fulfillAdPlacement } from '../../shared/orderFulfillment.ts';
+import { fulfillJobPost, fulfillAdPlacement, fulfillCourseEnrolment } from '../../shared/orderFulfillment.ts';
 
 function timingSafeEqual(a, b) {
   let res = 0;
@@ -40,6 +40,8 @@ export default async function(req) {
         await fulfillJobPost(base44, md.record_id, md.transaction_id);
       } else if (md.product_type === 'ad_placement' && md.record_id) {
         await fulfillAdPlacement(base44, md.record_id, md.transaction_id);
+      } else if (md.product_type === 'course_enrolment' && md.record_id) {
+        await fulfillCourseEnrolment(base44, md.record_id, md.transaction_id);
       }
     }
 

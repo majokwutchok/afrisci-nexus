@@ -1,0 +1,92 @@
+{
+  "name": "Enrolment",
+  "type": "object",
+  "properties": {
+    "course_id": {
+      "type": "string"
+    },
+    "course_code": {
+      "type": "string"
+    },
+    "course_title": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_payment",
+        "active",
+        "completed",
+        "canceled"
+      ],
+      "default": "pending_payment"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "payment_provider": {
+      "type": "string",
+      "default": "stripe"
+    },
+    "stripe_checkout_session_id": {
+      "type": "string"
+    },
+    "enrolled_at": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string"
+    },
+    "certificate_id": {
+      "type": "string"
+    },
+    "certificate_code": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "course_id",
+    "course_title",
+    "user_email",
+    "status"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

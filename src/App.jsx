@@ -33,6 +33,8 @@ import WaiverPools from './pages/WaiverPools';
 import ServiceOrdersAdmin from './pages/ServiceOrdersAdmin';
 import Jobs from './pages/Jobs';
 import Advertise from './pages/Advertise';
+import Training from './pages/Training';
+import VerifyCertificate from './pages/VerifyCertificate';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -110,6 +112,8 @@ const AuthenticatedApp = () => {
       <Route path="/ServiceOrdersAdmin" element={<LayoutWrapper currentPageName="ServiceOrdersAdmin"><ServiceOrdersAdmin /></LayoutWrapper>} />
       <Route path="/Jobs" element={<LayoutWrapper currentPageName="Jobs"><Jobs /></LayoutWrapper>} />
       <Route path="/Advertise" element={<LayoutWrapper currentPageName="Advertise"><Advertise /></LayoutWrapper>} />
+      <Route path="/Training" element={<LayoutWrapper currentPageName="Training"><Training /></LayoutWrapper>} />
+      <Route path="/VerifyCertificate" element={<LayoutWrapper currentPageName="VerifyCertificate"><VerifyCertificate /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

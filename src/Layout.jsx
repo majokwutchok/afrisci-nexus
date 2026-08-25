@@ -28,7 +28,8 @@ import {
   Handshake,
   Wrench,
   Briefcase,
-  Megaphone
+  Megaphone,
+  GraduationCap
 } from "lucide-react";
 import AfriSciLogo from "./components/brand/AfriSciLogo";
 
@@ -192,6 +193,13 @@ const mainMenuItems = [
         url: createPageUrl("AuthorServices"), 
         description: "Optional editing, translation & stats add-ons",
         icon: Wrench,
+        badge: "New"
+      },
+      { 
+        title: "Training & Certification", 
+        url: createPageUrl("Training"), 
+        description: "Paid courses with verifiable certificates",
+        icon: GraduationCap,
         badge: "New"
       }
     ]
