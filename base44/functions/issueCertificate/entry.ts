@@ -31,6 +31,19 @@ export default async function(req) {
       }
     }
 
+    // Gate: all modules complete and quiz passed before a certificate is issued.
+    let course;
+    try { course = await base44.asServiceRole.entities.Course.get(enrolment.course_id); } catch { return Response.json({ error: 'Course not found' }, { status: 404 }); }
+    const totalModules = (course.syllabus || []).length;
+    const completedCount = (enrolment.completed_module_indices || []).length;
+    if (totalModules > 0 && completedCount < totalModules) {
+      return Response.json({ error: `Complete all ${totalModules} modules first (${completedCount} of ${totalModules} done)` }, { status: 400 });
+    }
+    const quizCount = (course.quiz || []).length;
+    if (quizCount > 0 && enrolment.quiz_passed !== true) {
+      return Response.json({ error: 'Pass the final quiz before generating your certificate' }, { status: 400 });
+    }
+
     const code = `ASN-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     const today = new Date().toISOString().slice(0, 10);
 

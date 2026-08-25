@@ -80,10 +80,55 @@
             "items": {
               "type": "string"
             }
+          },
+          "content": {
+            "type": "string",
+            "description": "In-depth teaching content for the module"
+          },
+          "duration_minutes": {
+            "type": "number",
+            "default": 0
           }
         }
       },
       "default": []
+    },
+    "quiz": {
+      "type": "array",
+      "description": "Final assessment questions (15 per course)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "correct_index": {
+            "type": "number"
+          },
+          "explanation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "options",
+          "correct_index"
+        ]
+      },
+      "default": []
+    },
+    "passing_score": {
+      "type": "number",
+      "default": 12,
+      "description": "Correct answers required to pass the quiz (of 15)"
     },
     "learning_outcomes": {
       "type": "array",

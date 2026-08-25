@@ -43,8 +43,7 @@
       "type": "string"
     },
     "cohort_id": {
-      "type": "string",
-      "description": "Linked CourseCohort when enrolled via an institutional cohort"
+      "type": "string"
     },
     "cohort_code": {
       "type": "string"
@@ -60,6 +59,26 @@
     },
     "certificate_code": {
       "type": "string"
+    },
+    "completed_module_indices": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": [],
+      "description": "Indices of completed modules"
+    },
+    "quiz_score": {
+      "type": "number",
+      "description": "Most recent quiz score (correct answers)"
+    },
+    "quiz_passed": {
+      "type": "boolean",
+      "default": false
+    },
+    "quiz_attempts": {
+      "type": "number",
+      "default": 0
     }
   },
   "required": [

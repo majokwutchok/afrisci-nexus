@@ -3,8 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { createCourseEnrolmentCheckout } from "@/functions/createCourseEnrolmentCheckout";
 import { createCohortCheckout } from "@/functions/createCohortCheckout";
 import { enrolInCohort } from "@/functions/enrolInCohort";
-import { issueCertificate } from "@/functions/issueCertificate";
-import { generateCertificatePDF } from "@/utils/generateCertificate";
+import CourseLearner from "@/components/training/CourseLearner";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GraduationCap, Clock, BarChart3, CheckCircle, Loader2, Award, BookOpen, Users, Link as LinkIcon } from "lucide-react";
+import { GraduationCap, Clock, BarChart3, CheckCircle, Loader2, BookOpen, Users, Link as LinkIcon } from "lucide-react";
 
 const CATEGORY_LABEL = {
   research_methods: "Research Methods",
@@ -41,15 +40,17 @@ export default function Training() {
   const [error, setError] = useState(null);
   const [joinError, setJoinError] = useState(null);
   const [successEnrolment, setSuccessEnrolment] = useState(null);
-  const [certData, setCertData] = useState(null);
-  const [issuing, setIssuing] = useState(false);
+  const [successCourseId, setSuccessCourseId] = useState(null);
   const [purchasedCohort, setPurchasedCohort] = useState(null);
 
   useEffect(() => {
     base44.entities.Course.filter({ is_active: true }, "sort_order", 50)
       .then(setCourses).catch(() => setCourses([])).finally(() => setLoading(false));
     const params = new URLSearchParams(window.location.search);
-    if (params.get("stripe") === "success" && params.get("enrolment")) setSuccessEnrolment(params.get("enrolment"));
+    if (params.get("stripe") === "success" && params.get("enrolment")) {
+      setSuccessEnrolment(params.get("enrolment"));
+      if (params.get("course")) setSuccessCourseId(params.get("course"));
+    }
     if (params.get("cohort") === "purchased" && params.get("cohort_id")) {
       try {
         const pending = JSON.parse(localStorage.getItem("pendingCohort") || "null");
@@ -108,28 +109,12 @@ export default function Training() {
       const data = res?.data || res;
       if (data?.enrolment_id) {
         setSuccessEnrolment(data.enrolment_id);
+        if (data.course_id) setSuccessCourseId(data.course_id);
         setJoinForm({ cohort_code: "", join_name: "", join_email: "" });
-        setTimeout(() => document.getElementById("success-panel")?.scrollIntoView({ behavior: "smooth" }), 100);
+        setTimeout(() => document.getElementById("learner-panel")?.scrollIntoView({ behavior: "smooth" }), 100);
       } else throw new Error(data?.error || "Could not join cohort.");
     } catch (err) { setJoinError(err?.message || "Could not join cohort."); }
     setJoining(false);
-  };
-
-  const handleGenerateCert = async () => {
-    if (!successEnrolment) return;
-    setIssuing(true); setError(null);
-    try {
-      const res = await issueCertificate({ enrolment_id: successEnrolment });
-      const data = res?.data || res;
-      if (data?.certificate_code) {
-        setCertData(data);
-        generateCertificatePDF({
-          studentName: data.user_name, courseTitle: data.course_title,
-          courseCode: data.course_code, certificateCode: data.certificate_code, issueDate: data.issue_date
-        });
-      } else throw new Error(data?.error || "Could not issue certificate.");
-    } catch (err) { setError(err?.message || "Could not issue certificate."); }
-    setIssuing(false);
   };
 
   const perSeat = selected ? Math.round((selected.price || 0) * (1 - seatDiscount(parseInt(cohortForm.seats, 10) || 0))) : 0;
@@ -138,12 +123,12 @@ export default function Training() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <SEO title="Training & Certification — AfriSci Nexus Discovery" description="Paid courses and webinars on research methods, grant writing, publication ethics, AI ethics, technical writing and peer review, with verifiable certificates. Individual and institutional cohort enrolment." canonicalPath="/Training" />
+      <SEO title="Training & Certification — AfriSci Nexus Discovery" description="Paid courses and webinars on research methods, grant writing, publication ethics, AI ethics, technical writing and peer review, with interactive modules, final quizzes and verifiable certificates." canonicalPath="/Training" />
       <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white py-14">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <Badge className="bg-teal-500/20 text-teal-100 border border-teal-400/30 mb-3">AfriSci Nexus Discovery</Badge>
           <h1 className="text-3xl md:text-4xl font-extrabold mb-2">Training & Certification</h1>
-          <p className="text-blue-100 max-w-2xl">Professional courses for researchers and institutions, covering research methods, grant writing, publication ethics, AI ethics, technical writing and peer review. Complete a course and earn a verifiable, branded certificate. Enrol individually or buy a cohort for your institution.</p>
+          <p className="text-blue-100 max-w-2xl">Professional courses for researchers and institutions. Work through interactive modules, pass a final quiz, and earn a verifiable, branded certificate. Enrol individually or buy a cohort for your institution.</p>
         </div>
       </div>
 
@@ -154,7 +139,7 @@ export default function Training() {
               <CheckCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <h3 className="font-bold text-blue-900">Cohort purchased, payment received</h3>
-                <p className="text-blue-800 text-sm mt-1">Share this cohort code with your {purchasedCohort.seats} learners. Each learner joins with the code, completes the course, and downloads a branded certificate.</p>
+                <p className="text-blue-800 text-sm mt-1">Share this cohort code with your {purchasedCohort.seats} learners. Each learner joins with the code, completes the modules and quiz, and downloads a branded certificate.</p>
                 <div className="mt-3 grid sm:grid-cols-3 gap-3 text-sm">
                   <div className="bg-white rounded-lg p-3 border border-blue-100"><p className="text-blue-400 text-xs">Cohort code</p><p className="font-mono font-bold text-blue-900">{purchasedCohort.cohort_code}</p></div>
                   <div className="bg-white rounded-lg p-3 border border-blue-100"><p className="text-blue-400 text-xs">Course</p><p className="font-medium text-blue-900">{purchasedCohort.course_title}</p></div>
@@ -170,28 +155,9 @@ export default function Training() {
           </div>
         )}
 
-        {successEnrolment && (
-          <div id="success-panel" className="mb-8 bg-teal-50 border border-teal-200 rounded-xl p-6">
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-6 h-6 text-teal-600 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="font-bold text-teal-900">You are enrolled, access is active</h3>
-                <p className="text-teal-800 text-sm mt-1">When you have completed the course materials, generate your verifiable certificate below.</p>
-                <div className="mt-4 flex flex-col sm:flex-row gap-3 items-start">
-                  <Button onClick={handleGenerateCert} disabled={issuing} className="bg-teal-600 hover:bg-teal-700 text-white">
-                    {issuing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Award className="w-4 h-4 mr-2" />}
-                    {certData ? "Re-download certificate" : "I have completed the course, generate certificate"}
-                  </Button>
-                  {certData && (
-                    <div className="text-sm text-teal-800">
-                      <p>Code: <strong>{certData.certificate_code}</strong></p>
-                      <a href={`/VerifyCertificate?code=${encodeURIComponent(certData.certificate_code)}`} className="text-teal-700 underline">Verify certificate →</a>
-                    </div>
-                  )}
-                  {error && <p className="text-sm text-red-600">{error}</p>}
-                </div>
-              </div>
-            </div>
+        {successEnrolment && successCourseId && (
+          <div id="learner-panel" className="mb-8">
+            <CourseLearner enrolmentId={successEnrolment} courseId={successCourseId} />
           </div>
         )}
 

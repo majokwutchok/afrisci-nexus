@@ -30,7 +30,7 @@ export default async function(req) {
     const session = await buildCheckoutSession({
       plan: { name: course.title, price: course.price, currency: course.currency, billing_interval: 'one_time' },
       customer_email: user_email,
-      success_url: `${origin}/Training?stripe=success&enrolment=${enrolment.id}`,
+      success_url: `${origin}/Training?stripe=success&enrolment=${enrolment.id}&course=${course.id}`,
       cancel_url: `${origin}/Training?stripe=canceled`,
       metadata: { product_type: 'course_enrolment', record_id: enrolment.id, transaction_id: tx.id, course_id: course.id }
     });

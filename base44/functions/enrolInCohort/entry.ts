@@ -33,7 +33,7 @@ export default async function(req) {
 
     await base44.asServiceRole.entities.CourseCohort.updateMany({ id: cohort.id }, { $inc: { seats_used: 1 } });
 
-    return Response.json({ enrolment_id: enrolment.id, course_title: cohort.course_title, course_code: cohort.course_code });
+    return Response.json({ enrolment_id: enrolment.id, course_id: cohort.course_id, course_title: cohort.course_title, course_code: cohort.course_code });
   } catch (error) {
     console.error('enrolInCohort error:', error);
     return Response.json({ error: error.message }, { status: 500 });
