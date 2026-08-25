@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { getCourseMap, courseModuleCount, courseQuizCount } from '../../shared/courseLookup.ts';
 
 // Returns a student's enrolled courses with module progress and quiz scores.
 // Email-based lookup (the app is public with no login), service-role read.
@@ -12,19 +13,13 @@ export default async function(req) {
 
     const enrolments = await base44.asServiceRole.entities.Enrolment.filter({ user_email: email }, '-enrolled_at', 100);
 
-    const courseCache = {};
-    const getCourse = async (id) => {
-      if (!id) return null;
-      if (id in courseCache) return courseCache[id];
-      try { const c = await base44.asServiceRole.entities.Course.get(id); courseCache[id] = c; return c; }
-      catch { courseCache[id] = null; return null; }
-    };
+    const courseMap = await getCourseMap(base44, enrolments.map(e => e.course_id));
 
     const items = [];
     for (const e of enrolments) {
-      const course = await getCourse(e.course_id);
-      const totalModules = course ? (course.syllabus || []).length : 0;
-      const quizTotal = course ? (course.quiz || []).length : 0;
+      const course = courseMap[e.course_id] || null;
+      const totalModules = courseModuleCount(course);
+      const quizTotal = courseQuizCount(course);
       const completedCount = (e.completed_module_indices || []).length;
       items.push({
         enrolment_id: e.id,

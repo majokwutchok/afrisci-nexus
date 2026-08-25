@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getStudentDashboard } from "@/functions/getStudentDashboard";
+import { getStudentLeaderboard } from "@/functions/getStudentLeaderboard";
+import LeaderboardWidget from "@/components/training/LeaderboardWidget";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,11 +19,27 @@ export default function StudentDashboard() {
   const [items, setItems] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [leaderboard, setLeaderboard] = useState(null);
+  const [me, setMe] = useState(null);
+  const [lbLoading, setLbLoading] = useState(true);
 
   useEffect(() => {
     const saved = localStorage.getItem("studentEmail");
     if (saved) { setLookupEmail(saved); load(saved); }
+    loadLeaderboard(saved || "");
   }, []);
+
+  const loadLeaderboard = async (em) => {
+    setLbLoading(true);
+    try {
+      const res = await getStudentLeaderboard({ email: em });
+      const data = res?.data || res;
+      if (data?.error) throw new Error(data.error);
+      setLeaderboard(data?.leaderboard || []);
+      setMe(data?.me || null);
+    } catch (err) { setLeaderboard([]); setMe(null); }
+    setLbLoading(false);
+  };
 
   const load = async (em) => {
     setLoading(true); setError(null);
@@ -39,6 +57,7 @@ export default function StudentDashboard() {
     e.preventDefault();
     if (!lookupEmail) return;
     load(lookupEmail);
+    loadLeaderboard(lookupEmail);
   };
 
   const activeCourses = items?.filter(i => i.status === "active") || [];
@@ -70,6 +89,10 @@ export default function StudentDashboard() {
         </form>
 
         {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 mb-6">{error}</div>}
+
+        <div className="mb-6">
+          <LeaderboardWidget leaderboard={leaderboard} me={me} loading={lbLoading} />
+        </div>
 
         {loading && <div className="grid sm:grid-cols-2 gap-4">{[0, 1].map(i => <Skeleton key={i} className="h-40 rounded-xl" />)}</div>}
 
