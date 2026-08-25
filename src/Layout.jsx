@@ -26,7 +26,9 @@ import {
   Phone,
   Archive as ArchiveIcon,
   Handshake,
-  Wrench
+  Wrench,
+  Briefcase,
+  Megaphone
 } from "lucide-react";
 import AfriSciLogo from "./components/brand/AfriSciLogo";
 
@@ -130,6 +132,13 @@ const mainMenuItems = [
         url: createPageUrl("Archive"), 
         description: "Browse our complete publication history",
         icon: ArchiveIcon
+      },
+      {
+        title: "Jobs & Opportunities",
+        url: createPageUrl("Jobs"),
+        description: "PhD, postdoc, faculty roles, fellowships & grants",
+        icon: Briefcase,
+        badge: "New"
       }
     ]
   },
@@ -286,6 +295,20 @@ const mainMenuItems = [
         url: createPageUrl("InstitutionDashboard"),
         description: "Manage your membership and entitlements",
         icon: BarChart3
+      },
+      {
+        title: "Post a Job",
+        url: createPageUrl("Jobs"),
+        description: "Reach 10,000+ African researchers — paid listings",
+        icon: Briefcase,
+        badge: "New"
+      },
+      {
+        title: "Advertise with Us",
+        url: createPageUrl("Advertise"),
+        description: "Sponsored placements on Research News & newsletter",
+        icon: Megaphone,
+        badge: "New"
       }
     ]
   }

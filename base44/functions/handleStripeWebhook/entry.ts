@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 import { activateSubscription } from '../../shared/subscriptionLifecycle.ts';
+import { fulfillJobPost, fulfillAdPlacement } from '../../shared/orderFulfillment.ts';
 
 function timingSafeEqual(a, b) {
   let res = 0;
@@ -32,8 +33,14 @@ export default async function(req) {
     const event = JSON.parse(rawBody);
     if (event.type === 'checkout.session.completed') {
       const session = event.data?.object;
-      const subscriptionId = session?.metadata?.subscription_id;
-      if (subscriptionId) await activateSubscription(base44, subscriptionId);
+      const md = session?.metadata || {};
+      if (md.subscription_id) {
+        await activateSubscription(base44, md.subscription_id);
+      } else if (md.product_type === 'job_post' && md.record_id) {
+        await fulfillJobPost(base44, md.record_id, md.transaction_id);
+      } else if (md.product_type === 'ad_placement' && md.record_id) {
+        await fulfillAdPlacement(base44, md.record_id, md.transaction_id);
+      }
     }
 
     return Response.json({ received: true });

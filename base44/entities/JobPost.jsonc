@@ -1,0 +1,127 @@
+{
+  "name": "JobPost",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Role title"
+    },
+    "organization_name": {
+      "type": "string",
+      "description": "Hiring organization"
+    },
+    "job_type": {
+      "type": "string",
+      "enum": [
+        "phd",
+        "postdoc",
+        "faculty",
+        "fellowship",
+        "grant",
+        "staff"
+      ],
+      "description": "Type of opportunity"
+    },
+    "field": {
+      "type": "string",
+      "description": "Research field/discipline"
+    },
+    "country": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "description": "Location (city/country or remote)"
+    },
+    "application_url": {
+      "type": "string",
+      "description": "External URL to apply"
+    },
+    "description": {
+      "type": "string",
+      "description": "Full role description"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "posted_by_email": {
+      "type": "string"
+    },
+    "organization_id": {
+      "type": "string"
+    },
+    "plan_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_payment",
+        "active",
+        "expired",
+        "closed",
+        "rejected"
+      ],
+      "default": "pending_payment"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "payment_provider": {
+      "type": "string",
+      "default": "stripe"
+    },
+    "stripe_checkout_session_id": {
+      "type": "string"
+    },
+    "posted_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "title",
+    "organization_name",
+    "job_type",
+    "application_url",
+    "status"
+  ],
+  "rls": {
+    "create": true,
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

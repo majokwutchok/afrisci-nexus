@@ -1,0 +1,111 @@
+{
+  "name": "AdPlacement",
+  "type": "object",
+  "properties": {
+    "slot": {
+      "type": "string",
+      "enum": [
+        "news_sidebar",
+        "news_banner",
+        "newsletter_banner",
+        "homepage_banner"
+      ],
+      "description": "Placement slot"
+    },
+    "title": {
+      "type": "string",
+      "description": "Campaign name"
+    },
+    "sponsor_name": {
+      "type": "string",
+      "description": "Advertiser display name"
+    },
+    "creative_url": {
+      "type": "string",
+      "description": "Banner/creative image URL"
+    },
+    "link_url": {
+      "type": "string",
+      "description": "Click-through URL"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "booked_by_email": {
+      "type": "string"
+    },
+    "organization_id": {
+      "type": "string"
+    },
+    "plan_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_payment",
+        "active",
+        "expired",
+        "rejected"
+      ],
+      "default": "pending_payment"
+    },
+    "payment_provider": {
+      "type": "string",
+      "default": "stripe"
+    },
+    "stripe_checkout_session_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "slot",
+    "sponsor_name",
+    "link_url",
+    "status"
+  ],
+  "rls": {
+    "create": true,
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

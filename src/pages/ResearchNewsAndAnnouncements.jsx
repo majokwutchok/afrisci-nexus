@@ -117,6 +117,11 @@ export default function ResearchNewsAndAnnouncements() {
           })}
         </div>
 
+        {/* Sponsored placement */}
+        <div className="mb-8">
+          <SponsoredAdSlot slot="news_banner" />
+        </div>
+
         {/* Grid */}
         {isLoading ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
