@@ -90,18 +90,16 @@ export default function ScholarMetaTags({ manuscript, journal, coverImage }) {
     add("citation_fulltext_html_url", articleUrl);
 
     if (manuscript.doi) add("citation_doi", manuscript.doi);
-    // Scholar requires citation_pdf_url to point directly at a crawlable PDF file,
-    // not a DOI resolver redirect — so always prefer the actual file URL.
-    if (manuscript.manuscript_file_url) {
+    // Scholar requires citation_pdf_url to be a crawlable http(s) PDF URL.
+    // Stored files may be base64 data URIs (not crawlable) — only emit a real URL.
+    if (manuscript.manuscript_file_url && manuscript.manuscript_file_url.startsWith('http')) {
       add("citation_pdf_url", manuscript.manuscript_file_url);
-    } else if (manuscript.doi) {
-      add("citation_pdf_url", `https://doi.org/${manuscript.doi}`);
     }
 
     (manuscript.authors || []).forEach(a => {
       add("citation_author", a.name);
       if (a.affiliation) add("citation_author_institution", a.affiliation);
-      if (a.orcid) add("citation_author_orcid", `https://orcid.org/${a.orcid}`);
+      if (a.orcid) add("citation_author_orcid", a.orcid.startsWith('http') ? a.orcid : `https://orcid.org/${a.orcid}`);
     });
     (manuscript.keywords || []).forEach(k => add("citation_keywords", k));
 

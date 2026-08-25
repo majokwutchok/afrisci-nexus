@@ -21,7 +21,11 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const url = new URL(req.url);
-    const id = url.searchParams.get('id');
+    let id = url.searchParams.get('id');
+    if (!id) {
+      const body = await req.json().catch(() => ({}));
+      id = body.id;
+    }
     if (!id) return new Response('Missing article id', { status: 400 });
 
     const m = await base44.asServiceRole.entities.Manuscript.get(id);
@@ -38,12 +42,15 @@ Deno.serve(async (req) => {
     const realPageUrl = `${BASE_URL}/ManuscriptDetail?id=${m.id}`;
     const pubDate = m.publication_date || (m.online_first_date || m.created_date || '').toString().split('T')[0] || '';
     const image = m.cover_image_url || 'https://media.base44.com/images/public/689712620d81bb990dd76bb3/21f8643a1_generated_image.png';
-    const pdfUrl = m.manuscript_file_url || (m.doi ? `https://doi.org/${m.doi}` : '');
+    // Scholar requires citation_pdf_url to be a crawlable http(s) PDF URL.
+    // Stored manuscript files may be base64 data URIs (not crawlable) — skip those.
+    const rawFile = m.manuscript_file_url || '';
+    const pdfUrl = rawFile.startsWith('http') ? rawFile : '';
 
     const authorTags = (m.authors || []).map(a => {
       let t = `<meta name="citation_author" content="${esc(a.name)}" />`;
       if (a.affiliation) t += `\n    <meta name="citation_author_institution" content="${esc(a.affiliation)}" />`;
-      if (a.orcid) t += `\n    <meta name="citation_author_orcid" content="https://orcid.org/${esc(a.orcid)}" />`;
+      if (a.orcid) { const o = a.orcid.startsWith('http') ? a.orcid : `https://orcid.org/${a.orcid}`; t += `\n    <meta name="citation_author_orcid" content="${esc(o)}" />`; }
       return t;
     }).join('\n    ');
     const kwTags = (m.keywords || []).map(k => `<meta name="citation_keywords" content="${esc(k)}" />`).join('\n    ');
