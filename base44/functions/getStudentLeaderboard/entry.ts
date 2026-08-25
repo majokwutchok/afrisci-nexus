@@ -1,20 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { getCourseMap, courseModuleCount, courseDurationHours, normalizeEmail } from '../../shared/courseLookup.ts';
+import { displayName } from '../../shared/learnerUtils.ts';
 
 // Public learner leaderboard. Ranks learners by a composite of assessment
 // scores and completed training hours. Email-based (public app, no login).
 // Credit-free: entity reads only.
-function displayName(name, email) {
-  if (name && name.trim()) {
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0];
-    return parts[0] + ' ' + parts[parts.length - 1].charAt(0) + '.';
-  }
-  if (!email) return 'Anonymous';
-  const [u, d] = email.split('@');
-  return (u ? u.slice(0, 2) : '') + '***@' + (d || '');
-}
-
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);

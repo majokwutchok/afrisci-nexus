@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, CheckCircle, Users, Sparkles, ArrowRight, Calendar, ShieldCheck } from "lucide-react";
+import { Building2, CheckCircle, Users, Sparkles, ArrowRight, Calendar, ShieldCheck, GraduationCap } from "lucide-react";
 
 const STATUS_STYLE = {
   active: "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -71,6 +71,16 @@ export default function InstitutionDashboard() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1">Institution Dashboard</h1>
         <p className="text-slate-600 mb-6">Manage your membership and view entitlements.</p>
+        <Link to={createPageUrl("InstitutionTraining")} className="block mb-6">
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl p-5 shadow-sm flex items-center gap-3">
+            <GraduationCap className="w-6 h-6 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold">Training Progress & Institutional Ranking</p>
+              <p className="text-indigo-100 text-sm">Track member module progress, assessment scores, and your rank among partners</p>
+            </div>
+            <ArrowRight className="w-5 h-5 flex-shrink-0" />
+          </div>
+        </Link>
 
         {subscriptions.length === 0 ? (
           <Card className="p-8 text-center">

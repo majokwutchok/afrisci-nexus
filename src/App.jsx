@@ -36,6 +36,7 @@ import Advertise from './pages/Advertise';
 import Training from './pages/Training';
 import StudentDashboard from './pages/StudentDashboard';
 import VerifyCertificate from './pages/VerifyCertificate';
+import InstitutionTraining from './pages/InstitutionTraining';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -116,6 +117,7 @@ const AuthenticatedApp = () => {
       <Route path="/Training" element={<LayoutWrapper currentPageName="Training"><Training /></LayoutWrapper>} />
       <Route path="/StudentDashboard" element={<LayoutWrapper currentPageName="StudentDashboard"><StudentDashboard /></LayoutWrapper>} />
       <Route path="/VerifyCertificate" element={<LayoutWrapper currentPageName="VerifyCertificate"><VerifyCertificate /></LayoutWrapper>} />
+      <Route path="/InstitutionTraining" element={<LayoutWrapper currentPageName="InstitutionTraining"><InstitutionTraining /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
