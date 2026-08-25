@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GraduationCap, Clock, BarChart3, CheckCircle, Loader2, BookOpen, Users, Link as LinkIcon } from "lucide-react";
+import AfriSciLogo from "@/components/brand/AfriSciLogo";
+import Footer from "@/components/layout/Footer";
 
 const CATEGORY_LABEL = {
   research_methods: "Research Methods",
@@ -127,6 +129,17 @@ export default function Training() {
   return (
     <div className="min-h-screen bg-slate-50">
       <SEO title="Training & Certification — AfriSci Nexus Discovery" description="Paid courses and webinars on research methods, grant writing, publication ethics, AI ethics, technical writing and peer review, with interactive modules, final quizzes and verifiable certificates." canonicalPath="/Training" />
+      <header className="sticky top-0 z-40 bg-blue-900 text-white shadow-lg border-b border-blue-700/50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between py-3">
+          <Link to="/" className="flex items-center"><AfriSciLogo variant="header" theme="dark" /></Link>
+          <nav className="flex items-center gap-3 sm:gap-5 text-sm">
+            <Link to="/" className="text-sky-200 hover:text-white hidden sm:inline">Home</Link>
+            <Link to="/Journals" className="text-sky-200 hover:text-white hidden sm:inline">Journals</Link>
+            <Link to="/StudentDashboard" className="text-sky-200 hover:text-white">My Learning</Link>
+            <Link to="/Submit"><Button size="sm" className="bg-teal-500 hover:bg-teal-600 text-white">Submit Article</Button></Link>
+          </nav>
+        </div>
+      </header>
       <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-sky-900 text-white py-14">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <Badge className="bg-teal-500/20 text-teal-100 border border-teal-400/30 mb-3">AfriSci Nexus Discovery</Badge>
@@ -311,6 +324,7 @@ export default function Training() {
           )}
         </DialogContent>
       </Dialog>
+      <Footer />
     </div>
   );
 }

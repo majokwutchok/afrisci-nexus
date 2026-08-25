@@ -472,7 +472,7 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
-  if (currentPageName === 'Home') {
+  if (currentPageName === 'Home' || currentPageName === 'Training') {
     return <>{children}</>;
   }
 
