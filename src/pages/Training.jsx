@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { createCourseEnrolmentCheckout } from "@/functions/createCourseEnrolmentCheckout";
 import { createCohortCheckout } from "@/functions/createCohortCheckout";
@@ -47,9 +48,11 @@ export default function Training() {
     base44.entities.Course.filter({ is_active: true }, "sort_order", 50)
       .then(setCourses).catch(() => setCourses([])).finally(() => setLoading(false));
     const params = new URLSearchParams(window.location.search);
-    if (params.get("stripe") === "success" && params.get("enrolment")) {
-      setSuccessEnrolment(params.get("enrolment"));
-      if (params.get("course")) setSuccessCourseId(params.get("course"));
+    const enrolmentId = params.get("enrolment");
+    const courseId = params.get("course");
+    if (enrolmentId && courseId) {
+      setSuccessEnrolment(enrolmentId);
+      setSuccessCourseId(courseId);
     }
     if (params.get("cohort") === "purchased" && params.get("cohort_id")) {
       try {
@@ -129,6 +132,9 @@ export default function Training() {
           <Badge className="bg-teal-500/20 text-teal-100 border border-teal-400/30 mb-3">AfriSci Nexus Discovery</Badge>
           <h1 className="text-3xl md:text-4xl font-extrabold mb-2">Training & Certification</h1>
           <p className="text-blue-100 max-w-2xl">Professional courses for researchers and institutions. Work through interactive modules, pass a final quiz, and earn a verifiable, branded certificate. Enrol individually or buy a cohort for your institution.</p>
+          <Link to="/StudentDashboard" className="inline-flex items-center gap-2 mt-4 text-teal-200 hover:text-teal-100 text-sm font-medium">
+            <BarChart3 className="w-4 h-4" /> Track your progress in the My Learning Dashboard →
+          </Link>
         </div>
       </div>
 

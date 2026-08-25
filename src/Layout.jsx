@@ -201,6 +201,13 @@ const mainMenuItems = [
         description: "Paid courses with verifiable certificates",
         icon: GraduationCap,
         badge: "New"
+      },
+      { 
+        title: "My Learning Dashboard", 
+        url: createPageUrl("StudentDashboard"), 
+        description: "Track your courses, module progress and quiz scores",
+        icon: BarChart3,
+        badge: "New"
       }
     ]
   },
@@ -765,6 +772,7 @@ export default function Layout({ children, currentPageName }) {
                currentPageName === 'AuthorResources' ? 'Author Resources' : // Added breadcrumb mapping
                currentPageName === 'ReviewGuidelines' ? 'Reviewer Guidelines' : // Added breadcrumb mapping
                currentPageName === 'ReviewerAwards' ? 'Reviewer Awards' : // Added breadcrumb mapping
+               currentPageName === 'StudentDashboard' ? 'My Learning Dashboard' :
                currentPageName || 'Page'}
             </span>
           </div>

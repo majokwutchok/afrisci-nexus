@@ -34,6 +34,7 @@ import ServiceOrdersAdmin from './pages/ServiceOrdersAdmin';
 import Jobs from './pages/Jobs';
 import Advertise from './pages/Advertise';
 import Training from './pages/Training';
+import StudentDashboard from './pages/StudentDashboard';
 import VerifyCertificate from './pages/VerifyCertificate';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -113,6 +114,7 @@ const AuthenticatedApp = () => {
       <Route path="/Jobs" element={<LayoutWrapper currentPageName="Jobs"><Jobs /></LayoutWrapper>} />
       <Route path="/Advertise" element={<LayoutWrapper currentPageName="Advertise"><Advertise /></LayoutWrapper>} />
       <Route path="/Training" element={<LayoutWrapper currentPageName="Training"><Training /></LayoutWrapper>} />
+      <Route path="/StudentDashboard" element={<LayoutWrapper currentPageName="StudentDashboard"><StudentDashboard /></LayoutWrapper>} />
       <Route path="/VerifyCertificate" element={<LayoutWrapper currentPageName="VerifyCertificate"><VerifyCertificate /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
