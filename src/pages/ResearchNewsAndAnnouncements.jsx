@@ -7,6 +7,7 @@ import SEO from '@/components/SEO';
 import {
   Calendar, ExternalLink, Search, Megaphone, Award, Globe, BookOpen, Star, Handshake
 } from 'lucide-react';
+import SponsoredAdSlot from '@/components/ads/SponsoredAdSlot';
 
 const CATEGORY_CONFIG = {
   call_for_papers: { label: 'Call for Papers', icon: BookOpen, color: 'bg-blue-100 text-blue-800 border-blue-200' },
