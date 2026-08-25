@@ -1,0 +1,102 @@
+{
+  "name": "CourseCohort",
+  "type": "object",
+  "properties": {
+    "course_id": {
+      "type": "string"
+    },
+    "course_code": {
+      "type": "string"
+    },
+    "course_title": {
+      "type": "string"
+    },
+    "institution_name": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "seats_purchased": {
+      "type": "number",
+      "default": 0
+    },
+    "seats_used": {
+      "type": "number",
+      "default": 0
+    },
+    "price_per_seat": {
+      "type": "number",
+      "default": 0
+    },
+    "total_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_payment",
+        "active",
+        "exhausted",
+        "closed"
+      ],
+      "default": "pending_payment"
+    },
+    "cohort_code": {
+      "type": "string",
+      "description": "Unique shareable code learners use to join"
+    },
+    "stripe_checkout_session_id": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "course_id",
+    "course_title",
+    "institution_name",
+    "seats_purchased",
+    "status"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.contact_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

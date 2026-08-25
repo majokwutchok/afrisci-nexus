@@ -28,3 +28,11 @@ export async function fulfillCourseEnrolment(base44, recordId, transactionId) {
   }
   return { ok: true };
 }
+
+export async function fulfillCourseCohort(base44, recordId, transactionId) {
+  await base44.asServiceRole.entities.CourseCohort.update(recordId, { status: 'active' });
+  if (transactionId) {
+    try { await base44.asServiceRole.entities.Transaction.update(transactionId, { status: 'completed' }); } catch {}
+  }
+  return { ok: true };
+}
