@@ -1,8 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { sendCertificateEmail } from '../../shared/sendCertificateEmail.ts';
 
 // Marks an enrolment completed and issues a verifiable certificate with a
 // unique code. Credit-free: only entity operations, no integration calls.
-// The branded PDF itself is generated client-side by the frontend.
+// The branded PDF itself is generated client-side by the frontend, and a
+// notification email is sent through the linked Gmail account on first issue.
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -43,6 +45,18 @@ export default async function(req) {
       status: 'completed', completed_at: new Date().toISOString(),
       certificate_id: cert.id, certificate_code: code
     });
+
+    // Notify the learner through the linked Gmail account. Non-blocking:
+    // a send failure never prevents the certificate from being issued.
+    try {
+      await sendCertificateEmail(base44, {
+        user_name: enrolment.user_name, user_email: enrolment.user_email,
+        course_title: enrolment.course_title, course_code: enrolment.course_code,
+        certificate_code: code, issue_date: today
+      });
+    } catch (e) {
+      console.error('Certificate email send failed:', e?.message || e);
+    }
 
     return Response.json({
       certificate_code: code, course_title: enrolment.course_title,
