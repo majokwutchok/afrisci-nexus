@@ -1,178 +1,155 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, ExternalLink, ArrowRight, Megaphone, Award, Globe, BookOpen, Star, Handshake } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
-const CATEGORY_CONFIG = {
-  call_for_papers: { label: 'Call for Papers', icon: BookOpen, color: 'bg-blue-100 text-blue-800 border-blue-200', dot: 'bg-blue-500' },
-  indexing: { label: 'Indexing Achievement', icon: Star, color: 'bg-amber-100 text-amber-800 border-amber-200', dot: 'bg-amber-500' },
-  conference: { label: 'Conference', icon: Globe, color: 'bg-purple-100 text-purple-800 border-purple-200', dot: 'bg-purple-500' },
-  announcement: { label: 'Announcement', icon: Megaphone, color: 'bg-teal-100 text-teal-800 border-teal-200', dot: 'bg-teal-500' },
-  award: { label: 'Award', icon: Award, color: 'bg-yellow-100 text-yellow-800 border-yellow-200', dot: 'bg-yellow-500' },
-  partnership: { label: 'Partnership', icon: Handshake, color: 'bg-green-100 text-green-800 border-green-200', dot: 'bg-green-500' },
+// Category names and accent colours (kept to the site palette).
+const CATEGORY = {
+  call_for_papers: { label: 'Call for papers', color: '#1E40AF' },
+  indexing: { label: 'Indexing', color: '#B45309' },
+  conference: { label: 'Conference', color: '#7C3AED' },
+  announcement: { label: 'Announcement', color: '#0F766E' },
+  award: { label: 'Award', color: '#B45309' },
+  partnership: { label: 'Partnership', color: '#0F766E' },
+};
+const MAX_POSTS = 4;
+
+function parseDate(value) {
+  if (!value) return null;
+  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00` : value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+const fmt = (d, opts) => d.toLocaleDateString('en-GB', opts);
+
+/** "Open until 31 Jan 2027", "Closes in 5 days", "Closes today", or "Closed". */
+export function deadlineStatus(deadline, now = new Date()) {
+  const d = parseDate(deadline);
+  if (!d) return null;
+  const end = new Date(d); end.setHours(23, 59, 59, 999);
+  const days = Math.ceil((end - now) / 86400000);
+  if (end < now) return { text: 'Closed', tone: 'closed' };
+  if (days <= 1) return { text: 'Closes today', tone: 'soon' };
+  if (days <= 14) return { text: `Closes in ${days} days`, tone: 'soon' };
+  return { text: `Open until ${fmt(d, { day: 'numeric', month: 'short', year: 'numeric' })}`, tone: 'open' };
+}
+const TONE = {
+  open: 'text-emerald-800 bg-emerald-50 ring-emerald-200',
+  soon: 'text-amber-900 bg-amber-50 ring-amber-200',
+  closed: 'text-slate-500 bg-slate-50 ring-slate-200',
 };
 
-function NewsCard({ post, featured }) {
-  const cfg = CATEGORY_CONFIG[post.category] || CATEGORY_CONFIG.announcement;
-  const Icon = cfg.icon;
+function postHref(post) {
+  return post.external_url || createPageUrl(`ResearchNewsArticle?id=${post.id}`);
+}
 
-  if (featured) {
-    return (
-      <article className="relative group rounded-2xl overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-teal-800 text-white shadow-2xl">
-        {post.cover_image_url && (
-          <img src={post.cover_image_url} alt={post.title} className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-25 transition-opacity" />
-        )}
-        <div className="relative p-8 md:p-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white border border-white/30`}>
-              <Icon className="w-3 h-3" />
-              {cfg.label}
-            </span>
-            <span className="text-xs text-blue-200">📌 Featured</span>
-          </div>
-          <h3 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">{post.title}</h3>
-          <p className="text-blue-100 text-base mb-5 leading-relaxed">{post.summary}</p>
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-4 text-sm text-blue-200">
-              {post.published_date && (
-                <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{new Date(post.published_date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-              )}
-              {post.deadline && (
-                <span className="flex items-center gap-1.5 text-amber-300 font-semibold">⏰ Deadline: {new Date(post.deadline).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-              )}
-            </div>
-            {post.external_url ? (
-              <a href={post.external_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-white text-blue-900 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-colors">
-                Learn More <ExternalLink className="w-4 h-4" />
-              </a>
-            ) : (
-              <span className="inline-flex items-center gap-2 bg-white/10 text-white text-sm px-4 py-2 rounded-xl border border-white/20">
-                {post.author_name}
-              </span>
-            )}
-          </div>
-        </div>
-      </article>
-    );
-  }
+function NewsRow({ post }) {
+  const cat = CATEGORY[post.category] || CATEGORY.announcement;
+  const date = parseDate(post.published_date) || parseDate(post.created_date);
+  const status = deadlineStatus(post.deadline);
+  const external = Boolean(post.external_url);
+  // Skip a summary that only repeats the title.
+  const summary = post.summary && post.summary.trim().toLowerCase() !== String(post.title || '').trim().toLowerCase() ? post.summary : '';
+  const Anchor = external ? 'a' : Link;
+  const anchorProps = external ? { href: post.external_url, target: '_blank', rel: 'noopener noreferrer' } : { to: postHref(post) };
 
   return (
-    <article className="group bg-white rounded-xl border border-slate-200 hover:border-teal-300 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
-      {post.cover_image_url && (
-        <img src={post.cover_image_url} alt={post.title} className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500" />
-      )}
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-center gap-2 mb-3">
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cfg.color}`}>
-            <Icon className="w-3 h-3" />
-            {cfg.label}
-          </span>
-          {post.deadline && <span className="text-xs text-red-600 font-medium">⏰ {new Date(post.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+    <li className="border-t border-slate-200">
+      <Anchor {...anchorProps} className="group grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-5 py-5 outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-4 sm:grid-cols-[4.5rem_minmax(0,1fr)_auto] sm:gap-x-6 rounded-sm">
+        {date ? (
+          <time dateTime={date.toISOString().slice(0, 10)} className="row-span-2 flex flex-col leading-none text-slate-900 sm:row-span-1">
+            <span className="text-3xl font-semibold tabular-nums tracking-tight sm:text-4xl">{fmt(date, { day: 'numeric' })}</span>
+            <span className="mt-1.5 text-sm text-slate-500">{fmt(date, { month: 'short', year: 'numeric' })}</span>
+          </time>
+        ) : <span className="row-span-2 sm:row-span-1" />}
+
+        <div className="min-w-0">
+          <p className="flex items-center gap-2 text-sm font-medium" style={{ color: cat.color }}>
+            <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: cat.color }} aria-hidden="true" />
+            {cat.label}
+            {post.is_featured && <span className="font-normal text-slate-500">Featured</span>}
+          </p>
+          <h3 className="mt-1.5 text-lg font-semibold leading-snug text-slate-900 decoration-slate-300 underline-offset-4 group-hover:underline sm:text-xl">
+            {post.title}
+            {external && <span className="sr-only"> (opens in a new tab)</span>}
+          </h3>
+          {summary && <p className="mt-1.5 max-w-2xl text-[15px] leading-relaxed text-slate-600 line-clamp-2">{summary}</p>}
         </div>
-        <h3 className="font-bold text-slate-900 text-base leading-snug mb-2 group-hover:text-teal-700 transition-colors line-clamp-2">{post.title}</h3>
-        <p className="text-slate-600 text-sm leading-relaxed mb-4 flex-1 line-clamp-3">{post.summary}</p>
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100">
-          <span className="text-xs text-slate-400 flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            {post.published_date ? new Date(post.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent'}
+
+        {status && (
+          <span className={`col-start-2 mt-3 w-fit self-start whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset sm:col-start-3 sm:mt-0.5 ${TONE[status.tone]}`}>
+            {status.text}
           </span>
-          {post.external_url ? (
-            <a href={post.external_url} target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:text-teal-800 text-xs font-semibold flex items-center gap-1">
-              Read more <ExternalLink className="w-3 h-3" />
-            </a>
-          ) : (
-            <span className="text-xs text-slate-400">{post.author_name}</span>
-          )}
-        </div>
-      </div>
-    </article>
+        )}
+      </Anchor>
+    </li>
   );
 }
 
 export default function NewsSection() {
-  const [posts, setPosts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [posts, setPosts] = useState(null);
 
   useEffect(() => {
-    base44.entities.NewsPost.filter({ status: 'published' }, '-published_date', 10)
-      .then(setPosts)
-      .catch(() => setPosts([]))
-      .finally(() => setIsLoading(false));
+    base44.entities.NewsPost.filter({ status: 'published' }, '-published_date', 8)
+      .then((rows) => {
+        const list = Array.isArray(rows) ? rows : rows?.items || [];
+        // Featured first, then newest; open calls before closed ones of the same date.
+        list.sort((a, b) => (b.is_featured === true) - (a.is_featured === true));
+        setPosts(list.slice(0, MAX_POSTS));
+      })
+      .catch(() => setPosts([]));
   }, []);
 
-  if (!isLoading && posts.length === 0) return null;
+  if (posts && posts.length === 0) return null;
 
-  const featured = posts.find(p => p.is_featured);
-  const rest = posts.filter(p => !p.is_featured).slice(0, 6);
-
-  // Structured data for Google News / SEO
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "AfriSci Nexus News",
-    "itemListElement": posts.map((p, i) => ({
-      "@type": "ListItem",
-      "position": i + 1,
-      "item": {
-        "@type": "NewsArticle",
-        "headline": p.title,
-        "description": p.summary,
-        "datePublished": p.published_date,
-        "author": { "@type": "Organization", "name": p.author_name || "AfriSci Nexus" },
-        "publisher": { "@type": "Organization", "name": "AfriSci Nexus" }
-      }
-    }))
+  const structuredData = posts && {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'AfriSci Nexus news and announcements',
+    itemListElement: posts.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: p.external_url || `https://afriscinexus.com/ResearchNewsArticle?id=${p.id}`,
+      item: {
+        '@type': 'NewsArticle',
+        headline: p.title,
+        description: p.summary,
+        datePublished: p.published_date,
+        author: { '@type': 'Organization', name: p.author_name || 'AfriSci Nexus' },
+        publisher: { '@type': 'Organization', name: 'AfriSci Nexus' },
+      },
+    })),
   };
 
   return (
-    <section aria-label="AfriSci Nexus News and Announcements" className="py-16">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-
-      {/* Section Header */}
-      <div className="flex items-end justify-between mb-10">
+    <section aria-labelledby="news-title">
+      {structuredData && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />}
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-block w-8 h-1 bg-teal-500 rounded-full"></span>
-            <span className="text-teal-600 font-semibold text-sm uppercase tracking-widest">Latest News</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">
-            News & Announcements
-          </h2>
-          <p className="text-slate-500 mt-2 text-base max-w-xl">
-            Stay updated with calls for papers, indexing milestones, conferences, and platform news from AfriSci Nexus.
+          <h2 id="news-title" className="text-3xl font-bold tracking-tight text-slate-900">News and announcements</h2>
+          <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-slate-600">
+            Calls for papers, partnerships and platform updates from the editorial office.
           </p>
         </div>
-        <Link to={createPageUrl('ResearchNewsAndAnnouncements')} className="hidden md:inline-flex items-center gap-2 text-teal-600 hover:text-teal-800 font-semibold text-sm transition-colors">
-          All News <ArrowRight className="w-4 h-4" />
+        <Link to={createPageUrl('ResearchNewsAndAnnouncements')} className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-800 hover:text-blue-950">
+          All news <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </Link>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-4">
-          <Skeleton className="h-56 w-full rounded-2xl" />
-          <div className="grid md:grid-cols-3 gap-4">
-            <Skeleton className="h-48 rounded-xl" /><Skeleton className="h-48 rounded-xl" /><Skeleton className="h-48 rounded-xl" />
-          </div>
-        </div>
+      {posts === null ? (
+        <ul className="mt-6" aria-busy="true" aria-label="Loading news">
+          {[0, 1].map((i) => (
+            <li key={i} className="grid grid-cols-[4.5rem_1fr] gap-6 border-t border-slate-200 py-5">
+              <div className="h-10 w-12 animate-pulse rounded bg-slate-100" />
+              <div className="space-y-2"><div className="h-4 w-28 animate-pulse rounded bg-slate-100" /><div className="h-5 w-3/4 animate-pulse rounded bg-slate-100" /></div>
+            </li>
+          ))}
+        </ul>
       ) : (
-        <div className="space-y-6">
-          {featured && <NewsCard post={featured} featured />}
-          {rest.length > 0 && (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {rest.map(post => <NewsCard key={post.id} post={post} />)}
-            </div>
-          )}
-        </div>
+        <ul className="mt-6 border-b border-slate-200">
+          {posts.map((post) => <NewsRow key={post.id} post={post} />)}
+        </ul>
       )}
-
-      <div className="mt-8 text-center md:hidden">
-        <Link to={createPageUrl('ResearchNewsAndAnnouncements')} className="inline-flex items-center gap-2 text-teal-600 font-semibold text-sm">
-          View All News <ArrowRight className="w-4 h-4" />
-        </Link>
-      </div>
     </section>
   );
 }
