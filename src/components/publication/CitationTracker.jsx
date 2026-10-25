@@ -84,18 +84,26 @@ export default function CitationTracker({ manuscript, journal, onCitationAdded }
   const mla = formatMLA(manuscript, journal);
   const chicago = formatChicago(manuscript, journal);
 
+  // A reported citation is saved for the editors to verify; it no longer changes the public
+  // count, which comes only from OpenAlex and Crossref.
   const handleReportCitation = async () => {
     if (!sourceTitle.trim()) return;
     setSubmitting(true);
-    const newCount = (manuscript.citation_count || 0) + 1;
-    await base44.entities.Manuscript.update(manuscript.id, {
-      citation_count: newCount
-    });
-    setSubmitted(true);
-    setShowReportForm(false);
-    setSourceUrl("");
-    setSourceTitle("");
-    if (onCitationAdded) onCitationAdded(newCount);
+    try {
+      await base44.entities.CitationReport.create({
+        manuscript_id: manuscript.id,
+        manuscript_title: manuscript.title || "",
+        citing_title: sourceTitle.trim(),
+        citing_url: sourceUrl.trim(),
+        status: "pending",
+      });
+      setSubmitted(true);
+      setShowReportForm(false);
+      setSourceUrl("");
+      setSourceTitle("");
+    } catch {
+      setSubmitted(false);
+    }
     setSubmitting(false);
   };
 
@@ -117,7 +125,7 @@ export default function CitationTracker({ manuscript, journal, onCitationAdded }
         {/* Report a citation */}
         {submitted && (
           <div className="flex items-center gap-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700">
-            <Check className="w-4 h-4" /> Citation reported — thank you!
+            <Check className="w-4 h-4" /> Thank you. Our editors will verify this citation.
           </div>
         )}
 

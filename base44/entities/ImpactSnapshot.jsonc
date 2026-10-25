@@ -1,0 +1,32 @@
+{
+  "name": "ImpactSnapshot",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "impact_map or citations_sync"
+    },
+    "data": {
+      "type": "object"
+    },
+    "computed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "key"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

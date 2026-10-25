@@ -16,6 +16,7 @@ import ReadershipMap from '../components/home/ReadershipMap';
 import NewsSection from '../components/home/NewsSection';
 import HomeSidebar from '../components/home/HomeSidebar';
 import GlobalResearchMap from '../components/home/GlobalResearchMap';
+import { useImpactData } from '@/lib/impact/useImpactData';
 
 export default function HomePage() {
   const [data, setData] = useState({
@@ -25,21 +26,23 @@ export default function HomePage() {
     users: [],
   });
   const [isLoading, setIsLoading] = useState(true);
+  const impact = useImpactData();
 
   useEffect(() => {
     const fetchData = async (isInitial) => {
       if (isInitial) setIsLoading(true);
       try {
-        const [journalData, publicationData, readershipData, reviewerData] = await Promise.all([
+        // Reader countries now come from the shared, cached impact data (useImpactData),
+        // instead of downloading thousands of raw readership records on every visit.
+        const [journalData, publicationData, reviewerData] = await Promise.all([
           base44.entities.Journal.filter({ status: 'active' }, '-created_date', 500),
           base44.entities.Manuscript.filter({ status: 'published' }, '-publication_date', 500),
-          base44.entities.ReadershipStats.list('-created_date', 2000),
           base44.entities.ReviewerProfile.filter({ status: 'active' }, '-created_date', 500),
         ]);
         setData({
           journals: journalData,
           publications: publicationData,
-          stats: readershipData,
+          stats: [],
           users: reviewerData,
         });
       } catch (error) {
@@ -58,7 +61,7 @@ export default function HomePage() {
     journals: isLoading ? null : data.journals.length || 0,
     articles: isLoading ? null : data.publications.length || 0,
     reviewers: isLoading ? null : data.users.length || 0,
-    countries: isLoading ? null : [...new Set(data.stats.map(s => s.country).filter(Boolean))].length || 0,
+    countries: impact.data ? impact.data.totals.countries_reached : null,
   };
 
   const ComponentLoader = () => (
