@@ -1,0 +1,81 @@
+{
+  "name": "EmailTemplate",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Stable identifier, e.g. accepted, rejected"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "author",
+        "reviewer",
+        "editorial",
+        "general"
+      ],
+      "enumNames": [
+        "Authors",
+        "Reviewers",
+        "Editorial & applications",
+        "General"
+      ],
+      "default": "general"
+    },
+    "description": {
+      "type": "string"
+    },
+    "header_label": {
+      "type": "string",
+      "description": "Small caps label shown above the body, e.g. 'Editorial decision'"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Subject line, supports {{variables}}"
+    },
+    "body_html": {
+      "type": "string",
+      "description": "Body HTML, supports {{variables}}, {{#if}}, [button: Label | url] and [box]...[/box]"
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "is_system": {
+      "type": "boolean",
+      "default": false,
+      "description": "Built-in template (can be reset to default)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_edited_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "subject",
+    "body_html"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

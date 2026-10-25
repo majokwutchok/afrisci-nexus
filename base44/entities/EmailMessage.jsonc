@@ -1,0 +1,172 @@
+{
+  "name": "EmailMessage",
+  "type": "object",
+  "properties": {
+    "thread_id": {
+      "type": "string"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "outbound",
+        "inbound"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sending",
+        "sent",
+        "failed",
+        "received",
+        "bounced"
+      ],
+      "default": "draft"
+    },
+    "delivery_status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "delivered",
+        "delivery_delayed",
+        "opened",
+        "clicked",
+        "bounced",
+        "complained",
+        "failed"
+      ],
+      "description": "Latest provider delivery event"
+    },
+    "delivery_updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "from_email": {
+      "type": "string"
+    },
+    "from_name": {
+      "type": "string"
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cc": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "bcc": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reply_to": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "body_html": {
+      "type": "string",
+      "description": "Full rendered HTML (outbound: branded email; inbound: as received)"
+    },
+    "body_text": {
+      "type": "string"
+    },
+    "editor_html": {
+      "type": "string",
+      "description": "Draft/source body before branding (drafts and outbound)"
+    },
+    "template_key": {
+      "type": "string"
+    },
+    "variables": {
+      "type": "object"
+    },
+    "snippet": {
+      "type": "string"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "content_type": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "provider": {
+      "type": "string"
+    },
+    "provider_message_id": {
+      "type": "string"
+    },
+    "message_id_header": {
+      "type": "string"
+    },
+    "in_reply_to": {
+      "type": "string"
+    },
+    "references": {
+      "type": "string"
+    },
+    "error": {
+      "type": "string"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    },
+    "sent_by": {
+      "type": "string"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "related_manuscript_id": {
+      "type": "string"
+    },
+    "spam_verdict": {
+      "type": "string",
+      "description": "SPF/DKIM/DMARC summary for inbound"
+    }
+  },
+  "required": [
+    "direction",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

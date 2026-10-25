@@ -1,0 +1,90 @@
+{
+  "name": "EmailThread",
+  "type": "object",
+  "properties": {
+    "subject": {
+      "type": "string"
+    },
+    "normalized_subject": {
+      "type": "string"
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "External email addresses"
+    },
+    "participant_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "last_message_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_direction": {
+      "type": "string",
+      "enum": [
+        "inbound",
+        "outbound"
+      ]
+    },
+    "snippet": {
+      "type": "string"
+    },
+    "message_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "unread_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "archived"
+      ],
+      "default": "open"
+    },
+    "starred": {
+      "type": "boolean",
+      "default": false
+    },
+    "has_failed": {
+      "type": "boolean",
+      "default": false
+    },
+    "related_manuscript_id": {
+      "type": "string"
+    },
+    "related_manuscript_title": {
+      "type": "string"
+    },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "subject"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

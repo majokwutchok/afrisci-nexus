@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { readFileAsDataUrl } from "@/utils/pdfUpload";
+import EmailComposeDialog from "@/components/email/EmailComposeDialog";
 import {
   CheckSquare, Square, Globe, Upload, Loader2, CheckCircle,
-  ChevronDown, X, Edit, Plus, Trash2, FileText, Save,
+  ChevronDown, X, Edit, Plus, Trash2, FileText, Save, Mail,
 } from "lucide-react";
 
 const STATUS_OPTIONS = [
@@ -281,13 +282,14 @@ function EditManuscriptModal({ manuscript, onClose, onSaved }) {
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
-export default function BulkManuscriptActions({ manuscripts, onRefresh }) {
+export default function BulkManuscriptActions({ manuscripts, onRefresh, canEmail = false }) {
   const [selected, setSelected] = useState(new Set());
   const [bulkStatus, setBulkStatus] = useState("published");
   const [applying, setApplying] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [result, setResult] = useState(null);
   const [editingMs, setEditingMs] = useState(null);
+  const [emailingMs, setEmailingMs] = useState(null);
 
   const filtered = filterStatus === "all"
     ? manuscripts
@@ -429,6 +431,13 @@ export default function BulkManuscriptActions({ manuscripts, onRefresh }) {
                             onClick={() => setEditingMs(ms)}>
                             <Edit className="w-3 h-3 mr-1" />Edit
                           </Button>
+                          {canEmail && (
+                            <Button size="sm" variant="outline"
+                              className="text-xs text-slate-700 border-slate-200 hover:bg-slate-50"
+                              onClick={() => setEmailingMs(ms)}>
+                              <Mail className="w-3 h-3 mr-1" />Email author
+                            </Button>
+                          )}
                           {ms.status !== "published" && (
                             <UploadPublishButton manuscript={ms} onRefresh={onRefresh} />
                           )}
@@ -447,6 +456,14 @@ export default function BulkManuscriptActions({ manuscripts, onRefresh }) {
           )}
         </CardContent>
       </Card>
+
+      {canEmail && (
+        <EmailComposeDialog
+          open={Boolean(emailingMs)}
+          manuscript={emailingMs}
+          onClose={() => setEmailingMs(null)}
+        />
+      )}
 
       {editingMs && (
         <EditManuscriptModal
