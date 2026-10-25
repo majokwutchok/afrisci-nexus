@@ -9,7 +9,7 @@ const StatItem = ({ icon: Icon, value, label, isLoading, gradient }) => (
         <Icon className="h-7 w-7 text-white" />
       </div>
       <div className="text-left">
-        {isLoading ? (
+        {isLoading || value == null ? (
           <div className="space-y-2">
             <Skeleton className="h-8 w-20 bg-white/30" />
             <Skeleton className="h-5 w-28 bg-white/20" />

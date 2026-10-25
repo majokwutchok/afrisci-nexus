@@ -1,54 +1,51 @@
 /**
- * Central engagement tracking utility.
- * Increments the appropriate counter on the Manuscript entity
- * AND writes a detailed ReadershipStats record for analytics.
+ * Reader engagement tracking.
+ * Sends each view / full text read / PDF download to the trackEngagement backend function,
+ * which records it (country, device, source), ignores bots and repeat refreshes, and increments
+ * the article's counters atomically on the server. No Base44 integrations, so no credits.
+ *
+ * trackView(manuscriptId, viewType, manuscript) keeps its original signature:
+ * viewType is "abstract" | "full_text" | "pdf_download". Returns optimistic counts at once.
  */
 import { base44 } from "@/api/base44Client";
 
-function getDeviceType() {
-  const ua = navigator.userAgent;
-  if (/Mobi|Android/i.test(ua)) return "mobile";
-  if (/Tablet|iPad/i.test(ua)) return "tablet";
-  return "desktop";
-}
+const TYPE = { abstract: "view", full_text: "read", pdf_download: "download" };
+const WINDOW_MS = 30 * 60 * 1000; // same as the server: one count per reader, action and article per 30 min
 
-function getReferrerSource() {
-  const ref = document.referrer || "";
-  if (!ref) return "direct";
-  if (/google\./i.test(ref)) return "google";
-  if (/scholar\.google/i.test(ref)) return "scholar";
-  if (/twitter|linkedin|facebook|instagram/i.test(ref)) return "social_media";
-  return "institutional";
-}
-
-/**
- * @param {string} manuscriptId
- * @param {"abstract"|"full_text"|"pdf_download"} viewType
- * @param {object} [manuscript]  - optional current manuscript object to optimistically bump counts
- */
-export async function trackView(manuscriptId, viewType, manuscript) {
-  const today = new Date().toISOString().split("T")[0];
-
-  // Write ReadershipStats record (fire and forget)
-  base44.entities.ReadershipStats.create({
-    manuscript_id: manuscriptId,
-    page_title: manuscript?.title || "Untitled Article",
-    journal_id: manuscript?.journal_id || null,
-    country: "Unknown",       // geo not available client-side without IP lookup
-    view_date: today,
-    view_type: viewType,
-    device_type: getDeviceType(),
-    referrer_source: getReferrerSource(),
-  }).catch(() => {});
-
-  // Increment the right counter on Manuscript
-  if (viewType === "pdf_download") {
-    const newCount = (manuscript?.download_count || 0) + 1;
-    base44.entities.Manuscript.update(manuscriptId, { download_count: newCount }).catch(() => {});
-    return { download_count: newCount };
-  } else {
-    const newCount = (manuscript?.view_count || 0) + 1;
-    base44.entities.Manuscript.update(manuscriptId, { view_count: newCount }).catch(() => {});
-    return { view_count: newCount };
+function visitorId() {
+  try {
+    let id = localStorage.getItem("afs_visitor");
+    if (!id) {
+      id = (crypto.randomUUID && crypto.randomUUID()) || `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem("afs_visitor", id);
+    }
+    return id;
+  } catch {
+    return "";
   }
+}
+function recentlySent(key) {
+  try {
+    const t = Number(sessionStorage.getItem(key) || 0);
+    if (Date.now() - t < WINDOW_MS) return true;
+    sessionStorage.setItem(key, String(Date.now()));
+  } catch { /* storage unavailable: let the server de-duplicate */ }
+  return false;
+}
+
+export function trackView(manuscriptId, viewType, manuscript) {
+  const type = TYPE[viewType];
+  if (!manuscriptId || !type) return {};
+  const optimistic =
+    type === "download" ? { download_count: (manuscript?.download_count || 0) + 1 } :
+    type === "read" ? { view_count: (manuscript?.view_count || 0) + 1, read_count: (manuscript?.read_count || 0) + 1 } :
+    { view_count: (manuscript?.view_count || 0) + 1 };
+
+  if (recentlySent(`afs_t_${type}_${manuscriptId}`)) return optimistic;
+  let tz = "";
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch { /* old browser */ }
+  base44.functions
+    .invoke("trackEngagement", { manuscript_id: manuscriptId, type, visitor: visitorId(), tz, referrer: document.referrer || "" })
+    .catch(() => {});
+  return optimistic;
 }

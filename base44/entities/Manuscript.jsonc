@@ -395,6 +395,28 @@
       "type": "string",
       "maxLength": 1000,
       "description": "Optional additional description or summary for this manuscript"
+    },
+    "read_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Full text reads"
+    },
+    "citation_sources": {
+      "type": "object",
+      "description": "Latest citation counts per source, e.g. { openalex, crossref }"
+    },
+    "citations_synced_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When citations were last synced from OpenAlex and Crossref"
+    },
+    "openalex_id": {
+      "type": "string",
+      "description": "OpenAlex work id"
+    },
+    "citing_countries": {
+      "type": "object",
+      "description": "Countries of citing authors: { ISO2: number of citing works }"
     }
   },
   "required": [

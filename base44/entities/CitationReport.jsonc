@@ -1,0 +1,51 @@
+{
+  "name": "CitationReport",
+  "type": "object",
+  "properties": {
+    "manuscript_id": {
+      "type": "string"
+    },
+    "manuscript_title": {
+      "type": "string"
+    },
+    "citing_title": {
+      "type": "string",
+      "description": "Title of the work that cites the article"
+    },
+    "citing_url": {
+      "type": "string",
+      "description": "Link or DOI of the citing work"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "verified",
+        "rejected"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "manuscript_id",
+    "citing_title"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

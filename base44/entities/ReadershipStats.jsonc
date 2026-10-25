@@ -73,6 +73,18 @@
       "type": "string",
       "maxLength": 1000,
       "description": "Optional notes about this readership record"
+    },
+    "country_code": {
+      "type": "string",
+      "description": "ISO 3166 alpha 2 code of the reader's country"
+    },
+    "country_source": {
+      "type": "string",
+      "description": "How the country was determined: CDN header name, timezone, or none"
+    },
+    "visitor_hash": {
+      "type": "string",
+      "description": "Anonymous salted hash of the reader's browser id, used only to avoid counting repeat refreshes"
     }
   },
   "required": [
