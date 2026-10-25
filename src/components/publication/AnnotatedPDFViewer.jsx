@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
+import { Document, Page } from 'react-pdf';
+import '@/lib/pdfWorker';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,8 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Highlighter, X, Eye, EyeOff, MessageSquare, Trash2 } from 'lucide-react';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const HIGHLIGHT_COLORS = [
   { name: 'yellow', bg: 'rgba(255, 235, 59, 0.3)', border: '#FBC02D', label: 'Yellow' },

@@ -1,12 +1,11 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
+import { Document, Page } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+import "@/lib/pdfWorker";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, FileText, Loader2 } from "lucide-react";
 import { convertToAfriSciURL } from "@/utils/afrisciLinks";
-
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function InlinePDFViewer({ fileUrl }) {
   const afrisciUrl = convertToAfriSciURL(fileUrl);
