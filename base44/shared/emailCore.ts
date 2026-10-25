@@ -17,7 +17,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   accent_color: "#F59E0B",
   logo_url: "",
   website_url: "https://afriscinexus.com",
-  default_editor_name: "Majok Wutchok",
+  default_editor_name: "Dr. Majok Wutchok, PhD",
   default_editor_title: "Chief Editor",
   signature_html:
     "<p>Kind regards,</p><p><strong>{{editor_name}}</strong><br>{{editor_title}}<br>AfriSci Nexus Editorial Office</p>",
@@ -29,8 +29,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
 // sample value for previews. `multiline` values keep their line breaks.
 export const VARIABLE_CATALOG = Object.freeze({
   recipient_name: { label: "Recipient name", sample: "Dr Amina Hassan" },
-  manuscript_title: { label: "Manuscript title", sample: "Climate-Resilient Maize Varieties in the Sahel: A Multi-Site Field Trial" },
-  manuscript_id: { label: "Manuscript ID", sample: "AJAE-2026-0142" },
+  manuscript_title: { label: "Manuscript title", sample: "Climate Resilient Maize Varieties in the Sahel: A Multi Site Field Trial" },
+  manuscript_id: { label: "Manuscript ID", sample: "AFS7A9AFDF4" },
   journal_name: { label: "Journal", sample: "AfriSci Journal of Agriculture and Environment" },
   submission_date: { label: "Submission date", sample: "12 September 2026" },
   decision_date: { label: "Decision date", sample: "23 October 2026", auto: "today" },
@@ -39,19 +39,28 @@ export const VARIABLE_CATALOG = Object.freeze({
   editor_comments: { label: "Editor comments", sample: "The manuscript is well written and addresses an important question.", multiline: true },
   reviewer_comments: { label: "Reviewer comments", sample: "Reviewer 1: Please clarify the sampling frame in Section 2.\nReviewer 2: The discussion would benefit from comparison with East African trials.", multiline: true },
   rejection_reason: { label: "Reason for decision", sample: "The scope of the study falls outside the aims of the journal.", multiline: true },
-  doi: { label: "DOI", sample: "10.67418/afrisci.2026.0142" },
+  doi: { label: "DOI", sample: "10.67418/afrisci.2026.7a9afdf4" },
   article_url: { label: "Article URL", sample: "https://afriscinexus.com/ManuscriptDetail?id=example" },
   proofs_url: { label: "Proofs URL", sample: "https://afriscinexus.com/MyManuscripts" },
   apc_amount: { label: "APC amount", sample: "USD 250" },
-  invoice_number: { label: "Invoice number", sample: "INV-2026-0388" },
+  invoice_number: { label: "Invoice number", sample: "INV20260388" },
   payment_link: { label: "Payment link", sample: "https://afriscinexus.com/MyManuscripts" },
   payment_due_date: { label: "Payment due date", sample: "6 November 2026" },
   amount_paid: { label: "Amount paid", sample: "USD 250" },
   role_name: { label: "Role", sample: "Associate Editor" },
   institution_name: { label: "Institution", sample: "University of Nairobi" },
   custom_message: { label: "Message", sample: "Thank you for getting in touch with AfriSci Nexus.", multiline: true },
-  editor_name: { label: "Editor name", sample: "Prof. Fatima Al-Zahra", auto: "editor" },
-  editor_title: { label: "Editor title", sample: "Editor-in-Chief", auto: "editor" },
+  missing_items: { label: "Missing items", sample: "A signed cover letter\nThe completed author declaration form", multiline: true },
+  formatting_issues: { label: "Changes needed", sample: "Please add line numbers to the main text.\nPlease supply figures as separate high resolution files.", multiline: true },
+  withdrawal_reason: { label: "Withdrawal reason", sample: "The authors wish to include additional field data.", multiline: true },
+  waiver_amount: { label: "Waiver granted", sample: "a full waiver (100 percent of the APC)" },
+  current_stage: { label: "Current stage", sample: "peer review" },
+  expected_timeline: { label: "Expected timeline", sample: "within the next three weeks" },
+  call_title: { label: "Call title", sample: "Climate Adaptation and Food Security in Africa" },
+  call_deadline: { label: "Submission deadline", sample: "31 January 2027" },
+  certificate_url: { label: "Certificate link", sample: "https://afriscinexus.com/VerifyCertificate" },
+  editor_name: { label: "Editor name", sample: "Dr. Majok Wutchok, PhD", auto: "editor" },
+  editor_title: { label: "Editor title", sample: "Chief Editor", auto: "editor" },
   portal_url: { label: "Portal URL", sample: "https://afriscinexus.com", auto: "website" },
 });
 
@@ -223,7 +232,7 @@ export function brandedLayout({ bodyHtml, subject = "", preheader = "", headerLa
     </td></tr>
     <tr><td class="em-pad" style="padding:6px 40px 30px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:1px solid #E2E8F0;padding-top:18px;font-family:${font};font-size:12px;line-height:1.7;color:#64748B;">
-        <strong style="color:#334155;">AfriSci Nexus</strong> · Open-access, peer-reviewed African research<br>
+        <strong style="color:#334155;">AfriSci Nexus</strong> · Open access, peer reviewed African research<br>
         ISSN (Online) 3079-4730 · Crossref DOI prefix 10.67418 · COPE member<br>
         ${escapeHtml(s.footer_address)}<br>
         ${link("/Home", "Website")} &nbsp;·&nbsp; ${link("/Submit", "Submit a manuscript")} &nbsp;·&nbsp; ${link("/MyManuscripts", "Track submission")} &nbsp;·&nbsp; ${link("/Contact", "Contact")}

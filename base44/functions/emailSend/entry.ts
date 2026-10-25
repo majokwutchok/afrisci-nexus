@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
     if (!String(p.subject || "").trim()) throw new HttpError(400, "Subject is required");
     if (!String(p.body_html || "").replace(/<[^>]+>/g, "").trim()) throw new HttpError(400, "Message body is empty");
     const variables = { ...(p.variables || {}) };
-    if (!variables.editor_name && user.full_name) variables.editor_name = user.full_name;
+    if (!variables.editor_name) variables.editor_name = settings.default_editor_name || user.full_name || "";
     if (!variables.recipient_name && to.length === 1 && to[0].name) variables.recipient_name = to[0].name;
     const composed = composeEmail({
       subject: p.subject,

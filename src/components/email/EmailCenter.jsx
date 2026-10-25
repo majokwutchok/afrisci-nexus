@@ -23,24 +23,22 @@ export default function EmailCenter({ defaultTab = "inbox" }) {
   const [composeKey, setComposeKey] = useState(0);
   const [openThreadId, setOpenThreadId] = useState(null);
 
-  const loadTemplates = useCallback(async () => {
-    let rows = await list(ENTITY.template, "name", 500).catch(() => []);
-    if (rows.length === 0) {
-      // First run: install the built-in branded templates.
+  const loadTemplates = useCallback(async (opts = {}) => {
+    if (opts.sync) {
+      // Install new built-in templates and refresh untouched ones; never overwrites admin edits.
       try {
-        await invoke("emailAdmin", { action: "seed_templates" });
-        rows = await list(ENTITY.template, "name", 500);
+        await invoke("emailAdmin", { action: "seed_templates", sync: true });
       } catch (e) {
         setToast({ kind: "error", text: `Couldn't install templates: ${e.message}` });
       }
     }
-    setTemplates(rows);
+    setTemplates(await list(ENTITY.template, "name", 500).catch(() => []));
   }, []);
   const loadSettings = useCallback(async () => setSettingsRecord(await loadSettingsRecord()), []);
 
   useEffect(() => {
     currentUser().then(setUser);
-    loadTemplates();
+    loadTemplates({ sync: true });
     loadSettings();
     (async () => {
       const set = new Set();
