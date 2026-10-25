@@ -1,0 +1,75 @@
+{
+  "name": "EmailSettings",
+  "type": "object",
+  "properties": {
+    "from_name": {
+      "type": "string",
+      "default": "AfriSci Nexus Editorial Office"
+    },
+    "from_email": {
+      "type": "string",
+      "format": "email",
+      "default": "editorial@afriscinexus.com"
+    },
+    "inbound_domain": {
+      "type": "string",
+      "default": "ulkudelook.resend.app",
+      "description": "Resend receiving domain (managed *.resend.app, or a custom subdomain whose MX points to Resend)"
+    },
+    "reply_local_part": {
+      "type": "string",
+      "default": "reply"
+    },
+    "fallback_reply_to": {
+      "type": "string"
+    },
+    "bcc_archive": {
+      "type": "string",
+      "description": "Optional address that gets a BCC copy of every outbound email"
+    },
+    "brand_color": {
+      "type": "string",
+      "default": "#1E40AF"
+    },
+    "accent_color": {
+      "type": "string",
+      "default": "#F59E0B"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "website_url": {
+      "type": "string",
+      "default": "https://afriscinexus.com"
+    },
+    "default_editor_name": {
+      "type": "string"
+    },
+    "default_editor_title": {
+      "type": "string"
+    },
+    "signature_html": {
+      "type": "string"
+    },
+    "footer_address": {
+      "type": "string"
+    },
+    "staff_roles": {
+      "type": "string",
+      "default": "admin",
+      "description": "Comma-separated user roles allowed to send"
+    }
+  },
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
