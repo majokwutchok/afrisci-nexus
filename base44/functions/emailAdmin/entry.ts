@@ -96,22 +96,30 @@ Deno.serve(async (req) => {
       }
 
       case "seed_templates": {
+        // Creates missing built-in templates. With { sync: true } it also refreshes
+        // built-ins nobody has edited (no last_edited_by), so improved defaults reach
+        // the live site without overwriting an admin's own wording.
+        // { overwrite: true } restores every built-in to its default.
         const existing = await listAll(db.EmailTemplate, "name", 500);
         const byKey = new Map(existing.map((t: any) => [t.key, t]));
-        let created = 0, restored = 0;
+        let created = 0, restored = 0, refreshed = 0;
         for (const t of DEFAULT_TEMPLATES) {
           const cur: any = byKey.get(t.key);
-          if (!cur) { await db.EmailTemplate.create(templateRecord(t)); created++; }
-          else if (p.overwrite) { await db.EmailTemplate.update(cur.id, { ...templateRecord(t), last_edited_by: user.email }); restored++; }
+          const rec = templateRecord(t);
+          if (!cur) { await db.EmailTemplate.create(rec); created++; continue; }
+          if (p.overwrite) { await db.EmailTemplate.update(cur.id, { ...rec, last_edited_by: user.email }); restored++; continue; }
+          const untouched = cur.is_system && !cur.last_edited_by;
+          const differs = ["name", "category", "description", "header_label", "subject", "body_html"].some((k) => (cur[k] ?? "") !== (rec[k] ?? ""));
+          if (p.sync && untouched && differs) { await db.EmailTemplate.update(cur.id, rec); refreshed++; }
         }
-        return json({ ok: true, created, restored, total: DEFAULT_TEMPLATES.length });
+        return json({ ok: true, created, restored, refreshed, total: DEFAULT_TEMPLATES.length });
       }
 
       case "reset_template": {
         const def = DEFAULT_TEMPLATES.find((t) => t.key === p.key);
         if (!def) throw new HttpError(404, "No built-in default for this template");
         const [cur] = await filterAll(db.EmailTemplate, { key: p.key }, "-updated_date", 1);
-        const data = { ...templateRecord(def), last_edited_by: user.email };
+        const data = { ...templateRecord(def), last_edited_by: "" };
         const saved = cur ? await db.EmailTemplate.update(cur.id, data) : await db.EmailTemplate.create(data);
         return json({ ok: true, template: saved });
       }

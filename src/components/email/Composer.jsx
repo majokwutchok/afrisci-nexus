@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Send, Eye, EyeOff, Paperclip, X, FileText, Save, BookmarkPlus, ChevronDown, ChevronUp, Link as LinkIcon, AlertTriangle, Search, Wand2 } from "lucide-react";
-import { composeEmail, extractVariables, renderString, withAutoVariables, VARIABLE_CATALOG, isValidEmail, parseAddress } from "@/lib/email/emailCore";
+import { composeEmail, extractVariables, renderString, withAutoVariables, VARIABLE_CATALOG, DEFAULT_SETTINGS, isValidEmail, parseAddress } from "@/lib/email/emailCore";
 import { TEMPLATE_CATEGORIES } from "@/lib/email/templates";
 import RichTextEditor from "./RichTextEditor";
 import { Button, EmailFrame, RecipientInput, inputClass } from "./ui";
@@ -75,7 +75,7 @@ export default function Composer({
     const autoName = to.length === 1 ? parseAddress(to[0]).name : "";
     const vars = { ...variables };
     if (!vars.recipient_name && autoName) vars.recipient_name = autoName;
-    if (!vars.editor_name && user?.full_name) vars.editor_name = user.full_name;
+    if (!vars.editor_name) vars.editor_name = (settings.default_editor_name || DEFAULT_SETTINGS.default_editor_name) || user?.full_name || "";
     return composeEmail({ subject, bodyHtml: body, variables: vars, settings, headerLabel });
   }, [subject, body, variables, settings, headerLabel, to, user]);
 
@@ -85,7 +85,7 @@ export default function Composer({
   // unused optional sections, so the admin can edit the final wording directly.
   function mergeFields() {
     const autoName = to.length === 1 ? parseAddress(to[0]).name : "";
-    const vars = withAutoVariables({ recipient_name: autoName, editor_name: user?.full_name, ...Object.fromEntries(Object.entries(variables).filter(([, v]) => v)) }, settings);
+    const vars = withAutoVariables({ recipient_name: autoName, editor_name: (settings.default_editor_name || DEFAULT_SETTINGS.default_editor_name) || user?.full_name, ...Object.fromEntries(Object.entries(variables).filter(([, v]) => v)) }, settings);
     setBody(renderString(body, vars, { html: true }).output);
     setSubject(renderString(subject, vars, { html: false }).output);
     setDirty(true);

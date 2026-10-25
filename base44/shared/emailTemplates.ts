@@ -4,15 +4,16 @@
 // These are the defaults seeded into the EmailTemplate entity. Admins can edit
 // any of them in the Email Center (Templates tab) at any time, and can also
 // edit the subject/body of an individual email before it is sent. "Reset to
-// default" restores the text below.
+// default" restores the text below. House style: no dashes in any wording.
 //
 // Syntax available in subject and body:
 //   {{variable}}                      value substitution (see VARIABLE_CATALOG)
 //   {{#if variable}}…{{else}}…{{/if}}   optional sections
-//   [button: Label | https://…]        branded call-to-action button
+//   [button: Label | https://…]        branded call to action button
 //   [box] … [/box]                    highlighted details panel
 
 const details = `[box]<p style="margin:0 0 4px;"><strong>Manuscript:</strong> {{manuscript_title}}</p><p style="margin:0 0 4px;"><strong>Manuscript ID:</strong> {{manuscript_id}}</p><p style="margin:0;"><strong>Journal:</strong> {{journal_name}}</p>[/box]`;
+const track = `[button: Track your submission | {{portal_url}}/MyManuscripts]`;
 
 export const DEFAULT_TEMPLATES = [
   // ------------------------------------------------------------ general
@@ -25,16 +26,88 @@ export const DEFAULT_TEMPLATES = [
     subject: "{{#if manuscript_id}}[{{manuscript_id}}] {{/if}}Message from AfriSci Nexus",
     body_html: `<p>Dear {{recipient_name}},</p><p>{{custom_message}}</p><p>Please do not hesitate to reply to this email if you have any questions.</p>`,
   },
+  {
+    key: "enquiry_acknowledgement",
+    name: "Enquiry received",
+    category: "general",
+    header_label: "Thank you for contacting us",
+    description: "Acknowledges a general enquiry and sets a response time.",
+    subject: "We have received your enquiry",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for contacting AfriSci Nexus. This is to confirm that we have received your message and a member of our editorial office will respond {{#if expected_timeline}}{{expected_timeline}}{{else}}within two working days{{/if}}.</p>{{#if custom_message}}<p>{{custom_message}}</p>{{/if}}<p>In the meantime, you may find answers to common questions in our author resources and submission guidelines.</p>[button: Visit author resources | {{portal_url}}/AuthorResources]`,
+  },
+  {
+    key: "account_creation_guide",
+    name: "How to create an author account",
+    category: "general",
+    header_label: "Getting started",
+    description: "Reply to an author asking how to register and upload a manuscript.",
+    subject: "How to create your AfriSci Nexus author account and submit a manuscript",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for your interest in publishing with AfriSci Nexus. Creating an author account is free and takes only a few minutes. Please follow the steps below.</p><ol><li><strong>Register.</strong> Visit our website and select <strong>Sign Up</strong>. You can register with your email address or your Google account. Please use an institutional email address if you have one.</li><li><strong>Verify your email.</strong> Follow the instructions in the verification email we send you to activate your account. Please check your spam or junk folder if it does not arrive within a few minutes.</li><li><strong>Complete your profile.</strong> Add your full name, affiliation, country and ORCID iD. A complete profile helps editors and readers identify your work.</li><li><strong>Submit your manuscript.</strong> Select <strong>Submit Article</strong>, choose the journal that best fits your research, and upload your manuscript file together with any figures and supplementary material.</li><li><strong>Track your submission.</strong> After submitting, you can follow every stage of the review from <strong>My Manuscripts</strong>.</li></ol>[button: Create your author account | {{portal_url}}/Apply?role=author]<p>Before submitting, please read our submission guidelines so that your manuscript is prepared in the required format.</p>[button: Read the submission guidelines | {{portal_url}}/Guidelines]<p>If you experience any difficulty, simply reply to this email and we will be glad to help.</p>`,
+  },
+  {
+    key: "account_login_help",
+    name: "Login and account help",
+    category: "general",
+    header_label: "Account support",
+    description: "Helps an author who cannot sign in or cannot find their submission.",
+    subject: "Help with signing in to your AfriSci Nexus account",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for letting us know that you are having trouble accessing your account. Please try the following:</p><ul><li>Sign in with the same method you used to register, either your email address or your Google account.</li><li>If you registered with an email address, select <strong>Forgot password</strong> on the sign in page to receive a reset link. Please check your spam or junk folder if it does not arrive.</li><li>Make sure you are using the email address under which your manuscript was submitted, as submissions are linked to that address.</li></ul>{{#if custom_message}}<p>{{custom_message}}</p>{{/if}}[button: Sign in to AfriSci Nexus | {{portal_url}}/MyManuscripts]<p>If you still cannot sign in, reply to this email with the address you registered with and we will look into it for you.</p>`,
+  },
+  {
+    key: "status_update",
+    name: "Manuscript status update",
+    category: "general",
+    header_label: "Submission status",
+    description: "Reply to an author asking about the progress of their manuscript.",
+    subject: "[{{manuscript_id}}] Update on the status of your manuscript",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for your enquiry about the progress of your manuscript.</p>${details}<p>Your manuscript is currently at the <strong>{{current_stage}}</strong> stage. We expect to be in touch with you {{#if expected_timeline}}{{expected_timeline}}{{else}}as soon as there is further news{{/if}}.</p>{{#if custom_message}}<p>{{custom_message}}</p>{{/if}}<p>We appreciate your patience. Careful peer review takes time, and we are committed to giving every manuscript a fair and thorough assessment.</p>${track}`,
+  },
+  {
+    key: "call_for_papers",
+    name: "Call for papers invitation",
+    category: "general",
+    header_label: "Call for papers",
+    description: "Invites a researcher to submit to a journal or special issue.",
+    subject: "Invitation to submit: {{call_title}}",
+    body_html: `<p>Dear {{recipient_name}},</p><p>On behalf of {{#if journal_name}}<strong>{{journal_name}}</strong>{{else}}AfriSci Nexus{{/if}}, I am pleased to invite you to submit your research to our call for papers on <strong>{{call_title}}</strong>.</p>[box]<p style="margin:0 0 4px;"><strong>Call:</strong> {{call_title}}</p>{{#if journal_name}}<p style="margin:0 0 4px;"><strong>Journal:</strong> {{journal_name}}</p>{{/if}}<p style="margin:0;"><strong>Submission deadline:</strong> {{call_deadline}}</p>[/box]<p>AfriSci Nexus is a fully open access, peer reviewed platform. Every article receives a DOI and is freely available to readers worldwide.</p>{{#if custom_message}}<p>{{custom_message}}</p>{{/if}}[button: Submit your manuscript | {{portal_url}}/Submit]<p>We would be delighted to consider your work.</p>`,
+  },
 
   // ------------------------------------------------------------ authors
+  {
+    key: "author_welcome",
+    name: "Welcome to new author",
+    category: "author",
+    header_label: "Welcome",
+    description: "Welcomes an author after they register an account.",
+    subject: "Welcome to AfriSci Nexus",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Welcome to AfriSci Nexus, and thank you for registering as an author. Your account is now active.</p><p>With your account you can:</p><ul><li>submit manuscripts to any of our open access journals,</li><li>follow the progress of each submission from <strong>My Manuscripts</strong>,</li><li>respond to reviewer comments and upload revised versions,</li><li>build your public author profile and showcase your published work.</li></ul><p>We recommend completing your profile with your affiliation and ORCID iD before your first submission.</p>[button: Submit your first manuscript | {{portal_url}}/Submit]<p>We look forward to publishing your research.</p>`,
+  },
   {
     key: "submission_received",
     name: "Submission received",
     category: "author",
     header_label: "Submission acknowledgement",
     description: "Confirms receipt of a new manuscript and explains next steps.",
-    subject: "[{{manuscript_id}}] Submission received – {{journal_name}}",
-    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for submitting your manuscript to <strong>{{journal_name}}</strong>. We confirm that it has been received{{#if submission_date}} on {{submission_date}}{{/if}} and has entered our editorial workflow.</p>${details}<p>Your manuscript will first undergo an editorial screening for scope, originality and adherence to our submission guidelines. If it passes screening, it will be sent for double-blind peer review. We aim to communicate an initial decision within four to six weeks.</p><p>You can follow the progress of your submission at any time from your author dashboard.</p>[button: Track your submission | {{portal_url}}/MyManuscripts]<p>Please quote your manuscript ID in all correspondence.</p>`,
+    subject: "[{{manuscript_id}}] Submission received by {{journal_name}}",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for submitting your manuscript to <strong>{{journal_name}}</strong>. We confirm that it has been received{{#if submission_date}} on {{submission_date}}{{/if}} and has entered our editorial workflow.</p>${details}<p>Your manuscript will first undergo an editorial screening for scope, originality and adherence to our submission guidelines. If it passes screening, it will be sent for double blind peer review. We aim to communicate an initial decision within four to six weeks.</p><p>You can follow the progress of your submission at any time from your author dashboard.</p>${track}<p>Please quote your manuscript ID in all correspondence.</p>`,
+  },
+  {
+    key: "missing_documents",
+    name: "Submission incomplete",
+    category: "author",
+    header_label: "Action required",
+    description: "Asks the author for missing files or information before screening.",
+    subject: "[{{manuscript_id}}] Additional documents needed for your submission",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for your submission to <strong>{{journal_name}}</strong>. Before we can begin the editorial assessment, we need the following items:</p>${details}[box]<p style="margin:0;">{{missing_items}}</p>[/box]<p>Please upload the items to your submission or reply to this email with them attached{{#if revision_deadline}} by <strong>{{revision_deadline}}</strong>{{/if}}. Your manuscript will remain on hold until we receive them.</p>${track}`,
+  },
+  {
+    key: "technical_check_return",
+    name: "Returned for formatting",
+    category: "author",
+    header_label: "Technical check",
+    description: "Returns a manuscript to the author for formatting corrections.",
+    subject: "[{{manuscript_id}}] Formatting changes needed before review",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for submitting your manuscript to <strong>{{journal_name}}</strong>. During our technical check we found a few points that need attention before the manuscript can be sent for peer review.</p>${details}<h2>Changes needed</h2><p>{{formatting_issues}}</p><p>Please make these changes and upload the corrected files{{#if revision_deadline}} by <strong>{{revision_deadline}}</strong>{{/if}}. This is not an editorial decision; it simply ensures your manuscript meets our submission guidelines.</p>[button: Read the submission guidelines | {{portal_url}}/Guidelines]${track}`,
   },
   {
     key: "under_review",
@@ -43,7 +116,7 @@ export const DEFAULT_TEMPLATES = [
     header_label: "Peer review update",
     description: "Tells the author the manuscript passed screening and is with reviewers.",
     subject: "[{{manuscript_id}}] Your manuscript is now under peer review",
-    body_html: `<p>Dear {{recipient_name}},</p><p>We are pleased to let you know that your manuscript has passed editorial screening and has now been sent to independent expert reviewers.</p>${details}<p>AfriSci Nexus operates a rigorous double-blind peer review process. We will contact you as soon as the reviewers' reports have been received and the handling editor has reached a decision.</p>[button: View submission status | {{portal_url}}/MyManuscripts]`,
+    body_html: `<p>Dear {{recipient_name}},</p><p>We are pleased to let you know that your manuscript has passed editorial screening and has now been sent to independent expert reviewers.</p>${details}<p>AfriSci Nexus operates a rigorous double blind peer review process. We will contact you as soon as the reviewers' reports have been received and the handling editor has reached a decision.</p>[button: View submission status | {{portal_url}}/MyManuscripts]`,
   },
   {
     key: "revision_minor",
@@ -52,7 +125,7 @@ export const DEFAULT_TEMPLATES = [
     header_label: "Editorial decision",
     description: "Decision: minor revisions, with reviewer comments and a deadline.",
     subject: "[{{manuscript_id}}] Decision: minor revisions required",
-    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for your submission to <strong>{{journal_name}}</strong>. Your manuscript has now been reviewed, and I am pleased to inform you that it is potentially acceptable for publication subject to <strong>minor revisions</strong>.</p>${details}{{#if editor_comments}}<h2>Editor's comments</h2><p>{{editor_comments}}</p>{{/if}}<h2>Reviewers' comments</h2><p>{{reviewer_comments}}</p><p>Please upload your revised manuscript together with a point-by-point response to each comment{{#if revision_deadline}} by <strong>{{revision_deadline}}</strong>{{/if}}. Changes in the manuscript should be highlighted.</p>[button: Submit your revision | {{portal_url}}/MyManuscripts]<p>We look forward to receiving your revised manuscript.</p>`,
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for your submission to <strong>{{journal_name}}</strong>. Your manuscript has now been reviewed, and I am pleased to inform you that it is potentially acceptable for publication subject to <strong>minor revisions</strong>.</p>${details}{{#if editor_comments}}<h2>Editor's comments</h2><p>{{editor_comments}}</p>{{/if}}<h2>Reviewers' comments</h2><p>{{reviewer_comments}}</p><p>Please upload your revised manuscript together with a point by point response to each comment{{#if revision_deadline}} by <strong>{{revision_deadline}}</strong>{{/if}}. Changes in the manuscript should be highlighted.</p>[button: Submit your revision | {{portal_url}}/MyManuscripts]<p>We look forward to receiving your revised manuscript.</p>`,
   },
   {
     key: "revision_major",
@@ -61,7 +134,25 @@ export const DEFAULT_TEMPLATES = [
     header_label: "Editorial decision",
     description: "Decision: major revisions, with reviewer comments and a deadline.",
     subject: "[{{manuscript_id}}] Decision: major revisions required",
-    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for submitting your manuscript to <strong>{{journal_name}}</strong>. The reviewers recognise the value of your work but have raised substantive points that need to be addressed. The editor has therefore decided that your manuscript requires <strong>major revisions</strong> before it can be considered further.</p>${details}{{#if editor_comments}}<h2>Editor's comments</h2><p>{{editor_comments}}</p>{{/if}}<h2>Reviewers' comments</h2><p>{{reviewer_comments}}</p><p>Please submit your revised manuscript with a detailed, point-by-point response to the reviewers{{#if revision_deadline}} by <strong>{{revision_deadline}}</strong>{{/if}}. The revised version may be returned to the original reviewers for further assessment.</p>[button: Submit your revision | {{portal_url}}/MyManuscripts]`,
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for submitting your manuscript to <strong>{{journal_name}}</strong>. The reviewers recognise the value of your work but have raised substantive points that need to be addressed. The editor has therefore decided that your manuscript requires <strong>major revisions</strong> before it can be considered further.</p>${details}{{#if editor_comments}}<h2>Editor's comments</h2><p>{{editor_comments}}</p>{{/if}}<h2>Reviewers' comments</h2><p>{{reviewer_comments}}</p><p>Please submit your revised manuscript with a detailed, point by point response to the reviewers{{#if revision_deadline}} by <strong>{{revision_deadline}}</strong>{{/if}}. The revised version may be returned to the original reviewers for further assessment.</p>[button: Submit your revision | {{portal_url}}/MyManuscripts]`,
+  },
+  {
+    key: "revision_reminder",
+    name: "Revision deadline reminder",
+    category: "author",
+    header_label: "Friendly reminder",
+    description: "Reminds an author that their revised manuscript is due.",
+    subject: "[{{manuscript_id}}] Reminder: your revised manuscript is due",
+    body_html: `<p>Dear {{recipient_name}},</p><p>This is a friendly reminder that we are expecting your revised manuscript{{#if revision_deadline}} by <strong>{{revision_deadline}}</strong>{{/if}}.</p>${details}<p>If you need more time to address the reviewers' comments, please reply to this email and let us know when you expect to resubmit. We are happy to agree a reasonable extension.</p>[button: Submit your revision | {{portal_url}}/MyManuscripts]`,
+  },
+  {
+    key: "revision_received",
+    name: "Revised manuscript received",
+    category: "author",
+    header_label: "Revision received",
+    description: "Confirms receipt of a revised manuscript.",
+    subject: "[{{manuscript_id}}] Revised manuscript received",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for submitting the revised version of your manuscript and your response to the reviewers.</p>${details}<p>The handling editor will now assess your revisions. Where needed, the revised manuscript may be returned to the reviewers. We will inform you of the decision as soon as it is reached.</p>${track}`,
   },
   {
     key: "accepted",
@@ -69,12 +160,21 @@ export const DEFAULT_TEMPLATES = [
     category: "author",
     header_label: "Editorial decision · Accepted",
     description: "Acceptance letter with next steps toward publication.",
-    subject: "[{{manuscript_id}}] Congratulations – your manuscript has been accepted",
-    body_html: `<p>Dear {{recipient_name}},</p><p>On behalf of the editorial board of <strong>{{journal_name}}</strong>, it is my great pleasure to inform you that your manuscript has been <strong>accepted for publication</strong>{{#if decision_date}} as of {{decision_date}}{{/if}}.</p>${details}{{#if editor_comments}}<p>{{editor_comments}}</p>{{/if}}<p><strong>What happens next</strong></p><ul><li>Our production team will prepare your article for typesetting and send you the proofs for checking.</li><li>A DOI under the Crossref prefix 10.67418 will be registered for your article.</li><li>Once published, your article will be freely available worldwide under our open-access policy.</li></ul>{{#if apc_amount}}<p>An article processing charge of <strong>{{apc_amount}}</strong> applies. You will receive a separate invoice with payment instructions.</p>{{/if}}<p>Congratulations once again, and thank you for choosing AfriSci Nexus to share your research.</p>[button: Go to your author dashboard | {{portal_url}}/MyManuscripts]`,
+    subject: "[{{manuscript_id}}] Congratulations, your manuscript has been accepted",
+    body_html: `<p>Dear {{recipient_name}},</p><p>On behalf of the editorial board of <strong>{{journal_name}}</strong>, it is my great pleasure to inform you that your manuscript has been <strong>accepted for publication</strong>{{#if decision_date}} as of {{decision_date}}{{/if}}.</p>${details}{{#if editor_comments}}<p>{{editor_comments}}</p>{{/if}}<p><strong>What happens next</strong></p><ul><li>Our production team will prepare your article for typesetting and send you the proofs for checking.</li><li>A DOI under the Crossref prefix 10.67418 will be registered for your article.</li><li>Once published, your article will be freely available worldwide under our open access policy.</li></ul>{{#if apc_amount}}<p>An article processing charge of <strong>{{apc_amount}}</strong> applies. You will receive a separate invoice with payment instructions.</p>{{/if}}<p>Congratulations once again, and thank you for choosing AfriSci Nexus to share your research.</p>[button: Go to your author dashboard | {{portal_url}}/MyManuscripts]`,
+  },
+  {
+    key: "copyright_agreement",
+    name: "Licence agreement request",
+    category: "author",
+    header_label: "Publishing agreement",
+    description: "Asks the corresponding author to confirm the open access licence agreement.",
+    subject: "[{{manuscript_id}}] Please confirm your publishing agreement",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Congratulations again on the acceptance of your manuscript. Before we can publish it, we need the corresponding author to confirm the publishing agreement.</p>${details}<p>AfriSci Nexus publishes under a Creative Commons Attribution licence (CC BY 4.0). You and your coauthors keep the copyright of your work, and readers may share and reuse it with proper citation.</p><p>Please confirm, on behalf of all authors, that the work is original, that all authors approve publication, and that you have permission to include any third party material.</p>[button: Review and confirm the agreement | {{portal_url}}/MyManuscripts]<p>You may also confirm by replying to this email with the words "I agree".</p>`,
   },
   {
     key: "rejected",
-    name: "Manuscript rejected (after review)",
+    name: "Manuscript rejected after review",
     category: "author",
     header_label: "Editorial decision",
     description: "Respectful rejection after peer review, including reviewer feedback.",
@@ -91,13 +191,22 @@ export const DEFAULT_TEMPLATES = [
     body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for considering <strong>{{journal_name}}</strong> for your manuscript.</p>${details}<p>Following an initial editorial assessment, we regret that we are unable to send your manuscript for external peer review.</p>{{#if rejection_reason}}<p><strong>Reason:</strong> {{rejection_reason}}</p>{{/if}}<p>Because this decision was made at screening, your manuscript is free to be submitted elsewhere immediately. You may also wish to consider one of our other journals that may be a closer fit.</p>[button: Browse AfriSci Nexus journals | {{portal_url}}/Journals]`,
   },
   {
+    key: "withdrawal_confirmation",
+    name: "Manuscript withdrawal confirmed",
+    category: "author",
+    header_label: "Withdrawal confirmed",
+    description: "Confirms that a manuscript has been withdrawn at the author's request.",
+    subject: "[{{manuscript_id}}] Confirmation of manuscript withdrawal",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Further to your request, we confirm that the following manuscript has been <strong>withdrawn</strong> from consideration by <strong>{{journal_name}}</strong>{{#if decision_date}} as of {{decision_date}}{{/if}}.</p>${details}{{#if withdrawal_reason}}<p><strong>Reason given:</strong> {{withdrawal_reason}}</p>{{/if}}<p>All editorial and review activity on this manuscript has stopped, and any reviewers involved have been informed. You are now free to submit the work elsewhere. No fees are payable for a manuscript withdrawn before acceptance.</p><p>Thank you for considering AfriSci Nexus. You are very welcome to submit this or future work to us at any time.</p>[button: Submit a new manuscript | {{portal_url}}/Submit]`,
+  },
+  {
     key: "proofs_ready",
     name: "Proofs ready for checking",
     category: "author",
     header_label: "Production",
     description: "Asks the author to check typeset proofs.",
     subject: "[{{manuscript_id}}] Your article proofs are ready",
-    body_html: `<p>Dear {{recipient_name}},</p><p>The typeset proofs of your accepted article are ready for your review.</p>${details}<p>Please check the proofs carefully for typesetting errors, author names and affiliations, tables, figures and references. Only essential corrections can be accepted at this stage.</p>[button: Review your proofs | {{proofs_url}}]<p>Please return your corrections{{#if revision_deadline}} by <strong>{{revision_deadline}}</strong>{{else}} within 3 working days{{/if}}.</p>`,
+    body_html: `<p>Dear {{recipient_name}},</p><p>The typeset proofs of your accepted article are ready for your review.</p>${details}<p>Please check the proofs carefully for typesetting errors, author names and affiliations, tables, figures and references. Only essential corrections can be accepted at this stage.</p>[button: Review your proofs | {{proofs_url}}]<p>Please return your corrections{{#if revision_deadline}} by <strong>{{revision_deadline}}</strong>{{else}} within three working days{{/if}}.</p>`,
   },
   {
     key: "published",
@@ -105,17 +214,35 @@ export const DEFAULT_TEMPLATES = [
     category: "author",
     header_label: "Now published",
     description: "Announces publication with DOI and article link.",
-    subject: "Your article is now published – {{journal_name}}",
+    subject: "Your article is now published in {{journal_name}}",
     body_html: `<p>Dear {{recipient_name}},</p><p>We are delighted to let you know that your article has been <strong>published</strong> in <strong>{{journal_name}}</strong> and is now freely available to readers worldwide.</p>[box]<p style="margin:0 0 4px;"><strong>Title:</strong> {{manuscript_title}}</p><p style="margin:0 0 4px;"><strong>DOI:</strong> <a href="https://doi.org/{{doi}}">https://doi.org/{{doi}}</a></p><p style="margin:0;"><strong>Journal:</strong> {{journal_name}}</p>[/box][button: Read your article | {{article_url}}]<p>To maximise the reach of your work, we encourage you to share the DOI link on your institutional profile, ORCID, Google Scholar and social media.</p><p>Thank you for publishing with AfriSci Nexus.</p>`,
   },
   {
+    key: "publication_certificate",
+    name: "Certificate of publication",
+    category: "author",
+    header_label: "Certificate of publication",
+    description: "Sends the author their certificate of publication.",
+    subject: "Your certificate of publication from AfriSci Nexus",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Congratulations on the publication of your article in <strong>{{journal_name}}</strong>. Please find your certificate of publication below.</p>[box]<p style="margin:0 0 4px;"><strong>Title:</strong> {{manuscript_title}}</p>{{#if doi}}<p style="margin:0 0 4px;"><strong>DOI:</strong> https://doi.org/{{doi}}</p>{{/if}}<p style="margin:0;"><strong>Journal:</strong> {{journal_name}}</p>[/box][button: Download your certificate | {{certificate_url}}]<p>Each certificate carries a unique code that anyone can check on our verification page, so you can include it with confidence in promotion, grant and award applications.</p>`,
+  },
+  {
     key: "apc_invoice",
-    name: "APC invoice / payment request",
+    name: "APC invoice and payment request",
     category: "author",
     header_label: "Article processing charge",
     description: "Requests payment of the article processing charge.",
-    subject: "[{{manuscript_id}}] Invoice {{invoice_number}} – article processing charge",
-    body_html: `<p>Dear {{recipient_name}},</p><p>Following the acceptance of your manuscript, please find below the details of the article processing charge (APC) that supports open-access publication.</p>[box]<p style="margin:0 0 4px;"><strong>Invoice:</strong> {{invoice_number}}</p><p style="margin:0 0 4px;"><strong>Manuscript:</strong> {{manuscript_title}} ({{manuscript_id}})</p><p style="margin:0 0 4px;"><strong>Amount due:</strong> {{apc_amount}}</p><p style="margin:0;"><strong>Due date:</strong> {{payment_due_date}}</p>[/box][button: Pay securely | {{payment_link}}]<p>If your institution holds an AfriSci Nexus partnership agreement, or if you wish to request a waiver, please reply to this email before the due date.</p>`,
+    subject: "[{{manuscript_id}}] Invoice {{invoice_number}} for the article processing charge",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Following the acceptance of your manuscript, please find below the details of the article processing charge (APC) that supports open access publication.</p>[box]<p style="margin:0 0 4px;"><strong>Invoice:</strong> {{invoice_number}}</p><p style="margin:0 0 4px;"><strong>Manuscript:</strong> {{manuscript_title}} ({{manuscript_id}})</p><p style="margin:0 0 4px;"><strong>Amount due:</strong> {{apc_amount}}</p><p style="margin:0;"><strong>Due date:</strong> {{payment_due_date}}</p>[/box][button: Pay securely | {{payment_link}}]<p>If your institution holds an AfriSci Nexus partnership agreement, or if you wish to request a waiver, please reply to this email before the due date.</p>`,
+  },
+  {
+    key: "apc_reminder",
+    name: "APC payment reminder",
+    category: "author",
+    header_label: "Payment reminder",
+    description: "Polite reminder that an APC invoice is still outstanding.",
+    subject: "[{{manuscript_id}}] Reminder: invoice {{invoice_number}} is awaiting payment",
+    body_html: `<p>Dear {{recipient_name}},</p><p>This is a friendly reminder that the article processing charge for your accepted manuscript has not yet been received.</p>[box]<p style="margin:0 0 4px;"><strong>Invoice:</strong> {{invoice_number}}</p><p style="margin:0 0 4px;"><strong>Manuscript:</strong> {{manuscript_title}} ({{manuscript_id}})</p><p style="margin:0 0 4px;"><strong>Amount due:</strong> {{apc_amount}}</p><p style="margin:0;"><strong>Due date:</strong> {{payment_due_date}}</p>[/box][button: Pay securely | {{payment_link}}]<p>Your article will move to publication as soon as payment is received. If you have already paid, please accept our thanks and disregard this message. If you are facing difficulty with payment, please reply and we will discuss the options available, including our waiver programme.</p>`,
   },
   {
     key: "payment_received",
@@ -123,8 +250,26 @@ export const DEFAULT_TEMPLATES = [
     category: "author",
     header_label: "Payment confirmation",
     description: "Confirms APC payment.",
-    subject: "[{{manuscript_id}}] Payment received – thank you",
+    subject: "[{{manuscript_id}}] Payment received, thank you",
     body_html: `<p>Dear {{recipient_name}},</p><p>Thank you. We confirm receipt of your payment of <strong>{{amount_paid}}</strong>{{#if invoice_number}} for invoice {{invoice_number}}{{/if}}.</p>${details}<p>Your article will now proceed through production. Please keep this email for your records.</p>`,
+  },
+  {
+    key: "waiver_approved",
+    name: "Fee waiver approved",
+    category: "author",
+    header_label: "Fee waiver",
+    description: "Confirms an APC waiver has been granted.",
+    subject: "[{{manuscript_id}}] Your fee waiver request has been approved",
+    body_html: `<p>Dear {{recipient_name}},</p><p>We are pleased to inform you that your request for a waiver of the article processing charge has been <strong>approved</strong>. You have been granted {{waiver_amount}}.</p>${details}<p>AfriSci Nexus is committed to ensuring that cost is never a barrier to sharing African research. {{#if apc_amount}}The remaining amount payable is <strong>{{apc_amount}}</strong>, and an updated invoice will follow.{{else}}No further payment is required and your article will proceed to production.{{/if}}</p>`,
+  },
+  {
+    key: "waiver_declined",
+    name: "Fee waiver declined",
+    category: "author",
+    header_label: "Fee waiver",
+    description: "Declines an APC waiver request courteously.",
+    subject: "[{{manuscript_id}}] Update on your fee waiver request",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for your request for a waiver of the article processing charge. After careful review against our fees and waiver policy, we are unable to grant a waiver on this occasion.</p>${details}{{#if rejection_reason}}<p>{{rejection_reason}}</p>{{/if}}<p>Your institution may hold, or be able to join, an AfriSci Nexus partnership that covers publishing costs for its authors. Please reply to this email if you would like to discuss payment arrangements.</p>[button: Read the fees and waiver policy | {{portal_url}}/FeesWaiverPolicy]`,
   },
 
   // ------------------------------------------------------------ reviewers
@@ -135,7 +280,7 @@ export const DEFAULT_TEMPLATES = [
     header_label: "Invitation to review",
     description: "Invites an expert to review a manuscript.",
     subject: "Invitation to review for {{journal_name}} [{{manuscript_id}}]",
-    body_html: `<p>Dear {{recipient_name}},</p><p>In view of your expertise, I would like to invite you to review the following manuscript submitted to <strong>{{journal_name}}</strong>.</p>${details}<p>We would be grateful to receive your report{{#if review_deadline}} by <strong>{{review_deadline}}</strong>{{/if}}. AfriSci Nexus operates double-blind peer review, and all manuscript content must be treated as confidential.</p>[button: Respond to this invitation | {{portal_url}}/Profile]<p>If you are unable to review, we would greatly appreciate suggestions of alternative reviewers. Thank you for supporting African scholarship.</p>`,
+    body_html: `<p>Dear {{recipient_name}},</p><p>In view of your expertise, I would like to invite you to review the following manuscript submitted to <strong>{{journal_name}}</strong>.</p>${details}<p>We would be grateful to receive your report{{#if review_deadline}} by <strong>{{review_deadline}}</strong>{{/if}}. AfriSci Nexus operates double blind peer review, and all manuscript content must be treated as confidential.</p>[button: Respond to this invitation | {{portal_url}}/Profile]<p>If you are unable to review, we would greatly appreciate suggestions of alternative reviewers. Thank you for supporting African scholarship.</p>`,
   },
   {
     key: "reviewer_reminder",
@@ -152,7 +297,7 @@ export const DEFAULT_TEMPLATES = [
     category: "reviewer",
     header_label: "With our thanks",
     description: "Thanks a reviewer after a completed report.",
-    subject: "Thank you for your review – {{manuscript_id}}",
+    subject: "Thank you for your review of {{manuscript_id}}",
     body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for completing your review of <em>{{manuscript_title}}</em> for <strong>{{journal_name}}</strong>. Your careful assessment is essential to maintaining the quality of research we publish.</p><p>Your contribution will be recorded on your AfriSci Nexus reviewer profile. We hope to call on your expertise again.</p>`,
   },
 
@@ -176,19 +321,28 @@ export const DEFAULT_TEMPLATES = [
     body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for your interest in joining AfriSci Nexus as a <strong>{{role_name}}</strong>. After careful review, we are unable to approve your application at this time.</p>{{#if rejection_reason}}<p>{{rejection_reason}}</p>{{/if}}<p>We encourage you to stay connected with our journals, and you are welcome to apply again in the future.</p>`,
   },
   {
+    key: "editorial_board_invitation",
+    name: "Editorial board invitation",
+    category: "editorial",
+    header_label: "Invitation",
+    description: "Invites a scholar to join a journal's editorial board.",
+    subject: "Invitation to join the editorial board of {{journal_name}}",
+    body_html: `<p>Dear {{recipient_name}},</p><p>In recognition of your scholarly standing, I am delighted to invite you to join the editorial board of <strong>{{journal_name}}</strong> as a <strong>{{role_name}}</strong>.</p><p>Board members help shape the direction of the journal, handle submissions in their field, recommend reviewers and champion high quality open access research from Africa and beyond. We are flexible about workload and will agree a level of involvement that suits you.</p>{{#if custom_message}}<p>{{custom_message}}</p>{{/if}}[button: Accept the invitation | {{portal_url}}/Apply?role=editor]<p>I would be glad to answer any questions you may have before deciding.</p>`,
+  },
+  {
     key: "partnership_reply",
     name: "Institutional partnership reply",
     category: "editorial",
     header_label: "Institutional partnership",
     description: "Response to an institutional partnership enquiry.",
-    subject: "AfriSci Nexus institutional partnership – {{institution_name}}",
-    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for {{institution_name}}'s interest in an institutional partnership with AfriSci Nexus.</p><p>Our partnership programme allows 10–50 affiliated authors to publish under a single annual agreement, with streamlined invoicing and dedicated editorial support.</p>{{#if custom_message}}<p>{{custom_message}}</p>{{/if}}[button: View partnership options | {{portal_url}}/InstitutionalPartnership]<p>We would be happy to arrange a short call to discuss your institution's needs.</p>`,
+    subject: "AfriSci Nexus institutional partnership for {{institution_name}}",
+    body_html: `<p>Dear {{recipient_name}},</p><p>Thank you for {{institution_name}}'s interest in an institutional partnership with AfriSci Nexus.</p><p>Our partnership programme allows 10 to 50 affiliated authors to publish under a single annual agreement, with streamlined invoicing and dedicated editorial support.</p>{{#if custom_message}}<p>{{custom_message}}</p>{{/if}}[button: View partnership options | {{portal_url}}/InstitutionalPartnership]<p>We would be happy to arrange a short call to discuss your institution's needs.</p>`,
   },
 ];
 
 export const TEMPLATE_CATEGORIES = [
   { value: "author", label: "Authors" },
   { value: "reviewer", label: "Reviewers" },
-  { value: "editorial", label: "Editorial & applications" },
+  { value: "editorial", label: "Editorial and applications" },
   { value: "general", label: "General" },
 ];

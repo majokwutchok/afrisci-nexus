@@ -27,9 +27,9 @@ export function correspondingAuthor(m) {
   return { name: a.name || "", email: a.email || m?.created_by || "" };
 }
 
-/** Short reference used in subjects, e.g. AFS-7A9AFDF4 (same id suffix the DOIs use). */
+/** Short reference used in subjects, e.g. AFS7A9AFDF4 (same id suffix the DOIs use). */
 export function manuscriptRef(m) {
-  return `AFS-${String(m?.id || "").slice(-8).toUpperCase()}`;
+  return `AFS${String(m?.id || "").slice(-8).toUpperCase()}`;
 }
 
 export function manuscriptVars(m, journalTitle = "", origin = "") {
