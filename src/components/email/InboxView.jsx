@@ -4,6 +4,11 @@ import { Badge, Button, EmailFrame, StatusBadge } from "./ui";
 import Composer from "./Composer";
 import { filter, invoke, list, remove, ENTITY, timeAgo, fullDate, displayName, subscribe } from "./api";
 
+// Conversations created before the has_inbound/has_outbound flags existed fall back to
+// their last message direction and unread count.
+export const hasInbound = (t) => t.has_inbound ?? (t.last_direction === "inbound" || (t.unread_count || 0) > 0);
+export const hasOutbound = (t) => t.has_outbound ?? t.last_direction === "outbound";
+
 const FOLDERS = [
   { key: "inbox", label: "Inbox", icon: Inbox },
   { key: "unread", label: "Unread", icon: MailOpen },
@@ -51,10 +56,10 @@ export default function InboxView({ templates, settings, user, suggestions, onTo
     const term = q.trim().toLowerCase();
     let rows = threads.filter((t) => {
       switch (folder) {
-        case "inbox": return t.status !== "archived";
+        case "inbox": return t.status !== "archived" && hasInbound(t);
         case "unread": return t.status !== "archived" && t.unread_count > 0;
         case "starred": return t.starred;
-        case "sent": return t.last_direction === "outbound" && t.status !== "archived";
+        case "sent": return hasOutbound(t);
         case "failed": return t.has_failed;
         case "archived": return t.status === "archived";
         default: return true;
@@ -112,7 +117,7 @@ export default function InboxView({ templates, settings, user, suggestions, onTo
                 <button type="button" aria-label="Delete draft" onClick={async () => { await remove(ENTITY.message, d.id); load(); }} className="opacity-0 group-hover:opacity-100"><Trash2 className="h-4 w-4 text-slate-400 hover:text-red-600" /></button>
               </div>
             ))
-          ) : loading ? <Empty text="Loading…" /> : shown.length === 0 ? <Empty text={q ? "No matches" : "Nothing here yet"} /> : shown.map((t) => {
+          ) : loading ? <Empty text="Loading…" /> : shown.length === 0 ? <Empty text={q ? "No matches" : folder === "inbox" ? "No received emails yet" : folder === "sent" ? "No sent emails yet" : "Nothing here yet"} /> : shown.map((t) => {
             const unread = t.unread_count > 0;
             const who = (t.participant_names || []).filter(Boolean).join(", ") || (t.participants || []).join(", ");
             return (
@@ -121,7 +126,7 @@ export default function InboxView({ templates, settings, user, suggestions, onTo
                 <div className="flex items-center gap-2">
                   {unread && <span className="h-2 w-2 shrink-0 rounded-full bg-blue-700" aria-label="Unread" />}
                   <span className={`flex-1 truncate text-sm ${unread ? "font-semibold text-slate-900" : "text-slate-700"}`}>
-                    {t.last_direction === "outbound" && <span className="text-slate-400">To: </span>}{who}
+                    {(folder === "sent" || !hasInbound(t)) && <span className="text-slate-400">To: </span>}{who}
                   </span>
                   {t.has_failed && <AlertCircle className="h-3.5 w-3.5 shrink-0 text-red-600" aria-label="Delivery problem" />}
                   {t.starred && <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />}
@@ -240,7 +245,7 @@ function ThreadView({ thread, templates, settings, user, suggestions, onBack, on
               />
             </div>
           ) : (
-            <Button variant="secondary" icon={Reply} onClick={() => setReplying(true)}>Reply</Button>
+            <Button variant="secondary" icon={Reply} disabled={messages === null} onClick={() => setReplying(true)}>Reply</Button>
           )}
         </div>
       </div>

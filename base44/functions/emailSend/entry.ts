@@ -104,6 +104,8 @@ Deno.serve(async (req) => {
         participant_names: [...to, ...cc].map((a) => a.name || ""),
         last_message_at: now,
         last_direction: "outbound",
+      has_outbound: true,
+        has_outbound: true,
         snippet: snippetFrom(composed.text),
         message_count: 0,
         unread_count: 0,
@@ -194,6 +196,7 @@ Deno.serve(async (req) => {
     await db.EmailThread.update(thread.id, {
       last_message_at: sentAt,
       last_direction: "outbound",
+      has_outbound: true,
       snippet: snippetFrom(composed.text),
       message_count: (thread.message_count || 0) + 1,
       participants: [...participants],
