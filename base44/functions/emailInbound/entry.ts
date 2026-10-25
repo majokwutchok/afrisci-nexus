@@ -147,6 +147,8 @@ async function handleReceived(base44: any, db: any, data: any) {
       participant_names: [from.name || ""],
       last_message_at: now,
       last_direction: "inbound",
+    has_inbound: true,
+      has_inbound: true,
       snippet: snippetFrom(text),
       message_count: 0,
       unread_count: 0,
@@ -189,6 +191,7 @@ async function handleReceived(base44: any, db: any, data: any) {
   await db.EmailThread.update(thread.id, {
     last_message_at: now,
     last_direction: "inbound",
+    has_inbound: true,
     snippet: snippetFrom(text),
     message_count: (thread.message_count || 0) + 1,
     unread_count: (thread.unread_count || 0) + 1,

@@ -32,6 +32,16 @@
         "outbound"
       ]
     },
+    "has_inbound": {
+      "type": "boolean",
+      "default": false,
+      "description": "Contains at least one received email (shown in Inbox)"
+    },
+    "has_outbound": {
+      "type": "boolean",
+      "default": false,
+      "description": "Contains at least one sent email (shown in Sent)"
+    },
     "snippet": {
       "type": "string"
     },
