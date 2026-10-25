@@ -1,84 +1,93 @@
 import React from 'react';
-import { Globe, ShieldCheck, TrendingUp, Edit } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { BookOpenCheck, Fingerprint, UserCheck, HandCoins, Activity, Route, ArrowRight } from 'lucide-react';
+import { createPageUrl } from '@/utils';
 
-const benefits = [
+// Every reason links to the page that backs it up.
+const REASONS = [
   {
-    icon: Globe,
-    title: "Global Visibility",
-    description: "Our open-access platform ensures your research reaches a worldwide audience, maximizing impact and citations.",
-    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=400&auto=format&fit=crop"
+    icon: BookOpenCheck,
+    title: 'Free to read, forever',
+    text: 'Every article is open access under a CC BY 4.0 licence. Anyone can read, share and build on your work, and you keep the copyright.',
+    link: { to: 'OpenAccess', label: 'Open access policy' },
   },
   {
-    icon: ShieldCheck,
-    title: "Rigorous Peer Review",
-    description: "Benefit from a thorough, fair, and constructive peer-review process conducted by experts in your field.",
-    image: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=400&auto=format&fit=crop"
+    icon: Fingerprint,
+    title: 'A DOI for every article',
+    text: 'Articles are registered with Crossref under our prefix 10.67418, so they are citable, discoverable and linked to the scholarly record.',
+    link: { to: 'Accreditations', label: 'Accreditations and indexing' },
   },
   {
-    icon: TrendingUp,
-    title: "Boost Your Profile",
-    description: "Publishing with us enhances your academic profile and connects you with a vibrant community of African researchers.",
-    image: "https://images.unsplash.com/photo-1528901166007-3784c7dd3653?q=80&w=400&auto=format&fit=crop"
+    icon: UserCheck,
+    title: 'Independent expert review',
+    text: 'Each manuscript is assessed by reviewers in its field, who typically report within 14 to 21 days. As a COPE member we follow its ethics guidance.',
+    link: { to: 'ReviewGuidelines', label: 'Peer review guidelines' },
   },
   {
-    icon: Edit,
-    title: "Author-Centric Support",
-    description: "From our AI-assisted submission process to post-publication support, we are dedicated to your success.",
-    image: "https://images.unsplash.com/photo-1531545514256-b1400bc00f31?q=80&w=400&auto=format&fit=crop"
+    icon: HandCoins,
+    title: 'Fair fees, with waivers',
+    text: 'Waivers and institutional partnerships mean cost is never a barrier, and a waiver never depends on the editorial decision.',
+    link: { to: 'FeesWaiverPolicy', label: 'Fees and waivers' },
   },
+  {
+    icon: Activity,
+    title: 'See your reach as it grows',
+    text: 'Views, full text reads, downloads, citations and reader countries update on your article page the moment they happen.',
+    link: { to: 'Publications', label: 'Browse published articles' },
+  },
+  {
+    icon: Route,
+    title: 'Follow every step',
+    text: 'Follow your manuscript through screening, review and publication in your author dashboard, from the day you submit.',
+    link: { to: 'MyManuscripts', label: 'Track a submission' },
+  },
+];
+
+const CREDENTIALS = [
+  ['ISSN (online)', '3079-4730'],
+  ['DOI prefix', '10.67418'],
+  ['Licence', 'CC BY 4.0'],
+  ['Ethics', 'COPE member'],
 ];
 
 export default function WhyNexus() {
   return (
-    <section className="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white py-20 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 20% 30%, #14B8A6 0%, transparent 50%),
-                           radial-gradient(circle at 80% 70%, #3B82F6 0%, transparent 50%),
-                           radial-gradient(circle at 40% 80%, #8B5CF6 0%, transparent 50%)`
-        }}></div>
-      </div>
-      
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Why Publish With AfriSci Nexus?</h2>
-          <p className="mt-4 max-w-2xl mx-auto text-blue-200">
-            We are committed to elevating African science through a platform built for visibility, quality, and author success.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {benefits.map((benefit, index) => (
-            <div key={index} className="group">
-              {/* Image Card */}
-              <div className="relative h-48 mb-6 overflow-hidden rounded-2xl">
-                <div 
-                  className="absolute inset-0 bg-cover bg-center transform group-hover:scale-110 transition-transform duration-500"
-                  style={{backgroundImage: `url(${benefit.image})`}}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                
-                {/* Icon Overlay */}
-                <div className="absolute bottom-4 left-4">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
-                    <benefit.icon className="w-7 h-7 text-white" />
-                  </div>
-                </div>
-              </div>
-              
-              {/* Content */}
-              <div className="text-center">
-                <h3 className="text-xl font-semibold mb-3 group-hover:text-teal-300 transition-colors duration-300">
-                  {benefit.title}
-                </h3>
-                <p className="text-blue-200 leading-relaxed">
-                  {benefit.description}
-                </p>
-              </div>
+    <section aria-labelledby="why-title" className="grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <div className="lg:sticky lg:top-8 lg:self-start">
+        <h2 id="why-title" className="text-3xl font-bold tracking-tight text-slate-900">Why publish with AfriSci Nexus?</h2>
+        <p className="mt-3 max-w-md text-[17px] leading-relaxed text-slate-600">
+          Open access research from Africa and beyond, built to be found, read and cited.
+        </p>
+
+        <dl className="mt-8 grid max-w-md grid-cols-2 gap-px overflow-hidden rounded-xl bg-slate-200 ring-1 ring-slate-200">
+          {CREDENTIALS.map(([label, value]) => (
+            <div key={label} className="bg-white px-4 py-3">
+              <dt className="text-xs text-slate-500">{label}</dt>
+              <dd className="mt-0.5 font-semibold tabular-nums text-slate-900">{value}</dd>
             </div>
           ))}
-        </div>
+        </dl>
+
+        <Link to={createPageUrl('Submit')}
+          className="mt-8 inline-flex items-center gap-2 rounded-lg bg-blue-800 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800">
+          Submit your manuscript <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
       </div>
+
+      <ul className="grid gap-x-8 gap-y-9 sm:grid-cols-2">
+        {REASONS.map(({ icon: Icon, title, text, link }) => (
+          <li key={title} className="flex flex-col">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-800 ring-1 ring-inset ring-blue-100">
+              <Icon className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <h3 className="mt-4 text-lg font-semibold text-slate-900">{title}</h3>
+            <p className="mt-1.5 flex-1 text-[15px] leading-relaxed text-slate-600">{text}</p>
+            <Link to={createPageUrl(link.to)} className="mt-3 w-fit text-sm font-medium text-blue-800 underline decoration-blue-200 underline-offset-4 hover:decoration-blue-800">
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
