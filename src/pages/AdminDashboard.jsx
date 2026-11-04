@@ -40,6 +40,7 @@ import ExecutiveBusinessCard from "../components/admin/ExecutiveBusinessCard";
 import BulkManuscriptActions from "../components/editor/BulkManuscriptActions";
 import PlatformAnalyticsDashboard from "../components/admin/PlatformAnalyticsDashboard";
 import EmailCenter from "../components/email/EmailCenter";
+import ArticleFilesLibrary from "../components/admin/ArticleFilesLibrary";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
   <Card className={`border-l-4 ${color} bg-white shadow-sm`}>
@@ -153,6 +154,7 @@ export default function AdminDashboard() {
           <TabsList className="flex flex-wrap gap-1 h-auto p-1">
             <TabsTrigger value="admin_profile" className="text-emerald-700 font-semibold">👤 My Admin Profiles</TabsTrigger>
             <TabsTrigger value="email_center" className="text-blue-800 font-semibold">✉️ Email Center</TabsTrigger>
+            <TabsTrigger value="article_files" className="text-blue-800 font-semibold">📄 Article Files</TabsTrigger>
             <TabsTrigger value="bulk_actions" className="text-blue-700 font-semibold">☑️ Bulk Actions</TabsTrigger>
             <TabsTrigger value="accelerator" className="text-amber-700 font-semibold">⚡ Manuscript Accelerator</TabsTrigger>
             <TabsTrigger value="oai_pmh" className="text-purple-700 font-semibold">📡 OAI-PMH Monitor</TabsTrigger>
@@ -182,6 +184,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="email_center" className="mt-6">
             <EmailCenter />
+          </TabsContent>
+
+          <TabsContent value="article_files" className="mt-6">
+            <ArticleFilesLibrary />
           </TabsContent>
 
           <TabsContent value="bulk_actions" className="mt-6">
