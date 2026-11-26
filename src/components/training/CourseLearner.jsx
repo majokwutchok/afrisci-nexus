@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle, Award, Loader2, ChevronDown, ChevronRight, Lock } from "lucide-react";
 import CourseQuiz from "./CourseQuiz";
+import { errStatus, errMessage, signIn } from "@/utils/authPrompt";
 
 export default function CourseLearner({ enrolmentId, courseId }) {
   const [course, setCourse] = useState(null);
@@ -19,6 +20,14 @@ export default function CourseLearner({ enrolmentId, courseId }) {
   const [certData, setCertData] = useState(null);
   const [issuing, setIssuing] = useState(false);
   const [error, setError] = useState(null);
+  const [authIssue, setAuthIssue] = useState(null); // "signin" | "wrong_account"
+
+  const handleAuthError = (e) => {
+    const st = errStatus(e);
+    if (st === 401) { setAuthIssue("signin"); return true; }
+    if (st === 403) { setAuthIssue("wrong_account"); return true; }
+    return false;
+  };
 
   useEffect(() => {
     (async () => {
@@ -27,7 +36,7 @@ export default function CourseLearner({ enrolmentId, courseId }) {
         setCourse(c);
         const res = await recordCourseProgress({ enrolment_id: enrolmentId, action: "get" });
         setProgress(res?.data || res);
-      } catch (e) {}
+      } catch (e) { handleAuthError(e); }
       setLoading(false);
     })();
   }, [enrolmentId, courseId]);
@@ -42,7 +51,7 @@ export default function CourseLearner({ enrolmentId, courseId }) {
     try {
       const res = await recordCourseProgress({ enrolment_id: enrolmentId, action: "complete_module", module_index: i });
       setProgress(res?.data || res);
-    } catch (e) {}
+    } catch (e) { if (!handleAuthError(e)) setError(errMessage(e, "Could not save progress.")); }
     setSaving(null);
   };
 
@@ -60,12 +69,28 @@ export default function CourseLearner({ enrolmentId, courseId }) {
         setCertData(data);
         generateCertificatePDF({ studentName: data.user_name, courseTitle: data.course_title, courseCode: data.course_code, certificateCode: data.certificate_code, issueDate: data.issue_date });
       } else throw new Error(data?.error || "Could not issue certificate.");
-    } catch (err) { setError(err?.message || "Could not issue certificate."); }
+    } catch (err) { if (!handleAuthError(err)) setError(errMessage(err, "Could not issue certificate.")); }
     setIssuing(false);
   };
 
   if (loading) return <Skeleton className="h-64 rounded-xl" />;
   if (!course) return <div className="text-sm text-slate-500">Course not found.</div>;
+
+  if (authIssue) {
+    return (
+      <div className="bg-white rounded-2xl border border-teal-200 shadow-lg p-6">
+        <h3 className="font-bold text-slate-900 text-lg">{course.title}</h3>
+        <p className="text-sm text-slate-600 mt-2">
+          {authIssue === "signin"
+            ? "Please sign in to continue your course. Use the same email address you enrolled with."
+            : "You're signed in with a different account from the one this enrolment belongs to. Sign out, then sign in with the email address you enrolled with."}
+        </p>
+        <Button onClick={() => signIn()} className="mt-4 bg-teal-600 hover:bg-teal-700 text-white">
+          {authIssue === "signin" ? "Sign in" : "Switch account"}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-teal-200 shadow-lg p-6">

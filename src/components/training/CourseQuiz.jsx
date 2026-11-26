@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { recordCourseProgress } from "@/functions/recordCourseProgress";
+import { errMessage } from "@/utils/authPrompt";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, XCircle, RotateCcw } from "lucide-react";
@@ -20,7 +21,7 @@ export default function CourseQuiz({ course, enrolmentId, onDone }) {
       const data = res?.data || res;
       setResult(data);
       if (data.quiz_passed) onDone(data);
-    } catch (err) { setError(err?.message || "Could not submit quiz."); }
+    } catch (err) { setError(errMessage(err, "Could not submit quiz.")); }
     setSubmitting(false);
   };
 
