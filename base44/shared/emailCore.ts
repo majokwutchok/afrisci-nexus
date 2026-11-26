@@ -354,7 +354,7 @@ function timingSafeEqual(a, b) {
 
 /** Signed per-thread token so replies thread reliably and can't be spoofed into other threads. */
 export async function makeThreadToken(threadId, secret) {
-  if (!secret) throw new Error("Email thread secret is not configured (set EMAIL_THREAD_SECRET or RESEND_WEBHOOK_SECRET)");
+  if (!secret) throw new Error("Email thread secret is not configured");
   const sig = bytesToHex(await hmac(new TextEncoder().encode(secret), `thread:${threadId}`)).slice(0, 10);
   return `${threadId}.${sig}`;
 }
