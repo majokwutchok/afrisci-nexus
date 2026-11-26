@@ -71,7 +71,9 @@ export async function requireStaff(base44, settings) {
 }
 
 export async function threadSecret() {
-  return (await getSecret("EMAIL_THREAD_SECRET")) || (await getSecret("RESEND_WEBHOOK_SECRET")) || "afrisci-nexus";
+  const s = (await getSecret("EMAIL_THREAD_SECRET")) || (await getSecret("RESEND_WEBHOOK_SECRET"));
+  if (!s) throw new HttpError(500, "Email thread secret is not configured (set EMAIL_THREAD_SECRET or RESEND_WEBHOOK_SECRET)");
+  return s;
 }
 
 // ------------------------------------------------------------ providers

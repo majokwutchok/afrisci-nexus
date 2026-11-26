@@ -53,7 +53,8 @@ export async function recordEvent(db, req, payload) {
   try { ms = await db.Manuscript.get(manuscriptId); } catch (_) { ms = null; }
   if (!ms || !PUBLIC_STATUSES.includes(ms.status)) return { ok: true, counted: false, reason: "not public" };
 
-  const salt = (await getSecret("ANALYTICS_SALT")) || "afrisci-nexus-readership";
+  const salt = await getSecret("ANALYTICS_SALT");
+  if (!salt) return { ok: false, status: 503, reason: "analytics not configured" };
   const visitor = String(payload?.visitor || "").slice(0, 80);
   const visitorHash = visitor ? (await sha256Hex(`${salt}:${visitor}`)).slice(0, 24) : "";
 
