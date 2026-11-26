@@ -24,6 +24,9 @@ export default async function(req) {
     if (manuscript_id) {
       try {
         const m = await base44.asServiceRole.entities.Manuscript.get(manuscript_id);
+        // Only attach a manuscript the caller owns (or any, for admins).
+        const owns = user?.role === 'admin' || (m && (m.created_by_id === user?.id || m.created_by === user?.email));
+        if (m && !owns) return Response.json({ error: 'Manuscript not found' }, { status: 404 });
         manuscript_title = m?.title || '';
       } catch { /* manuscript may not exist yet */ }
     }

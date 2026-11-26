@@ -20,6 +20,11 @@ export default async function(req) {
     const ts = sig.split(',').find(p => p.startsWith('t='))?.split('=')[1];
     const v1 = sig.split(',').find(p => p.startsWith('v1='))?.split('=')[1];
     if (!ts || !v1) return Response.json({ error: 'Invalid signature format' }, { status: 400 });
+    // Reject old signatures (5-minute tolerance, as Stripe's SDKs do) so captured events can't be replayed.
+    const tsNum = Number(ts);
+    if (!Number.isFinite(tsNum) || Math.abs(Date.now() / 1000 - tsNum) > 300) {
+      return Response.json({ error: 'Signature timestamp outside tolerance' }, { status: 400 });
+    }
 
     const enc = new TextEncoder();
     const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
