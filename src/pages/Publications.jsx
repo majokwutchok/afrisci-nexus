@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import DOMPurify from "dompurify";
 import PaginationBar from '../components/ui/PaginationBar';
 import SEO from '../components/SEO';
 import { base44 } from '@/api/base44Client';
@@ -112,7 +113,7 @@ function buildFullPDF(manuscript, journal) {
   if (manuscript.formatted_body) {
     doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
     const div = document.createElement("div");
-    div.innerHTML = manuscript.formatted_body;
+    div.innerHTML = DOMPurify.sanitize(manuscript.formatted_body || "");
     const bodyText = div.innerText || div.textContent || "";
     doc.setFont("times", "normal"); doc.setFontSize(11);
     const bodyLines = doc.splitTextToSize(bodyText, contentWidth);

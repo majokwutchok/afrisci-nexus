@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import DOMPurify from "dompurify";
 import { Bold, Italic, Underline, List, ListOrdered, Heading2, Link2, Unlink, Code2, Braces, MousePointerClick, SquareStack, Eraser } from "lucide-react";
 import { VARIABLE_CATALOG } from "@/lib/email/emailCore";
 
@@ -16,7 +17,7 @@ export default function RichTextEditor({ value, onChange, minHeight = 260, place
   useEffect(() => {
     if (source || !ref.current) return;
     if (value !== lastEmitted.current && ref.current.innerHTML !== value) {
-      ref.current.innerHTML = value || "";
+      ref.current.innerHTML = DOMPurify.sanitize(value || "");
       lastEmitted.current = value;
     }
   }, [value, source]);

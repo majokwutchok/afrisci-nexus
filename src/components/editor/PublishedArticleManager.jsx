@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import DOMPurify from "dompurify";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -60,7 +61,7 @@ export default function PublishedArticleManager({ manuscripts, onRefresh }) {
     // Populate editor after dialog opens
     setTimeout(() => {
       if (editorRef.current) {
-        editorRef.current.innerHTML = ms.formatted_body ||
+        editorRef.current.innerHTML = DOMPurify.sanitize(ms.formatted_body || "") ||
           `<h2 style="text-align:center">${ms.title || ""}</h2>
 <p style="text-align:center"><em>${ms.authors?.map(a => a.name).join(", ") || ""}</em></p>
 <hr/>
@@ -177,7 +178,7 @@ export default function PublishedArticleManager({ manuscripts, onRefresh }) {
       doc.line(margin, y, pageWidth - margin, y);
       y += 6;
       const div = document.createElement("div");
-      div.innerHTML = ms.formatted_body;
+      div.innerHTML = DOMPurify.sanitize(ms.formatted_body || "");
       const bodyText = div.innerText || div.textContent || "";
       doc.setFont("times", "normal");
       doc.setFontSize(11);

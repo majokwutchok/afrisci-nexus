@@ -188,7 +188,7 @@ export default function ManuscriptDetail() {
     if (ms.formatted_body) {
       doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
       const div = document.createElement("div");
-      div.innerHTML = ms.formatted_body;
+      div.innerHTML = DOMPurify.sanitize(ms.formatted_body || "");
       const bodyText = div.innerText || div.textContent || "";
       doc.setFont("times", "normal"); doc.setFontSize(11);
       const bodyLines = doc.splitTextToSize(bodyText, contentWidth);

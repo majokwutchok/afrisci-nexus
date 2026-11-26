@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import DOMPurify from "dompurify";
 import { useSearchParams, Link } from 'react-router-dom';
 import AfriSciLogo from '../components/brand/AfriSciLogo';
 import { createPageUrl } from '@/utils';
@@ -235,7 +236,7 @@ function downloadFullPDF(manuscript, journal) {
   if (manuscript.keywords?.length) { doc.setFont("times", "bold"); doc.text("Keywords: ", margin, y); doc.setFont("times", "italic"); doc.text(manuscript.keywords.join(", "), margin + 22, y); y += 8; }
   if (manuscript.formatted_body) {
     doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
-    const div = document.createElement("div"); div.innerHTML = manuscript.formatted_body;
+    const div = document.createElement("div"); div.innerHTML = DOMPurify.sanitize(manuscript.formatted_body || "");
     const bodyText = div.innerText || div.textContent || "";
     doc.setFont("times", "normal"); doc.setFontSize(11);
     doc.splitTextToSize(bodyText, contentWidth).forEach(l => { if (y > 268) { doc.addPage(); y = 22; } doc.text(l, margin, y); y += 6; });

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import DOMPurify from "dompurify";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -126,7 +127,7 @@ export default function ArticleFormatter({ manuscripts, journals = [], onRefresh
     doc.setFont("times", "normal");
     doc.setFontSize(11);
     const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = editorRef.current.innerHTML;
+    tempDiv.innerHTML = DOMPurify.sanitize(editorRef.current.innerHTML);
     const text = tempDiv.innerText || tempDiv.textContent || "";
     if (text.trim()) {
       doc.setDrawColor(150);
@@ -179,7 +180,7 @@ export default function ArticleFormatter({ manuscripts, journals = [], onRefresh
               setSelectedMs(ms || null);
               setTimeout(() => {
                 if (editorRef.current && ms) {
-                  editorRef.current.innerHTML = ms.formatted_body ||
+                  editorRef.current.innerHTML = DOMPurify.sanitize(ms.formatted_body || "") ||
                     `<h2>${ms.title || ""}</h2><p><em>${ms.authors?.map(a => a.name).join(", ") || ""}</em></p><hr/><h3>Abstract</h3><p>${ms.abstract || ""}</p><h3>Introduction</h3><p>Begin writing the article body here...</p>`;
                 }
               }, 50);

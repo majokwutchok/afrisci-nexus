@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import DOMPurify from "dompurify";
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -108,7 +109,7 @@ const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
     absLines.forEach(l => { if (y > 270) { doc.addPage(); y = margin; } doc.text(l, margin, y); y += 6; });
     if (manuscript.formatted_body) {
       y += 4; doc.setDrawColor(100); doc.line(margin, y, pageWidth - margin, y); y += 6;
-      const div = document.createElement("div"); div.innerHTML = manuscript.formatted_body;
+      const div = document.createElement("div"); div.innerHTML = DOMPurify.sanitize(manuscript.formatted_body || "");
       const bodyText = div.innerText || div.textContent || "";
       doc.setFont("times", "normal"); doc.setFontSize(11);
       const bodyLines = doc.splitTextToSize(bodyText, contentWidth);
