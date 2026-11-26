@@ -1,4 +1,5 @@
 import React from "react";
+import DOMPurify from "dompurify";
 import { jsPDF } from "jspdf";
 import { stampAfriSciNexus } from "@/utils/pdfStamp";
 import { Button } from "@/components/ui/button";
@@ -150,7 +151,7 @@ export default function ManuscriptPreviewModal({ manuscript, journal, onClose })
               <hr className="border-slate-200 mb-5" />
               <div
                 className="text-sm text-slate-700 leading-relaxed [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-2 [&_h2]:text-slate-900 [&_h3]:text-sm [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_p]:mb-3"
-                dangerouslySetInnerHTML={{ __html: `<p class="mb-3">${renderBodyHtml()}</p>` }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(`<p class="mb-3">${renderBodyHtml()}</p>`) }}
               />
             </div>
           ) : (

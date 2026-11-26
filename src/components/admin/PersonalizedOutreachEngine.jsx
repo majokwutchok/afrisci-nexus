@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import DOMPurify from "dompurify";
 import { base44 } from "@/api/base44Client";
 import { sendPersonalizedEmail } from "@/functions/sendPersonalizedEmail";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -130,7 +131,7 @@ function OutreachCard({ outreach, onApprove, onSend, onDelete, onEdit }) {
             To: {outreach.prospect_email} · Subject: {outreach.subject}
           </div>
           <div className="p-4 max-h-96 overflow-y-auto">
-            <div dangerouslySetInnerHTML={{ __html: outreach.body_html }} />
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(outreach.body_html || "") }} />
           </div>
         </div>
       )}

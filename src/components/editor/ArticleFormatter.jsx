@@ -149,7 +149,7 @@ export default function ArticleFormatter({ manuscripts, journals = [], onRefresh
   };
 
   const handlePrint = () => {
-    const content = editorRef.current?.innerHTML || "";
+    const content = DOMPurify.sanitize(editorRef.current?.innerHTML || "");
     const win = window.open("", "_blank");
     win.document.write(`<!DOCTYPE html><html><head>
       <title>${selectedMs?.title || "Article"}</title>
@@ -295,7 +295,7 @@ export default function ArticleFormatter({ manuscripts, journals = [], onRefresh
           <div
             className="prose max-w-none p-8 bg-white border rounded"
             style={{ fontFamily: "Times New Roman, serif", fontSize: "12pt", lineHeight: "1.8" }}
-            dangerouslySetInnerHTML={{ __html: editorRef.current?.innerHTML || "" }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(editorRef.current?.innerHTML || "") }}
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setPreviewOpen(false)}><X className="w-4 h-4 mr-1" />Close</Button>
