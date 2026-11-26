@@ -23,6 +23,7 @@ export function json(data, status = 200, extraHeaders = {}) {
 const rows = (r) => (Array.isArray(r) ? r : r?.items ?? []);
 const PUBLIC_STATUSES = ["published", "online_first"];
 const MS_FIELDS_COUNTERS = ["view_count", "read_count", "download_count", "citation_count"];
+const IP_CAP_PER_WINDOW = 25; // max counted events per article per network address per DEDUPE_MINUTES
 
 async function sha256Hex(text) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
@@ -56,7 +57,20 @@ export async function recordEvent(db, req, payload) {
   const salt = await getSecret("ANALYTICS_SALT");
   if (!salt) return { ok: false, status: 503, reason: "analytics not configured" };
   const visitor = String(payload?.visitor || "").slice(0, 80);
-  const visitorHash = visitor ? (await sha256Hex(`${salt}:${visitor}`)).slice(0, 24) : "";
+  if (!visitor) return { ok: true, counted: false, reason: "no visitor id" };
+  const visitorHash = (await sha256Hex(`${salt}:${visitor}`)).slice(0, 24);
+
+  // Cap how often one network address can move an article's counters (stops scripted inflation
+  // while still allowing many readers behind one university network).
+  const ip = (req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || (req.headers.get("x-forwarded-for") || "").split(",")[0] || "").trim();
+  const ipHash = ip ? (await sha256Hex(`${salt}:ip:${ip}`)).slice(0, 24) : "";
+  if (ipHash) {
+    const recent = rows(await db.ReadershipStats.filter({ manuscript_id: manuscriptId, ip_hash: ipHash }, "-created_date", IP_CAP_PER_WINDOW));
+    const oldest = recent[IP_CAP_PER_WINDOW - 1];
+    if (oldest && Date.now() - new Date(oldest.created_date).getTime() < DEDUPE_MINUTES * 60_000) {
+      return { ok: true, counted: false, reason: "rate limited", counts: pickCounts(ms) };
+    }
+  }
 
   // De-duplicate: the same reader repeating the same action on the same article within 30 minutes counts once.
   if (visitorHash) {
@@ -81,6 +95,7 @@ export async function recordEvent(db, req, payload) {
     device_type: deviceFromUA(ua),
     referrer_source: referrerSource(payload?.referrer),
     visitor_hash: visitorHash || null,
+    ip_hash: ipHash || null,
   });
 
   // Atomic server side increments (no lost updates when many readers arrive together).
