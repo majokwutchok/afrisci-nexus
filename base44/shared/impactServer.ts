@@ -122,9 +122,9 @@ export async function syncCitations(db, manuscripts, { budgetMs = 9000 } = {}) {
   const started = Date.now();
   const withDoi = manuscripts.filter((m) => normalizeDoi(m.doi));
   if (!withDoi.length) return { synced: 0 };
-  const openalexBase = (await getSecret("OPENALEX_API_BASE")) || "https://api.openalex.org";
-  const crossrefBase = (await getSecret("CROSSREF_API_BASE")) || "https://api.crossref.org";
-  const key = await getSecret("OPENALEX_API_KEY");
+  // Public APIs, used without keys (OpenAlex "polite pool" via mailto).
+  const openalexBase = "https://api.openalex.org";
+  const crossrefBase = "https://api.crossref.org";
   const mailto = "editorial@afriscinexus.com";
   const results = new Map(withDoi.map((m) => [m.id, { openalex: null, crossref: null, openalex_id: m.openalex_id || "", citing: null }]));
   const byDoi = new Map(withDoi.map((m) => [normalizeDoi(m.doi), m]));
@@ -132,7 +132,7 @@ export async function syncCitations(db, manuscripts, { budgetMs = 9000 } = {}) {
   // OpenAlex: one request for up to 100 DOIs
   for (let i = 0; i < withDoi.length; i += 100) {
     const chunk = withDoi.slice(i, i + 100).map((m) => normalizeDoi(m.doi));
-    const url = `${openalexBase}/works?filter=doi:${chunk.map(encodeURIComponent).join("|")}&select=id,doi,cited_by_count&per_page=100&mailto=${mailto}${key ? `&api_key=${key}` : ""}`;
+    const url = `${openalexBase}/works?filter=doi:${chunk.map(encodeURIComponent).join("|")}&select=id,doi,cited_by_count&per_page=100&mailto=${mailto}`;
     const t = withTimeout(5000);
     try {
       const r = await fetch(url, { signal: t.signal });
@@ -160,7 +160,7 @@ export async function syncCitations(db, manuscripts, { budgetMs = 9000 } = {}) {
     if (!r.openalex || !r.openalex_id || Date.now() - started > budgetMs) continue;
     const t = withTimeout(5000);
     try {
-      const res = await fetch(`${openalexBase}/works?filter=cites:${r.openalex_id}&select=id,authorships&per_page=200&mailto=${mailto}${key ? `&api_key=${key}` : ""}`, { signal: t.signal });
+      const res = await fetch(`${openalexBase}/works?filter=cites:${r.openalex_id}&select=id,authorships&per_page=200&mailto=${mailto}`, { signal: t.signal });
       if (res.ok) {
         const counts = {};
         for (const w of (await res.json()).results || []) {

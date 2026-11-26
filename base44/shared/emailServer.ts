@@ -53,9 +53,7 @@ export async function loadSettings(base44) {
   } catch (_) { /* entity may not exist yet */ }
   const clean = {};
   for (const [k, v] of Object.entries(record || {})) if (v !== null && v !== undefined && v !== "") clean[k] = v;
-  const envFrom = await getSecret("EMAIL_FROM");
   const settings = { ...DEFAULT_SETTINGS, ...clean };
-  if (envFrom && !clean.from_email) settings.from_email = envFrom;
   return { settings, record };
 }
 
@@ -65,32 +63,28 @@ export async function requireStaff(base44, settings) {
     user = await base44.auth.me();
   } catch (_) { /* not signed in */ }
   if (!user) throw new HttpError(401, "Sign in required");
-  const roles = String(settings.staff_roles || "admin").split(",").map((r) => r.trim().toLowerCase()).filter(Boolean);
+  // Admins are always staff. Settings may add only the editor role; the plain "user" role can never send.
+  const ALLOWED_EXTRA = ["editor"];
+  const roles = ["admin", ...String(settings.staff_roles || "").split(",").map((r) => r.trim().toLowerCase()).filter((r) => ALLOWED_EXTRA.includes(r))];
   if (!roles.includes(String(user.role || "").toLowerCase())) throw new HttpError(403, "Only editorial staff can use the email center");
   return user;
 }
 
 export async function threadSecret() {
-  const s = (await getSecret("EMAIL_THREAD_SECRET")) || (await getSecret("RESEND_WEBHOOK_SECRET"));
-  if (!s) throw new HttpError(500, "Email thread secret is not configured (set EMAIL_THREAD_SECRET or RESEND_WEBHOOK_SECRET)");
+  const s = await getSecret("RESEND_WEBHOOK_SECRET");
+  if (!s) throw new HttpError(500, "RESEND_WEBHOOK_SECRET is not configured");
   return s;
 }
 
 // ------------------------------------------------------------ providers
 
+// Email is sent through Resend; its key is the registered RESEND_API_KEY secret.
+const RESEND_API_BASE = "https://api.resend.com";
 async function providerConfig() {
-  const provider = ((await getSecret("EMAIL_PROVIDER")) || "resend").toLowerCase();
-  if (provider === "brevo") {
-    return {
-      provider,
-      apiKey: await getSecret("BREVO_API_KEY"),
-      base: (await getSecret("BREVO_API_BASE")) || "https://api.brevo.com",
-    };
-  }
   return {
     provider: "resend",
     apiKey: await getSecret("RESEND_API_KEY"),
-    base: (await getSecret("RESEND_API_BASE")) || "https://api.resend.com",
+    base: RESEND_API_BASE,
   };
 }
 
@@ -107,7 +101,7 @@ export async function providerStatus() {
 export async function sendViaProvider(msg) {
   const c = await providerConfig();
   if (!c.apiKey) {
-    throw new HttpError(500, c.provider === "brevo" ? "BREVO_API_KEY secret is not set" : "RESEND_API_KEY secret is not set");
+    throw new HttpError(500, "RESEND_API_KEY secret is not set");
   }
   if (c.provider === "brevo") {
     const body = {
@@ -157,8 +151,8 @@ export async function sendViaProvider(msg) {
 
 export async function resendGet(path) {
   const c = await providerConfig();
-  const apiKey = c.provider === "resend" ? c.apiKey : await getSecret("RESEND_API_KEY");
-  const base = c.provider === "resend" ? c.base : (await getSecret("RESEND_API_BASE")) || "https://api.resend.com";
+  const apiKey = c.apiKey;
+  const base = c.base;
   if (!apiKey) throw new HttpError(500, "RESEND_API_KEY secret is not set (needed to receive email)");
   const res = await fetch(`${base}${path}`, { headers: { authorization: `Bearer ${apiKey}` } });
   const data = await res.json().catch(() => ({}));
