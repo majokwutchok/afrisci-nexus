@@ -6,11 +6,16 @@ Deno.serve(async (req) => {
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { manuscript, journal } = await req.json();
+  const body = await req.json().catch(() => ({}));
+  const journal = body.journal;
+  const manuscriptId = body.manuscript?.id;
+  if (!manuscriptId) return Response.json({ error: 'manuscript.id is required' }, { status: 400 });
 
-  if (!manuscript?.id) return Response.json({ error: 'manuscript.id is required' }, { status: 400 });
+  // Authorize and build from the stored record, never from the copy the browser sent.
+  const manuscript = await base44.asServiceRole.entities.Manuscript.get(manuscriptId).catch((e) => (e?.status === 404 ? null : Promise.reject(e)));
+  if (!manuscript) return Response.json({ error: 'Manuscript not found' }, { status: 404 });
 
-  const isOwner = manuscript.created_by === user.email;
+  const isOwner = manuscript.created_by === user.email || (manuscript.created_by_id && manuscript.created_by_id === user.id);
   const isEditorOrAdmin = user.role === 'admin' || (user.editor_roles && user.editor_roles.length > 0);
   if (!isOwner && !isEditorOrAdmin) {
     return Response.json({ error: 'Forbidden: you do not have access to this manuscript' }, { status: 403 });
