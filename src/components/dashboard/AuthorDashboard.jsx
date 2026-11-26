@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { safeOpen } from "@/utils/safeUrl";
+import { safeOpen, safeHttpUrl } from "@/utils/safeUrl";
 import DOMPurify from "dompurify";
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -162,6 +162,10 @@ const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
 
   const handleSaveUrl = async () => {
     if (!manualUrl.trim()) return;
+    if (!/^https?:\/\//i.test(manualUrl.trim()) || !safeHttpUrl(manualUrl.trim())) {
+      alert('Please paste a full web link starting with https://');
+      return;
+    }
     setPdfUploading(true);
     try {
       await base44.entities.Manuscript.update(manuscript.id, {
