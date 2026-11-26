@@ -291,7 +291,7 @@ export default function Training() {
                   <h4 className="font-semibold text-slate-900">Enrol & pay</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div><Label>Full name *</Label><Input required value={form.user_name} onChange={e => setForm(f => ({ ...f, user_name: e.target.value }))} placeholder="As it should appear on the certificate" /></div>
-                    <div><Label>Email *</Label><Input required type="email" value={form.user_email} onChange={e => setForm(f => ({ ...f, user_email: e.target.value }))} placeholder="you@institution.edu" /></div>
+                    <div><Label>Email *</Label><Input required type="email" value={form.user_email} onChange={e => setForm(f => ({ ...f, user_email: e.target.value }))} placeholder="you@institution.edu" /><p className="text-xs text-slate-500 mt-1">You'll sign in with this email to take the course.</p></div>
                   </div>
                   {error && <p className="text-sm text-red-600">{error}</p>}
                   <DialogFooter>
