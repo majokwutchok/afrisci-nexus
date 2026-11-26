@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { getCourseMap, courseModuleCount, courseDurationHours, normalizeEmail } from '../../shared/courseLookup.ts';
 import { displayName } from '../../shared/learnerUtils.ts';
+import { currentUser } from '../../shared/authGuard.ts';
 
 // Public learner leaderboard. Ranks learners by a composite of assessment
 // scores and completed training hours. Email-based (public app, no login).
@@ -8,8 +9,9 @@ import { displayName } from '../../shared/learnerUtils.ts';
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json().catch(() => ({}));
-    const email = normalizeEmail(body.email || '');
+    // The top-10 board is public; the caller's own rank comes from their signed-in account only.
+    const user = await currentUser(base44);
+    const email = user ? normalizeEmail(user.email || '') : '';
 
     const enrolments = await base44.asServiceRole.entities.Enrolment.list('-created_date', 500);
 
