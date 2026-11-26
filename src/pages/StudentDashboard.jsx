@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getStudentDashboard } from "@/functions/getStudentDashboard";
 import { getStudentLeaderboard } from "@/functions/getStudentLeaderboard";
 import LeaderboardWidget from "@/components/training/LeaderboardWidget";
+import { getSignedInUser, signIn, errMessage } from "@/utils/authPrompt";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +16,7 @@ const STATUS_LABEL = { pending_payment: "Pending payment", active: "In progress"
 const pct = (a, b) => (b > 0 ? Math.round((a / b) * 100) : 0);
 
 export default function StudentDashboard() {
-  const [lookupEmail, setLookupEmail] = useState("");
+  const [account, setAccount] = useState(undefined); // undefined = checking, null = signed out
   const [items, setItems] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,9 +25,12 @@ export default function StudentDashboard() {
   const [lbLoading, setLbLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem("studentEmail");
-    if (saved) { setLookupEmail(saved); load(saved); }
-    loadLeaderboard(saved || "");
+    (async () => {
+      const u = await getSignedInUser();
+      setAccount(u);
+      if (u) load();
+      loadLeaderboard(u?.email || "");
+    })();
   }, []);
 
   const loadLeaderboard = async (em) => {
@@ -41,23 +45,15 @@ export default function StudentDashboard() {
     setLbLoading(false);
   };
 
-  const load = async (em) => {
+  const load = async () => {
     setLoading(true); setError(null);
     try {
-      const res = await getStudentDashboard({ email: em });
+      const res = await getStudentDashboard({});
       const data = res?.data || res;
       if (data?.error) throw new Error(data.error);
       setItems(data?.enrolments || []);
-      localStorage.setItem("studentEmail", em);
-    } catch (err) { setError(err?.message || "Could not load your courses."); setItems([]); }
+    } catch (err) { setError(errMessage(err, "Could not load your courses.")); setItems([]); }
     setLoading(false);
-  };
-
-  const submit = (e) => {
-    e.preventDefault();
-    if (!lookupEmail) return;
-    load(lookupEmail);
-    loadLeaderboard(lookupEmail);
   };
 
   const activeCourses = items?.filter(i => i.status === "active") || [];
@@ -72,21 +68,22 @@ export default function StudentDashboard() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <Badge className="bg-teal-500/20 text-teal-100 border border-teal-400/30 mb-3">AfriSci Nexus Discovery</Badge>
           <h1 className="text-3xl md:text-4xl font-extrabold mb-2">My Learning Dashboard</h1>
-          <p className="text-blue-100 max-w-2xl">Track your enrolled courses, module progress and assessment scores. Enter the email you used to enrol to view your learning.</p>
+          <p className="text-blue-100 max-w-2xl">Track your enrolled courses, module progress and assessment scores. Sign in with the email you used to enrol to view your learning.</p>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6 flex flex-col sm:flex-row sm:items-end gap-3">
-          <div className="flex-1">
-            <Label>Your enrolment email</Label>
-            <Input type="email" required value={lookupEmail} onChange={e => setLookupEmail(e.target.value)} placeholder="you@institution.edu" />
+        {account === null && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+            <p className="flex-1 text-sm text-slate-600">Sign in with the email address you enrolled with to see your courses, progress and scores.</p>
+            <Button onClick={() => signIn()} className="bg-teal-600 hover:bg-teal-700 text-white">
+              <BarChart3 className="w-4 h-4 mr-2" /> Sign in to view my courses
+            </Button>
           </div>
-          <Button type="submit" disabled={loading} className="bg-teal-600 hover:bg-teal-700 text-white">
-            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <BarChart3 className="w-4 h-4 mr-2" />}
-            View my courses
-          </Button>
-        </form>
+        )}
+        {account && (
+          <p className="text-sm text-slate-500 mb-4">Showing courses for <strong>{account.email}</strong></p>
+        )}
 
         {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 mb-6">{error}</div>}
 
@@ -101,7 +98,7 @@ export default function StudentDashboard() {
             {items.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
                 <GraduationCap className="w-14 h-14 mx-auto mb-3 text-slate-200" />
-                <p className="font-semibold text-slate-400 text-lg">No courses found for this email</p>
+                <p className="font-semibold text-slate-400 text-lg">No courses found for this account</p>
                 <p className="text-sm text-slate-400 mt-1">Enrol in a course to see your progress here.</p>
                 <Link to="/Training"><Button className="mt-4 bg-teal-600 hover:bg-teal-700 text-white">Browse courses</Button></Link>
               </div>
