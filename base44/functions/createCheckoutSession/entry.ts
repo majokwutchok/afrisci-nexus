@@ -1,9 +1,25 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
+import { requireUser, isAdmin } from '../../shared/authGuard.ts';
+
+// Only send Stripe's return links to our own site.
+function safeReturnUrl(value, fallback, origin) {
+  try {
+    if (!value) return fallback;
+    const u = new URL(value);
+    const host = u.hostname.replace(/^www\./, '');
+    const ok = u.protocol === 'https:' && (host === 'afriscinexus.com' || host.endsWith('.base44.app') || u.origin === origin);
+    return ok ? u.toString() : fallback;
+  } catch { return fallback; }
+}
 
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
+    // Memberships are bought by a signed-in account, for a subscription record that account created.
+    const gate = await requireUser(base44);
+    if (gate.response) return gate.response;
+    const user = gate.user;
     const key = secrets.get('STRIPE_SECRET_KEY');
     if (!key) return Response.json({ error: 'Stripe is not configured yet (missing STRIPE_SECRET_KEY)' }, { status: 503 });
 
@@ -14,6 +30,9 @@ export default async function(req) {
     let sub;
     try { sub = await base44.asServiceRole.entities.Subscription.get(subscription_id); } catch { return Response.json({ error: 'Subscription not found' }, { status: 404 }); }
     if (!sub) return Response.json({ error: 'Subscription not found' }, { status: 404 });
+    const ownsSub = isAdmin(user) || (sub.user_id && sub.user_id === user.id) || (sub.created_by_id && sub.created_by_id === user.id);
+    if (!ownsSub) return Response.json({ error: 'Subscription not found' }, { status: 404 });
+    if (sub.status === 'active') return Response.json({ error: 'This subscription is already active' }, { status: 409 });
 
     let plan;
     try { plan = await base44.asServiceRole.entities.Plan.get(sub.plan_id); } catch { return Response.json({ error: 'Plan not found' }, { status: 404 }); }
@@ -23,13 +42,14 @@ export default async function(req) {
     const isRecurring = plan.billing_interval === 'annual' || plan.billing_interval === 'monthly';
     const interval = plan.billing_interval === 'annual' ? 'year' : 'month';
     const origin = new URL(req.url).origin;
-    const success = (success_url && /^https?:\/\//.test(success_url)) ? success_url : `${origin}/InstitutionDashboard?stripe=success`;
-    const cancel = (cancel_url && /^https?:\/\//.test(cancel_url)) ? cancel_url : `${origin}/Memberships?stripe=canceled`;
+    const success = safeReturnUrl(success_url, `${origin}/InstitutionDashboard?stripe=success`, origin);
+    const cancel = safeReturnUrl(cancel_url, `${origin}/Memberships?stripe=canceled`, origin);
     const appId = Deno.env.get('BASE44_APP_ID') || '';
 
     const params = new URLSearchParams();
     params.append('mode', isRecurring ? 'subscription' : 'payment');
-    if (customer_email) params.append('customer_email', customer_email);
+    const email = user.email || customer_email;
+    if (email) params.append('customer_email', email);
     params.append('line_items[0][quantity]', '1');
     params.append('line_items[0][price_data][currency]', (plan.currency || 'USD').toLowerCase());
     params.append('line_items[0][price_data][unit_amount]', String(amount));
