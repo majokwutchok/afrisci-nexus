@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { getCourseMap, courseModuleCount, courseDurationHours, normalizeEmail } from '../../shared/courseLookup.ts';
 import { displayName } from '../../shared/learnerUtils.ts';
+import { currentUser, isAdmin } from '../../shared/authGuard.ts';
 
 // Institutional training summary. Aggregates cohort-linked enrolments per
 // institution into member progress + assessment scores, and ranks institutions
@@ -11,7 +12,10 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
-    const email = normalizeEmail(body.email || '');
+    // The public ranking needs no login. Member-level details are shown only to the
+    // institution's contact, identified by their signed-in account email (admins may look up any).
+    const user = await currentUser(base44);
+    const email = user ? normalizeEmail(isAdmin(user) && body.email ? body.email : user.email) : '';
 
     const cohorts = await base44.asServiceRole.entities.CourseCohort.list('-created_date', 500);
     const enrolments = await base44.asServiceRole.entities.Enrolment.list('-created_date', 500);

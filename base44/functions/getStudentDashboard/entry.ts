@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { requireUser, isAdmin } from '../../shared/authGuard.ts';
 import { getCourseMap, courseModuleCount, courseQuizCount } from '../../shared/courseLookup.ts';
 
 // Returns a student's enrolled courses with module progress and quiz scores.
@@ -7,9 +8,12 @@ import { getCourseMap, courseModuleCount, courseQuizCount } from '../../shared/c
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
+    // Learners see only their own courses: the email comes from the signed-in account.
+    const gate = await requireUser(base44);
+    if (gate.response) return gate.response;
     const body = await req.json().catch(() => ({}));
-    const email = (body.email || '').trim();
-    if (!email) return Response.json({ error: 'email is required' }, { status: 400 });
+    const email = (isAdmin(gate.user) && body.email ? String(body.email) : String(gate.user.email || '')).trim();
+    if (!email) return Response.json({ error: 'Your account has no email address' }, { status: 400 });
 
     const enrolments = await base44.asServiceRole.entities.Enrolment.filter({ user_email: email }, '-enrolled_at', 100);
 

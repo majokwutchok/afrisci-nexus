@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { requireUser } from '../../shared/authGuard.ts';
 
 // Lets a learner claim a prepaid seat in an institutional cohort using the
 // cohort code. Credit-free: only entity operations. Creates an active
@@ -6,11 +7,17 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
+    // Seats are claimed by a signed-in account; the seat is tied to that account's email.
+    const gate = await requireUser(base44);
+    if (gate.response) return gate.response;
     const body = await req.json().catch(() => ({}));
-    const { cohort_code, user_name, user_email } = body;
-    if (!cohort_code || !user_name || !user_email) {
-      return Response.json({ error: 'cohort_code, user_name and user_email are required' }, { status: 400 });
+    const cohort_code = String(body.cohort_code || '').trim();
+    const user_email = String(gate.user.email || '').trim().toLowerCase();
+    const user_name = String(body.user_name || gate.user.full_name || user_email).trim().slice(0, 120);
+    if (!cohort_code || cohort_code.length > 40) {
+      return Response.json({ error: 'A valid cohort code is required' }, { status: 400 });
     }
+    if (!user_email) return Response.json({ error: 'Your account has no email address' }, { status: 400 });
 
     const cohorts = await base44.asServiceRole.entities.CourseCohort.filter({ cohort_code }, '-created_date', 5);
     const cohort = (cohorts || [])[0];

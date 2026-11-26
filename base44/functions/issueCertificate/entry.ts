@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { requireUser, ownsEmail } from '../../shared/authGuard.ts';
 import { sendCertificateEmail } from '../../shared/sendCertificateEmail.ts';
 
 // Marks an enrolment completed and issues a verifiable certificate with a
@@ -14,6 +15,12 @@ export default async function(req) {
 
     let enrolment;
     try { enrolment = await base44.asServiceRole.entities.Enrolment.get(enrolment_id); } catch { return Response.json({ error: 'Enrolment not found' }, { status: 404 }); }
+    // Only the learner who owns this enrolment (signed in with its email) or an admin may use it.
+    const gate = await requireUser(base44);
+    if (gate.response) return gate.response;
+    if (!ownsEmail(gate.user, enrolment.user_email)) {
+      return Response.json({ error: 'This enrolment belongs to a different account. Please sign in with the email address you enrolled with.', wrong_account: true }, { status: 403 });
+    }
     if (enrolment.status !== 'active' && enrolment.status !== 'completed') {
       return Response.json({ error: 'Enrolment is not active (payment may still be processing)' }, { status: 400 });
     }
