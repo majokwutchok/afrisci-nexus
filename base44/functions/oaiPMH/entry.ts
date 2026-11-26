@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+// OAI-PMH 2.0 endpoint (public). Request echo is restricted to known verbs/arguments.
 const BATCH_SIZE = 100;
 const LOG_CAP = 30;
 
