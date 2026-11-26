@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 import { getInstitutionTrainingSummary } from "@/functions/getInstitutionTrainingSummary";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, Users, Clock, Star, Award, Search, Trophy, ArrowLeft } from "lucide-react";
 import InstitutionRankWidget from "@/components/training/InstitutionRankWidget";
+import { getSignedInUser, signIn, errMessage } from "@/utils/authPrompt";
 
 export default function InstitutionTraining() {
-  const [lookupEmail, setLookupEmail] = useState("");
+  const [account, setAccount] = useState(undefined); // undefined = checking, null = signed out
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,15 +18,18 @@ export default function InstitutionTraining() {
   const [searched, setSearched] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("institutionContactEmail");
-    if (saved) { setLookupEmail(saved); load(saved); }
-    else { loadRanking(""); }
+    (async () => {
+      const u = await getSignedInUser();
+      setAccount(u);
+      if (u) load();
+      else loadRanking();
+    })();
   }, []);
 
-  const loadRanking = async (em) => {
+  const loadRanking = async () => {
     setRankLoading(true);
     try {
-      const res = await getInstitutionTrainingSummary({ email: em || "" });
+      const res = await getInstitutionTrainingSummary({});
       const d = res?.data || res;
       if (d?.error) throw new Error(d.error);
       setRanking(d?.ranking || []);
@@ -35,23 +38,17 @@ export default function InstitutionTraining() {
     setRankLoading(false);
   };
 
-  const load = async (em) => {
+  const load = async () => {
     setLoading(true); setError(null); setSearched(true);
     try {
-      const res = await getInstitutionTrainingSummary({ email: em });
+      const res = await getInstitutionTrainingSummary({});
       const d = res?.data || res;
       if (d?.error) throw new Error(d.error);
       setRanking(d?.ranking || []);
       setData(d?.institution || null);
-      localStorage.setItem("institutionContactEmail", em);
-    } catch (err) { setError(err.message); }
+    } catch (err) { setError(errMessage(err, "Could not load your institution.")); }
     setLoading(false);
-  };
-
-  const submit = (e) => {
-    e.preventDefault();
-    if (!lookupEmail) return;
-    load(lookupEmail);
+    setRankLoading(false);
   };
 
   return (
@@ -73,18 +70,15 @@ export default function InstitutionTraining() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col sm:flex-row gap-3">
-          <Input
-            type="email"
-            placeholder="Enter the contact email used to purchase cohort seats"
-            value={lookupEmail}
-            onChange={e => setLookupEmail(e.target.value)}
-            className="flex-1"
-          />
-          <Button type="submit" disabled={loading} className="bg-teal-600 hover:bg-teal-700 text-white">
-            <Search className="w-4 h-4 mr-1" /> {loading ? "Loading..." : "View Progress"}
-          </Button>
-        </form>
+        {account === null && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col sm:flex-row sm:items-center gap-3">
+            <p className="flex-1 text-sm text-slate-600">Sign in with the contact email used to purchase cohort seats to see your members' progress.</p>
+            <Button onClick={() => signIn()} className="bg-teal-600 hover:bg-teal-700 text-white">
+              <Search className="w-4 h-4 mr-1" /> Sign in to view progress
+            </Button>
+          </div>
+        )}
+        {account && <p className="text-sm text-slate-500">Signed in as <strong>{account.email}</strong></p>}
 
         {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">{error}</div>}
 
@@ -99,7 +93,7 @@ export default function InstitutionTraining() {
 
         {!loading && !data && searched && !error && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-            No training cohorts found for this contact email. Ensure you used the email registered when purchasing cohort seats.
+            No training cohorts found for this account. Sign in with the contact email registered when purchasing cohort seats.
           </div>
         )}
 
