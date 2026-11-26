@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Printer } from "lucide-react";
@@ -16,7 +17,7 @@ export default function GalleyProofViewer({ proof, manuscript, journal, onClose 
   const handlePrint = () => {
     const printWindow = window.open("", "_blank", "width=900,height=700");
     if (!printWindow) return;
-    printWindow.document.write(`
+    const proofHtml = (`
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -313,6 +314,8 @@ export default function GalleyProofViewer({ proof, manuscript, journal, onClose 
   </div>
 </body>
 </html>`);
+    // Author-supplied fields (title, names, abstract…) are untrusted: sanitize the whole document.
+    printWindow.document.write("<!DOCTYPE html>" + DOMPurify.sanitize(proofHtml, { WHOLE_DOCUMENT: true }));
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => printWindow.print(), 600);
