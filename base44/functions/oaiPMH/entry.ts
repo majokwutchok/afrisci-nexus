@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const BATCH_SIZE = 100;
+const LOG_CAP = 30;
 
 async function logHarvesterRequest(base44, verb, params, recordsReturned, responseTimeMs, statusCode, error) {
   const ua = globalThis.requestHeaders?.get('user-agent') || 'Unknown';
@@ -9,15 +10,21 @@ async function logHarvesterRequest(base44, verb, params, recordsReturned, respon
                        ua.includes('CORE') ? 'CORE' : 
                        ua.includes('Googlebot') ? 'Google Scholar' : ua.split('/')[0];
   try {
+    // Throttle: at most LOG_CAP log rows per minute in total, so the public endpoint can't flood the table.
+    const recent = await base44.asServiceRole.entities.OAIRegistry.list('-created_date', LOG_CAP);
+    const list = Array.isArray(recent) ? recent : recent?.items ?? [];
+    const oldest = list[LOG_CAP - 1];
+    if (oldest && Date.now() - new Date(oldest.created_date).getTime() < 60_000) return;
+    const safeParams = Object.fromEntries(Object.entries(params || {}).slice(0, 10).map(([k, v]) => [String(k).slice(0, 40), String(v).slice(0, 200)]));
     await base44.asServiceRole.entities.OAIRegistry.create({
-      harvester_name: harvesterName,
-      verb,
-      user_agent: ua,
+      harvester_name: String(harvesterName || 'Unknown').slice(0, 100),
+      verb: ['Identify', 'ListMetadataFormats', 'GetRecord', 'ListRecords', 'ListIdentifiers'].includes(verb) ? verb : undefined,
+      user_agent: String(ua).slice(0, 300),
       records_returned: recordsReturned || 0,
       response_time_ms: responseTimeMs || 0,
       status_code: statusCode,
-      error: error || null,
-      request_params: params
+      error: error ? String(error).slice(0, 500) : null,
+      request_params: safeParams
     });
   } catch (e) {
     console.error('Failed to log harvester request:', e);
