@@ -85,7 +85,7 @@ export default function CourseLearner({ enrolmentId, courseId }) {
             ? "Please sign in to continue your course. Use the same email address you enrolled with."
             : "You're signed in with a different account from the one this enrolment belongs to. Sign out, then sign in with the email address you enrolled with."}
         </p>
-        <Button onClick={() => signIn()} className="mt-4 bg-teal-600 hover:bg-teal-700 text-white">
+        <Button onClick={() => (authIssue === "signin" ? signIn() : base44.auth.logout(window.location.href))} className="mt-4 bg-teal-600 hover:bg-teal-700 text-white">
           {authIssue === "signin" ? "Sign in" : "Switch account"}
         </Button>
       </div>
