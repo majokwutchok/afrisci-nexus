@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { safeOpen } from "@/utils/safeUrl";
 import DOMPurify from "dompurify";
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -176,12 +177,12 @@ const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
 
   const handlePreview = () => {
     if (manuscript.manuscript_file_url) {
-      window.open(manuscript.manuscript_file_url, '_blank');
+      safeOpen(manuscript.manuscript_file_url, '_blank');
     } else {
       const doc = buildPreviewPDF();
       const blob = doc.output('blob');
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
+      safeOpen(url, '_blank');
     }
   };
 

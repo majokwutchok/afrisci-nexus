@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { safeHttpUrl } from "@/utils/safeUrl";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -148,7 +149,7 @@ export default function ReviewForm({ manuscript, review, onSubmit, onCancel }) {
         <CardContent className="pt-0 space-y-3">
           <div className="flex gap-3">
             {manuscript.manuscript_file_url && (
-              <a href={manuscript.manuscript_file_url} target="_blank" rel="noreferrer" className="flex-1">
+              <a href={safeHttpUrl(manuscript.manuscript_file_url)} target="_blank" rel="noreferrer" className="flex-1">
                 <Button variant="outline" className="w-full" size="sm">
                   <Download className="w-4 h-4 mr-2" /> Download Manuscript
                 </Button>

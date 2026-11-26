@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { safeOpen } from "@/utils/safeUrl";
 import { Inbox, Send, Star, Archive, AlertCircle, FileEdit, Search, RefreshCw, ArrowLeft, Paperclip, Reply, MailOpen, ArchiveRestore, ChevronDown, ChevronRight, Download, ShieldCheck, Trash2 } from "lucide-react";
 import { Badge, Button, EmailFrame, StatusBadge } from "./ui";
 import Composer from "./Composer";
@@ -261,7 +262,7 @@ function MessageCard({ m, open, onToggle, onToast }) {
   async function download(a) {
     try {
       const r = await invoke("emailAdmin", { action: "attachment_url", message_id: m.id, attachment_id: a.id });
-      window.open(r.url, "_blank", "noopener");
+      safeOpen(r.url, "_blank", "noopener");
     } catch (e) {
       onToast?.({ kind: "error", text: e.message });
     }

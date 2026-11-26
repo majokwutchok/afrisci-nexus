@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { safeOpen } from "@/utils/safeUrl";
 import { X, Download, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { downloadPDF } from "@/utils/pdfOpen";
@@ -46,9 +47,9 @@ export default function PDFViewerModal({ url, title, filename, onClose }) {
 
   const handleOpenInNewTab = () => {
     if (url && !url.startsWith("data:")) {
-      window.open(url, "_blank", "noopener,noreferrer");
+      safeOpen(url, "_blank", "noopener,noreferrer");
     } else if (embedUrl) {
-      window.open(embedUrl, "_blank", "noopener,noreferrer");
+      safeOpen(embedUrl, "_blank", "noopener,noreferrer");
     }
   };
 

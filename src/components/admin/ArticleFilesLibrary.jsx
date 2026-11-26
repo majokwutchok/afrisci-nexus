@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { safeOpen } from "@/utils/safeUrl";
 import { FileText, FileType2, Download, Eye, Wand2, Search, RefreshCw, Loader2, Archive, Paperclip, History, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import {
@@ -95,9 +96,9 @@ export default function ArticleFilesLibrary() {
   async function preview(file) {
     if (file.url.startsWith("data:")) {
       const url = URL.createObjectURL(await blobOf(file));
-      window.open(url, "_blank", "noopener");
+      safeOpen(url, "_blank", "noopener");
       setTimeout(() => URL.revokeObjectURL(url), 5 * 60_000);
-    } else window.open(file.url, "_blank", "noopener");
+    } else safeOpen(file.url, "_blank", "noopener");
   }
 
   async function downloadOriginal(item, file) {

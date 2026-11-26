@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { safeHttpUrl } from "@/utils/safeUrl";
 import DOMPurify from "dompurify";
 import { base44 } from "@/api/base44Client";
 import { sendPersonalizedEmail } from "@/functions/sendPersonalizedEmail";
@@ -110,7 +111,7 @@ function OutreachCard({ outreach, onApprove, onSend, onDelete, onEdit }) {
               </Button>
             )}
             {outreach.linkedin_url && (
-              <a href={outreach.linkedin_url} target="_blank" rel="noopener noreferrer">
+              <a href={safeHttpUrl(outreach.linkedin_url)} target="_blank" rel="noopener noreferrer">
                 <Button size="sm" variant="outline" className="h-8 text-xs text-blue-700">
                   <Linkedin className="w-3.5 h-3.5" />
                 </Button>

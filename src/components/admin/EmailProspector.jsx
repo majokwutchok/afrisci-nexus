@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { safeHttpUrl } from "@/utils/safeUrl";
 import { base44 } from "@/api/base44Client";
 import { fetchProspectEmails } from "@/functions/fetchProspectEmails";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -315,7 +316,7 @@ export default function EmailProspector() {
                           <TableCell>
                             <div className="flex items-center gap-1">
                               {email.source_url && (
-                                <a href={email.source_url} target="_blank" rel="noopener noreferrer">
+                                <a href={safeHttpUrl(email.source_url)} target="_blank" rel="noopener noreferrer">
                                   <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600">
                                     <Globe className="w-3.5 h-3.5" />
                                   </Button>

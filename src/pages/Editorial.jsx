@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { safeHttpUrl } from "@/utils/safeUrl";
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -90,25 +91,25 @@ function EditorCard({ editor }) {
             <div className="mt-3 flex flex-wrap gap-2">
               {editor.orcid && <OrcidBadge orcid={editor.orcid} showVerified size="sm" />}
               {editor.google_scholar_url && (
-                <a href={editor.google_scholar_url} target="_blank" rel="noopener noreferrer"
+                <a href={safeHttpUrl(editor.google_scholar_url)} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2.5 py-0.5 hover:bg-blue-100 transition-colors">
                   <ExternalLink className="w-3 h-3" /> Scholar
                 </a>
               )}
               {editor.facebook_url && (
-                <a href={editor.facebook_url} target="_blank" rel="noopener noreferrer"
+                <a href={safeHttpUrl(editor.facebook_url)} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full px-2.5 py-0.5 hover:bg-indigo-100 transition-colors">
                   <Facebook className="w-3 h-3" /> Facebook
                 </a>
               )}
               {editor.linkedin_url && (
-                <a href={editor.linkedin_url} target="_blank" rel="noopener noreferrer"
+                <a href={safeHttpUrl(editor.linkedin_url)} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs bg-sky-50 text-sky-700 border border-sky-200 rounded-full px-2.5 py-0.5 hover:bg-sky-100 transition-colors">
                   <Linkedin className="w-3 h-3" /> LinkedIn
                 </a>
               )}
               {editor.x_url && (
-                <a href={editor.x_url} target="_blank" rel="noopener noreferrer"
+                <a href={safeHttpUrl(editor.x_url)} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs bg-slate-100 text-slate-700 border border-slate-300 rounded-full px-2.5 py-0.5 hover:bg-slate-200 transition-colors">
                   <Twitter className="w-3 h-3" /> X
                 </a>

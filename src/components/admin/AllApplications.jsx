@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { safeHttpUrl } from "@/utils/safeUrl";
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -68,19 +69,19 @@ function ApplicationCard({ app, isProcessing, onApprove, onDecline }) {
           )}
           <div className="flex flex-wrap gap-3">
             {app.cv_url && (
-              <a href={app.cv_url} target="_blank" rel="noreferrer"
+              <a href={safeHttpUrl(app.cv_url)} target="_blank" rel="noreferrer"
                 className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
                 <FileText className="w-3.5 h-3.5" /> View CV
               </a>
             )}
             {app.credentials_url && (
-              <a href={app.credentials_url} target="_blank" rel="noreferrer"
+              <a href={safeHttpUrl(app.credentials_url)} target="_blank" rel="noreferrer"
                 className="flex items-center gap-1.5 text-xs text-purple-600 hover:text-purple-700 font-medium bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-100">
                 <ExternalLink className="w-3.5 h-3.5" /> Credentials
               </a>
             )}
             {app.google_scholar_url && (
-              <a href={app.google_scholar_url} target="_blank" rel="noreferrer"
+              <a href={safeHttpUrl(app.google_scholar_url)} target="_blank" rel="noreferrer"
                 className="flex items-center gap-1.5 text-xs text-teal-600 hover:text-teal-700 font-medium bg-teal-50 px-3 py-1.5 rounded-lg border border-teal-100">
                 <ExternalLink className="w-3.5 h-3.5" /> Google Scholar
               </a>

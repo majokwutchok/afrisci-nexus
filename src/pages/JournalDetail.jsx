@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { safeHttpUrl } from "@/utils/safeUrl";
 import DOMPurify from "dompurify";
 import { useSearchParams, Link } from 'react-router-dom';
 import AfriSciLogo from '../components/brand/AfriSciLogo';
@@ -336,7 +337,7 @@ const EditorCard = ({ editor }) => (
         </div>
       )}
       {editor.google_scholar_url && (
-        <a href={editor.google_scholar_url} target="_blank" rel="noopener noreferrer"
+        <a href={safeHttpUrl(editor.google_scholar_url)} target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 hover:underline">
           <ExternalLink className="w-3 h-3" /> Google Scholar
         </a>

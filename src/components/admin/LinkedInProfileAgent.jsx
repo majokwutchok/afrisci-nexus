@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { safeHttpUrl } from "@/utils/safeUrl";
 import { base44 } from "@/api/base44Client";
 import { scrapeLinkedInProfiles } from "@/functions/scrapeLinkedInProfiles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -257,7 +258,7 @@ export default function LinkedInProfileAgent() {
                         <span className="text-slate-400">·</span>
                         <span className="text-slate-500 text-xs">{d.email}</span>
                         {d.linkedin_url && (
-                          <a href={d.linkedin_url} target="_blank" rel="noopener noreferrer"
+                          <a href={safeHttpUrl(d.linkedin_url)} target="_blank" rel="noopener noreferrer"
                             className="ml-auto text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1">
                             View <ExternalLink className="w-3 h-3" />
                           </a>
@@ -325,14 +326,14 @@ export default function LinkedInProfileAgent() {
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {p.linkedin_url && (
-                        <a href={p.linkedin_url} target="_blank" rel="noopener noreferrer">
+                        <a href={safeHttpUrl(p.linkedin_url)} target="_blank" rel="noopener noreferrer">
                           <Button size="sm" className="bg-blue-700 hover:bg-blue-800 text-white text-xs h-8">
                             <Linkedin className="w-3 h-3 mr-1" /> LinkedIn
                           </Button>
                         </a>
                       )}
                       {p.google_scholar_url && (
-                        <a href={p.google_scholar_url} target="_blank" rel="noopener noreferrer">
+                        <a href={safeHttpUrl(p.google_scholar_url)} target="_blank" rel="noopener noreferrer">
                           <Button size="sm" variant="outline" className="text-xs h-8">
                             <BookOpen className="w-3 h-3 mr-1" /> Scholar
                           </Button>

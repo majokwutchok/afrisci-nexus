@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { safeHttpUrl } from "@/utils/safeUrl";
 import { useSearchParams, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
@@ -118,7 +119,7 @@ export default function ResearchNewsArticle() {
         )}
 
         {post.external_url && (
-          <a href={post.external_url} target="_blank" rel="noopener noreferrer"
+          <a href={safeHttpUrl(post.external_url)} target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 mt-8 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors">
             Learn More <ExternalLink className="w-4 h-4" />
           </a>

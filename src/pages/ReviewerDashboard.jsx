@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { safeHttpUrl } from "@/utils/safeUrl";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -77,7 +78,7 @@ const ReviewCard = ({ manuscript, review, onStatusChange, onOpenForm }) => {
         {review.status === 'accepted' && (
           <div className="space-y-3">
             {manuscript.manuscript_file_url && (
-              <a href={manuscript.manuscript_file_url} target="_blank" rel="noreferrer">
+              <a href={safeHttpUrl(manuscript.manuscript_file_url)} target="_blank" rel="noreferrer">
                 <Button variant="outline" className="w-full">
                   <Download className="w-4 h-4 mr-2" /> Download Manuscript
                 </Button>

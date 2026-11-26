@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { safeOpen } from "@/utils/safeUrl";
 import { readFileAsDataUrl } from "@/utils/pdfUpload";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -103,7 +104,7 @@ function VersionCard({ version, isCurrent, onRestore, canRestore, restoring }) {
             size="sm"
             variant="outline"
             className="text-xs h-7"
-            onClick={() => window.open(version.file_url, "_blank")}
+            onClick={() => safeOpen(version.file_url, "_blank")}
           >
             <ExternalLink className="w-3 h-3 mr-1" /> View File
           </Button>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { safeOpen } from "@/utils/safeUrl";
 import { Manuscript } from "@/entities/Manuscript";
 import { Journal } from "@/entities/Journal";
 import { User } from "@/entities/User";
@@ -151,7 +152,7 @@ const ManuscriptCard = ({ manuscript, journal, onRefresh }) => {
             size="sm" 
             variant="ghost" 
             className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700"
-            onClick={() => window.open(manuscript.manuscript_file_url, '_blank')}
+            onClick={() => safeOpen(manuscript.manuscript_file_url, '_blank')}
           >
             <ExternalLink className="w-3 h-3" />
             Download

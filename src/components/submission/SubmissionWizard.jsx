@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { safeHttpUrl } from "@/utils/safeUrl";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -185,7 +186,7 @@ function Step2Files({ data, onChange }) {
           <div className="flex items-center gap-2 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700">
             <Check className="w-5 h-5 flex-shrink-0" />
             <span className="text-sm font-medium flex-1 truncate">{data.manuscript_file_url.startsWith('http') ? 'File linked' : 'File set'}</span>
-            <a href={data.manuscript_file_url} target="_blank" rel="noreferrer" className="text-xs text-emerald-600 underline mr-2">Preview</a>
+            <a href={safeHttpUrl(data.manuscript_file_url)} target="_blank" rel="noreferrer" className="text-xs text-emerald-600 underline mr-2">Preview</a>
             <button onClick={() => { onChange("manuscript_file_url", ""); setShowUrlInput(false); }} className="text-red-400 hover:text-red-600">
               <Trash2 className="w-4 h-4" />
             </button>
