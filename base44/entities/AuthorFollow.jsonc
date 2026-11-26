@@ -25,24 +25,7 @@
     },
     "followed_email": {
       "type": "string",
-      "description": "Email of the author being followed",
-      "rls": {
-        "read": {
-          "$or": [
-            {
-              "data.follower_email": "{{user.email}}"
-            },
-            {
-              "data.followed_email": "{{user.email}}"
-            },
-            {
-              "user_condition": {
-                "role": "admin"
-              }
-            }
-          ]
-        }
-      }
+      "description": "Email of the author being followed"
     },
     "followed_name": {
       "type": "string",
