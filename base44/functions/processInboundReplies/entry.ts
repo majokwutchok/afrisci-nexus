@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { requireAdmin } from '../../shared/authGuard.ts';
 
 function decodeBody(data) {
   if (!data) return '';
@@ -76,15 +77,12 @@ function analyzeSentiment(text, subject) {
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
-  const body = await req.json();
+  // Admin-only: called by the Gmail connector automation with the app owner's admin session.
+  const gate = await requireAdmin(base44).catch(() => ({ response: Response.json({ error: 'Auth check failed' }, { status: 503 }) }));
+  if (gate.response) return gate.response;
+  const body = await req.json().catch(() => ({}));
 
-  // Verify the caller is our own automation (shared secret), not a stranger hitting the public URL.
-  const SHARED_SECRET = "afrisci_inbound_replies_2026";
-  if (body.secret !== SHARED_SECRET) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const messageIds = body.data?.new_message_ids ?? [];
+  const messageIds = (Array.isArray(body.data?.new_message_ids) ? body.data.new_message_ids : []).slice(0, 50);
 
   if (!messageIds.length) {
     return Response.json({ skipped: true, reason: 'no new messages' });

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { requireAdmin } from '../../shared/authGuard.ts';
 
 function buildRawEmail({ to, subject, body }) {
   const message = [
@@ -20,13 +21,10 @@ function buildRawEmail({ to, subject, body }) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
-
-    // Verify the caller is our own automation (shared secret), not a stranger hitting the public URL.
-    const SHARED_SECRET = "afrisci_notify_subscribers_2026";
-    if (body.secret !== SHARED_SECRET) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Admin-only: entity automations / workflows run with the app owner's admin session.
+    const gate = await requireAdmin(base44);
+    if (gate.response) return gate.response;
+    const body = await req.json().catch(() => ({}));
 
     const { event, old_data } = body;
 
