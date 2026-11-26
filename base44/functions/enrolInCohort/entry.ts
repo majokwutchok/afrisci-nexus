@@ -31,14 +31,28 @@ export default async function(req) {
       return Response.json({ error: 'You are already enrolled in this cohort', enrolment_id: existing[0].id, already_enrolled: true }, { status: 409 });
     }
 
-    const enrolment = await base44.asServiceRole.entities.Enrolment.create({
+    // Claim a seat atomically: the increment only applies while seats remain, so concurrent
+    // requests can never take more seats than were purchased.
+    const purchased = Number(cohort.seats_purchased) || 0;
+    const claim = await base44.asServiceRole.entities.CourseCohort.updateMany(
+      { id: cohort.id, $or: [{ seats_used: { $lt: purchased } }, { seats_used: null }] },
+      { $inc: { seats_used: 1 } }
+    );
+    if (!claim?.updated) return Response.json({ error: 'All seats in this cohort have been claimed' }, { status: 400 });
+
+    let enrolment;
+    try {
+    enrolment = await base44.asServiceRole.entities.Enrolment.create({
       course_id: cohort.course_id, course_code: cohort.course_code, course_title: cohort.course_title,
       user_name, user_email, amount: 0, currency: cohort.currency || 'USD',
       status: 'active', payment_provider: 'cohort', enrolled_at: new Date().toISOString(),
       cohort_id: cohort.id, cohort_code: cohort.cohort_code
     });
-
-    await base44.asServiceRole.entities.CourseCohort.updateMany({ id: cohort.id }, { $inc: { seats_used: 1 } });
+    } catch (e) {
+      // Give the seat back if the enrolment could not be created.
+      await base44.asServiceRole.entities.CourseCohort.updateMany({ id: cohort.id }, { $inc: { seats_used: -1 } }).catch(() => {});
+      throw e;
+    }
 
     return Response.json({ enrolment_id: enrolment.id, course_id: cohort.course_id, course_title: cohort.course_title, course_code: cohort.course_code });
   } catch (error) {

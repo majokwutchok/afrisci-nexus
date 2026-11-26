@@ -123,7 +123,7 @@ export default function NewsSection() {
 
   return (
     <section aria-labelledby="news-title">
-      {structuredData && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />}
+      {structuredData && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />}
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <div>
           <h2 id="news-title" className="text-3xl font-bold tracking-tight text-slate-900">News and announcements</h2>

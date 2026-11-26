@@ -229,9 +229,10 @@ export async function buildImpact(db, { force = false } = {}) {
 
   const manuscripts = rows(await db.Manuscript.filter({ status: { $in: PUBLIC_STATUSES } }, "-publication_date", 2000));
 
-  // Refresh citations at most every 12 hours.
+  // Citation refresh (writes to Manuscript) runs only on an admin-forced call, e.g. the
+  // scheduled "Refresh citations" workflow, never on anonymous public traffic.
   const syncMeta = await getMeta(db, "citations_sync");
-  if (force || !syncMeta || Date.now() - new Date(syncMeta.computed_at).getTime() > CITATION_TTL_HOURS * 3600_000) {
+  if (force) {
     try {
       const r = await syncCitations(db, manuscripts);
       await setMeta(db, "citations_sync", syncMeta, r);
