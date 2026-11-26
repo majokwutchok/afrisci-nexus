@@ -7,8 +7,6 @@ import { getSignedInUser, signIn, errMessage } from "@/utils/authPrompt";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GraduationCap, BarChart3, Award, CheckCircle, XCircle, Loader2, BookOpen, Trophy, ArrowRight } from "lucide-react";
 
