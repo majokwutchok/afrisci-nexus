@@ -52,6 +52,7 @@ export default function Training() {
     getSignedInUser().then(u => {
       setAccount(u);
       if (u?.full_name) setJoinForm(f => (f.join_name ? f : { ...f, join_name: u.full_name }));
+      if (u) setForm(f => ({ user_name: f.user_name || u.full_name || "", user_email: f.user_email || u.email || "" }));
     });
     base44.entities.Course.filter({ is_active: true }, "sort_order", 50)
       .then(setCourses).catch(() => setCourses([])).finally(() => setLoading(false));
