@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { requireAdmin } from '../../shared/authGuard.ts';
 
 function buildRawEmail({ to, subject, body }) {
   const message = [
@@ -19,7 +20,11 @@ function buildRawEmail({ to, subject, body }) {
 
 Deno.serve(async (req) => {
   try {
-    const { email, name, confirmationToken } = await req.json();
+    // Admin-only: subscriber records (and their tokens) can be created by anyone, so a token
+    // match alone must never let an anonymous caller make the site send email.
+    const gate = await requireAdmin(createClientFromRequest(req));
+    if (gate.response) return gate.response;
+    const { email, name, confirmationToken } = await req.json().catch(() => ({}));
 
     if (!email || !confirmationToken) {
       return Response.json({ error: 'Missing email or confirmation token' }, { status: 400 });
@@ -42,6 +47,10 @@ Deno.serve(async (req) => {
     // This prevents the endpoint from acting as an open mail relay.
     if (subscribers.length === 0) {
       return Response.json({ success: false, message: 'Invalid email or confirmation token' });
+    }
+
+    if (subscribers[0].is_confirmed) {
+      return Response.json({ success: true, message: 'Already confirmed', email_sent: false });
     }
 
     await base44.asServiceRole.entities.NewsletterSubscriber.update(subscribers[0].id, {
