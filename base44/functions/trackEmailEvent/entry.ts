@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { verifyTracking } from '../../shared/emailTracking.ts';
 
 // Transparent 1x1 GIF for open tracking pixel
 const PIXEL = new Uint8Array([
@@ -12,8 +13,10 @@ Deno.serve(async (req) => {
   const email = url.searchParams.get('email');
   const link_url = url.searchParams.get('url');
 
-  // No auth needed — this is called by email clients
-  if (campaign_id && email && event) {
+  // Called by email clients, so there is no login. Only links we signed (see shared/emailTracking.ts) are counted.
+  const signed = !!(campaign_id && email && (event === 'open' || event === 'click')) &&
+    await verifyTracking({ event, campaign_id, email: decodeURIComponent(email), url: link_url ? decodeURIComponent(link_url) : '' }, url.searchParams.get('sig') || '');
+  if (signed) {
     const base44 = createClientFromRequest(req);
 
     // Log event (fire and forget — don't await to keep response fast)
