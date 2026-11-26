@@ -4,11 +4,45 @@
   "properties": {
     "follower_email": {
       "type": "string",
-      "description": "Email of the user who is following"
+      "description": "Email of the user who is following",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "data.follower_email": "{{user.email}}"
+            },
+            {
+              "data.followed_email": "{{user.email}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "followed_email": {
       "type": "string",
-      "description": "Email of the author being followed"
+      "description": "Email of the author being followed",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "data.follower_email": "{{user.email}}"
+            },
+            {
+              "data.followed_email": "{{user.email}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "followed_name": {
       "type": "string",

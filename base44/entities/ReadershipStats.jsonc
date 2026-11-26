@@ -85,10 +85,6 @@
     "visitor_hash": {
       "type": "string",
       "description": "Anonymous salted hash of the reader's browser id, used only to avoid counting repeat refreshes"
-    },
-    "ip_hash": {
-      "type": "string",
-      "description": "Anonymous salted hash of the reader's network address, used only to cap repeated counting"
     }
   },
   "required": [

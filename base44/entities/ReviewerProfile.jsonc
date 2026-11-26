@@ -82,7 +82,23 @@
     },
     "notes": {
       "type": "string",
-      "description": "Internal editor notes about this reviewer"
+      "description": "Internal editor notes about this reviewer",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            },
+            {
+              "user_condition": {
+                "role": "editor"
+              }
+            }
+          ]
+        }
+      }
     }
   },
   "required": [

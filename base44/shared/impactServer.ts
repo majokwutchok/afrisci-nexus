@@ -65,7 +65,7 @@ export async function recordEvent(db, req, payload) {
   const ip = (req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || (req.headers.get("x-forwarded-for") || "").split(",")[0] || "").trim();
   const ipHash = ip ? (await sha256Hex(`${salt}:ip:${ip}`)).slice(0, 24) : "";
   if (ipHash) {
-    const recent = rows(await db.ReadershipStats.filter({ manuscript_id: manuscriptId, ip_hash: ipHash }, "-created_date", IP_CAP_PER_WINDOW));
+    const recent = rows(await db.ReaderThrottle.filter({ manuscript_id: manuscriptId, ip_hash: ipHash }, "-created_date", IP_CAP_PER_WINDOW));
     const oldest = recent[IP_CAP_PER_WINDOW - 1];
     if (oldest && Date.now() - new Date(oldest.created_date).getTime() < DEDUPE_MINUTES * 60_000) {
       return { ok: true, counted: false, reason: "rate limited", counts: pickCounts(ms) };
@@ -95,8 +95,8 @@ export async function recordEvent(db, req, payload) {
     device_type: deviceFromUA(ua),
     referrer_source: referrerSource(payload?.referrer),
     visitor_hash: visitorHash || null,
-    ip_hash: ipHash || null,
   });
+  if (ipHash) await db.ReaderThrottle.create({ manuscript_id: manuscriptId, ip_hash: ipHash });
 
   // Atomic server side increments (no lost updates when many readers arrive together).
   const inc = { view_count: 1 };

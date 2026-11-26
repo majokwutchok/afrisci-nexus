@@ -1,0 +1,40 @@
+{
+  "name": "ReaderThrottle",
+  "type": "object",
+  "properties": {
+    "manuscript_id": {
+      "type": "string",
+      "description": "Article the counted event was for"
+    },
+    "ip_hash": {
+      "type": "string",
+      "description": "Salted hash of the reader's network address, used only to cap repeated counting"
+    }
+  },
+  "required": [
+    "manuscript_id",
+    "ip_hash"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
