@@ -5,6 +5,7 @@ import { createCourseEnrolmentCheckout } from "@/functions/createCourseEnrolment
 import { createCohortCheckout } from "@/functions/createCohortCheckout";
 import { enrolInCohort } from "@/functions/enrolInCohort";
 import CourseLearner from "@/components/training/CourseLearner";
+import { getSignedInUser, signIn, errMessage } from "@/utils/authPrompt";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +38,8 @@ export default function Training() {
   const [enrolTab, setEnrolTab] = useState("individual");
   const [form, setForm] = useState({ user_name: "", user_email: "" });
   const [cohortForm, setCohortForm] = useState({ institution_name: "", contact_name: "", contact_email: "", seats: 5 });
-  const [joinForm, setJoinForm] = useState({ cohort_code: "", join_name: "", join_email: "" });
+  const [joinForm, setJoinForm] = useState({ cohort_code: "", join_name: "" });
+  const [account, setAccount] = useState(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState(null);
@@ -47,6 +49,10 @@ export default function Training() {
   const [purchasedCohort, setPurchasedCohort] = useState(null);
 
   useEffect(() => {
+    getSignedInUser().then(u => {
+      setAccount(u);
+      if (u?.full_name) setJoinForm(f => (f.join_name ? f : { ...f, join_name: u.full_name }));
+    });
     base44.entities.Course.filter({ is_active: true }, "sort_order", 50)
       .then(setCourses).catch(() => setCourses([])).finally(() => setLoading(false));
     const params = new URLSearchParams(window.location.search);
@@ -108,17 +114,18 @@ export default function Training() {
 
   const handleJoinCohort = async (e) => {
     e.preventDefault();
+    if (!account) { signIn(`/Training?join=${encodeURIComponent(joinForm.cohort_code.trim())}`); return; }
     setJoining(true); setJoinError(null);
     try {
-      const res = await enrolInCohort({ cohort_code: joinForm.cohort_code, user_name: joinForm.join_name, user_email: joinForm.join_email });
+      const res = await enrolInCohort({ cohort_code: joinForm.cohort_code, user_name: joinForm.join_name });
       const data = res?.data || res;
       if (data?.enrolment_id) {
         setSuccessEnrolment(data.enrolment_id);
         if (data.course_id) setSuccessCourseId(data.course_id);
-        setJoinForm({ cohort_code: "", join_name: "", join_email: "" });
+        setJoinForm(f => ({ ...f, cohort_code: "" }));
         setTimeout(() => document.getElementById("learner-panel")?.scrollIntoView({ behavior: "smooth" }), 100);
       } else throw new Error(data?.error || "Could not join cohort.");
-    } catch (err) { setJoinError(err?.message || "Could not join cohort."); }
+    } catch (err) { setJoinError(errMessage(err, "Could not join cohort.")); }
     setJoining(false);
   };
 
@@ -191,10 +198,10 @@ export default function Training() {
           <form onSubmit={handleJoinCohort} className="grid sm:grid-cols-4 gap-3 items-end">
             <div><Label>Cohort code *</Label><Input required value={joinForm.cohort_code} onChange={e => setJoinForm(f => ({ ...f, cohort_code: e.target.value }))} placeholder="COHORT-2026-XXXXX" /></div>
             <div><Label>Your name *</Label><Input required value={joinForm.join_name} onChange={e => setJoinForm(f => ({ ...f, join_name: e.target.value }))} placeholder="As it should appear on the certificate" /></div>
-            <div><Label>Your email *</Label><Input required type="email" value={joinForm.join_email} onChange={e => setJoinForm(f => ({ ...f, join_email: e.target.value }))} placeholder="you@institution.edu" /></div>
+            <div className="text-sm text-slate-600 pb-2">{account ? <>Seat will be linked to <strong>{account.email}</strong></> : "You'll be asked to sign in with your email first."}</div>
             <Button type="submit" disabled={joining} className="bg-blue-700 hover:bg-blue-800 text-white">
               {joining ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Users className="w-4 h-4 mr-2" />}
-              Join & start
+              {account ? "Join & start" : "Sign in & join"}
             </Button>
           </form>
           {joinError && <p className="text-sm text-red-600 mt-2">{joinError}</p>}
