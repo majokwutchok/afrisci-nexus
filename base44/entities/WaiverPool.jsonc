@@ -74,13 +74,15 @@
     "total_slots"
   ],
   "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "read": {
       "$or": [
         {
           "created_by_id": "{{user.id}}"
-        },
-        {
-          "data.funder_organization_id": "{{user.data.organization_id}}"
         },
         {
           "user_condition": {
@@ -88,11 +90,6 @@
           }
         }
       ]
-    },
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
     },
     "update": {
       "user_condition": {

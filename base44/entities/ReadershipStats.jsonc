@@ -98,8 +98,12 @@
     "view_type"
   ],
   "rls": {
-    "create": true,
-    "read": true,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": null,
     "update": {
       "user_condition": {
         "role": "admin"

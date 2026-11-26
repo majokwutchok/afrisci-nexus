@@ -119,13 +119,10 @@
     "status"
   ],
   "rls": {
-    "read": {
+    "create": {
       "$or": [
         {
           "created_by_id": "{{user.id}}"
-        },
-        {
-          "data.organization_id": "{{user.data.organization_id}}"
         },
         {
           "user_condition": {
@@ -134,10 +131,13 @@
         }
       ]
     },
-    "create": {
+    "read": {
       "$or": [
         {
           "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.user_id": "{{user.id}}"
         },
         {
           "user_condition": {

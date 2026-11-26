@@ -97,8 +97,12 @@
     "status"
   ],
   "rls": {
-    "create": true,
-    "read": true,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": null,
     "update": {
       "$or": [
         {
