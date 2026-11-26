@@ -147,9 +147,12 @@ function buildOAIResponse(verb, params, data) {
   let xml = '<?xml version="1.0" encoding="UTF-8"?>';
   xml += `<OAI-PMH xmlns="${oaiNamespace}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="${oaiNamespace} ${oaiNamespace}OAI-PMH.xsd">`;
   xml += `<responseDate>${generateTimestamp()}</responseDate>`;
-  xml += `<request verb="${verb}"`;
+  // Echo only known OAI verbs/argument names, with escaped values (no XML injection).
+  const OAI_VERBS = ['Identify', 'ListMetadataFormats', 'GetRecord', 'ListRecords', 'ListIdentifiers', 'ListSets'];
+  const OAI_ARGS = ['identifier', 'metadataPrefix', 'from', 'until', 'set', 'resumptionToken'];
+  xml += OAI_VERBS.includes(verb) ? `<request verb="${verb}"` : `<request`;
   Object.entries(params).forEach(([k, v]) => {
-    if (k !== 'verb') xml += ` ${k}="${escapeXML(v)}"`;
+    if (OAI_ARGS.includes(k)) xml += ` ${k}="${escapeXML(String(v))}"`;
   });
   xml += `>${BASE_URL}</request>`;
   xml += data;

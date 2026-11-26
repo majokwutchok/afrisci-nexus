@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { safeHttpUrl } from "@/utils/safeUrl";
 import { base44 } from "@/api/base44Client";
 import { createJobPostCheckout } from "@/functions/createJobPostCheckout";
 import SEO from "@/components/SEO";
@@ -136,7 +137,7 @@ export default function Jobs() {
                   {job.deadline && <span className="flex items-center gap-1 text-red-600"><Calendar className="w-3 h-3" />{new Date(job.deadline).toLocaleDateString()}</span>}
                 </div>
                 {job.description && <p className="text-sm text-slate-600 line-clamp-3 mb-3 flex-1">{job.description}</p>}
-                <a href={job.application_url} target="_blank" rel="noopener noreferrer">
+                <a href={safeHttpUrl(job.application_url)} target="_blank" rel="noopener noreferrer">
                   <Button variant="outline" className="w-full">Apply / View details <ExternalLink className="w-3.5 h-3.5 ml-1" /></Button>
                 </a>
               </div>

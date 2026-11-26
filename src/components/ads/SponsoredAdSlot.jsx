@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { safeHttpUrl } from "@/utils/safeUrl";
 import { base44 } from "@/api/base44Client";
 
 // Renders the first active, in-date sponsored placement for a given slot.
@@ -21,10 +22,10 @@ export default function SponsoredAdSlot({ slot = "news_banner" }) {
   if (loading || !ad) return null;
 
   return (
-    <a href={ad.link_url} target="_blank" rel="noopener nofollow sponsored" className="block group">
+    <a href={safeHttpUrl(ad.link_url)} target="_blank" rel="noopener nofollow sponsored" className="block group">
       <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm hover:shadow-md transition-all">
         {ad.creative_url ? (
-          <img src={ad.creative_url} alt={`${ad.sponsor_name} advertisement`} className="w-full h-32 sm:h-40 object-cover" />
+          <img src={safeHttpUrl(ad.creative_url)} alt={`${ad.sponsor_name} advertisement`} className="w-full h-32 sm:h-40 object-cover" />
         ) : (
           <div className="p-6">
             <p className="font-semibold text-slate-900 group-hover:text-teal-700">{ad.title}</p>

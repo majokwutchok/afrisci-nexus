@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { safeHttpUrl } from '../../shared/safeUrl.ts';
 import { buildCheckoutSession } from '../../shared/stripeCheckout.ts';
 
 export default async function(req) {
@@ -14,10 +15,15 @@ export default async function(req) {
     try { plan = await base44.asServiceRole.entities.Plan.get(plan_id); } catch { return Response.json({ error: 'Plan not found' }, { status: 404 }); }
     if (plan.product_type !== 'ad_placement') return Response.json({ error: 'Selected plan is not an advertising plan' }, { status: 400 });
 
+    const safeLink = safeHttpUrl(link_url);
+    const safeCreative = safeHttpUrl(creative_url);
+    if (!safeLink) return Response.json({ error: 'link_url must be a full http(s) web address' }, { status: 400 });
+    if (safeCreative === null) return Response.json({ error: 'creative_url must be a full http(s) web address' }, { status: 400 });
+
     const origin = new URL(req.url).origin;
     const ad = await base44.asServiceRole.entities.AdPlacement.create({
       slot, title: title || sponsor_name, sponsor_name,
-      creative_url: creative_url || '', link_url,
+      creative_url: safeCreative || '', link_url: safeLink,
       start_date: start_date || '', end_date: end_date || '',
       booked_by_email: booked_by_email || '',
       plan_id, amount: plan.price || 0, currency: plan.currency || 'USD',

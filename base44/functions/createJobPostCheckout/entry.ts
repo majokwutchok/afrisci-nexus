@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { safeHttpUrl } from '../../shared/safeUrl.ts';
 import { buildCheckoutSession } from '../../shared/stripeCheckout.ts';
 
 export default async function(req) {
@@ -14,13 +15,16 @@ export default async function(req) {
     try { plan = await base44.asServiceRole.entities.Plan.get(plan_id); } catch { return Response.json({ error: 'Plan not found' }, { status: 404 }); }
     if (plan.product_type !== 'job_pack') return Response.json({ error: 'Selected plan is not a job posting plan' }, { status: 400 });
 
+    const safeApply = safeHttpUrl(application_url);
+    if (!safeApply) return Response.json({ error: 'application_url must be a full http(s) web address' }, { status: 400 });
+
     const origin = new URL(req.url).origin;
     const isFeatured = (plan.name || '').toLowerCase().includes('featured');
 
     const job = await base44.asServiceRole.entities.JobPost.create({
       title, organization_name, job_type,
       field: field || '', country: country || '', location: location || '',
-      application_url, description: description || '', deadline: deadline || '',
+      application_url: safeApply, description: description || '', deadline: deadline || '',
       posted_by_email: posted_by_email || '',
       plan_id, amount: plan.price || 0, currency: plan.currency || 'USD',
       status: 'pending_payment', payment_provider: 'stripe', is_featured: isFeatured
