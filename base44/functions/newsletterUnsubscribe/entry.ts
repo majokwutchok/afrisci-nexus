@@ -3,6 +3,7 @@
 // POST performs the unsubscribe and also serves RFC 8058 one-click requests from mail apps.
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.63";
 import { verifyUnsubscribe } from "../../shared/newsletterSend.ts";
+import { find } from "../../shared/newsletterContent.ts";
 import { BRAND, esc, NEWSLETTER_NAME } from "../../shared/newsletterRender.ts";
 
 function page(title, message, form = "") {
@@ -48,8 +49,8 @@ export default async function (req) {
 
     const base44 = createClientFromRequest(req);
     const db = base44.asServiceRole.entities;
-    const existing = await db.NewsletterSuppression.filter({ email }, { limit: 1, fields: ["id"] });
-    if (!(Array.isArray(existing) ? existing : existing?.items ?? []).length) {
+    const existing = await find(db.NewsletterSuppression, { email }, { limit: 1, fields: ["id"] });
+    if (!existing.length) {
       await db.NewsletterSuppression.create({ email, reason: "unsubscribed", newsletter_id: n.slice(0, 40) });
     }
     await db.NewsletterSubscriber.updateMany({ email }, { $set: { is_active: false } }).catch(() => {});

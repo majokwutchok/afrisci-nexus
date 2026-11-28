@@ -66,9 +66,9 @@ function Field({ label, children, hint }) {
   );
 }
 
-function ArticlePicker({ candidates, selected, onChange, empty, showViews, forthcoming }) {
+function ArticlePicker({ candidates, selected, onChange, empty, showViews, forthcoming, known }) {
   const sel = selected || [];
-  const byId = Object.fromEntries((candidates || []).map((a) => [a.id, a]));
+  const byId = { ...(known || {}), ...Object.fromEntries((candidates || []).map((a) => [a.id, a])) };
   const toggle = (a) => onChange(sel.includes(a.id) ? sel.filter((x) => x !== a.id) : [...sel, a.id], a);
   const move = (i, d) => {
     const n = [...sel];
@@ -460,17 +460,17 @@ export default function NewsletterStudio() {
 
           <Section icon={BookOpen} title="Newly published" hint="Articles published in the last two weeks. The first one becomes the lead story."
             right={ctxLoading && <Loader2 className="w-4 h-4 animate-spin text-slate-400" />}>
-            <ArticlePicker candidates={content.fresh} selected={S.new_articles} empty="No articles published in the last two weeks."
+            <ArticlePicker known={editing.articles} candidates={content.fresh} selected={S.new_articles} empty="No articles published in the last two weeks."
               onChange={(ids, a) => { if (a) addArticles([a]); patchSections({ new_articles: ids }); }} />
           </Section>
 
           <Section icon={BookOpen} title="From the archive" hint="Already published articles worth another look, sorted by readership.">
-            <ArticlePicker candidates={content.archive} selected={S.highlight_articles} showViews empty="No archive articles yet."
+            <ArticlePicker known={editing.articles} candidates={content.archive} selected={S.highlight_articles} showViews empty="No archive articles yet."
               onChange={(ids, a) => { if (a) addArticles([a]); patchSections({ highlight_articles: ids }); }} />
           </Section>
 
           <Section icon={BookOpen} title="Future publications" hint="Accepted manuscripts that are coming soon. Shown without links until they are published.">
-            <ArticlePicker candidates={content.upcoming} selected={S.upcoming_articles} forthcoming empty="No accepted manuscripts waiting for publication."
+            <ArticlePicker known={editing.articles} candidates={content.upcoming} selected={S.upcoming_articles} forthcoming empty="No accepted manuscripts waiting for publication."
               onChange={(ids, a) => { if (a) addArticles([a]); patchSections({ upcoming_articles: ids }); }} />
           </Section>
 

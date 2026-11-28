@@ -6,7 +6,7 @@ import { loadSettings } from "../../shared/emailServer.ts";
 import { renderNewsletter, NEWSLETTER_NAME } from "../../shared/newsletterRender.ts";
 import {
   loadContent, loadOffers, buildSolutions, solutionForIssue, buildIdeas,
-  suggestHeadline, suggestIntro, resolveRecipients, validEmail, normEmail,
+  suggestHeadline, suggestIntro, resolveRecipients, validEmail, normEmail, find,
 } from "../../shared/newsletterContent.ts";
 import { unsubscribeUrl, sendBatch } from "../../shared/newsletterSend.ts";
 
@@ -31,8 +31,8 @@ export default async function (req) {
     switch (p.action) {
       case "bootstrap": {
         const journalId = String(p.journal_id || "");
-        const last = await db.Newsletter.filter({}, { sort: "-issue_number", limit: 1, fields: ["issue_number"] });
-        const lastNo = (Array.isArray(last) ? last : last?.items ?? [])[0]?.issue_number || 0;
+        const last = await find(db.Newsletter, {}, { sort: "-issue_number", limit: 1, fields: ["issue_number"] });
+        const lastNo = last[0]?.issue_number || 0;
         const issueNumber = Number(p.issue_number) || lastNo + 1;
         const [content, offers] = await Promise.all([loadContent(db, { site, journalId }), loadOffers(db)]);
         const solutions = buildSolutions({ site, ...offers });

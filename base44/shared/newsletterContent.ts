@@ -8,6 +8,17 @@ const FORTHCOMING = ["accepted"];
 const ARTICLE_FIELDS = ["id", "title", "abstract", "keywords", "journal_id", "authors", "status", "publication_date", "online_first_date", "created_date", "doi", "view_count", "read_count", "download_count", "citation_count"];
 
 const rows = (r) => (Array.isArray(r) ? r : r?.items ?? []);
+
+/** filter() with field selection; falls back to the classic positional form if the options form is unavailable. */
+export async function find(handler, query, { sort = "-created_date", limit = 100, fields } = {}) {
+  try {
+    return rows(await handler.filter(query, { sort, limit, ...(fields ? { fields } : {}) }));
+  } catch (e) {
+    const status = e?.status ?? e?.response?.status;
+    if (status === 401 || status === 403) throw e;
+    return rows(await handler.filter(query, sort, limit, 0, fields));
+  }
+}
 const DAY = 86_400_000;
 
 export function weekStart(d = new Date()) {
@@ -254,11 +265,11 @@ export function suggestIntro({ fresh = [], journalTitle = "" }) {
 // ------------------------------------------------------------ data access
 
 export async function loadContent(db, { site, journalId = "", now = new Date() }) {
-  const journalRows = rows(await db.Journal.filter({}, { sort: "title", limit: 200, fields: ["id", "title"] }));
+  const journalRows = await find(db.Journal, {}, { sort: "title", limit: 200, fields: ["id", "title"] });
   const journals = Object.fromEntries(journalRows.map((j) => [j.id, j.title]));
   const q = (statuses) => (journalId ? { status: { $in: statuses }, journal_id: journalId } : { status: { $in: statuses } });
-  const pub = rows(await db.Manuscript.filter(q(PUBLIC), { sort: "-publication_date", limit: 300, fields: ARTICLE_FIELDS }));
-  const fut = rows(await db.Manuscript.filter(q(FORTHCOMING), { sort: "-updated_date", limit: 50, fields: ARTICLE_FIELDS }));
+  const pub = await find(db.Manuscript, q(PUBLIC), { sort: "-publication_date", limit: 300, fields: ARTICLE_FIELDS });
+  const fut = await find(db.Manuscript, q(FORTHCOMING), { sort: "-updated_date", limit: 50, fields: ARTICLE_FIELDS });
 
   const since = now.getTime() - 14 * DAY; // last two weeks counts as "new"
   const recent60 = now.getTime() - 60 * DAY;
@@ -281,8 +292,8 @@ export async function loadContent(db, { site, journalId = "", now = new Date() }
 }
 
 export async function loadOffers(db) {
-  const plans = rows(await db.Plan.filter({ is_active: true }, { sort: "price", limit: 100, fields: ["name", "product_type", "price", "currency", "description", "seats"] }));
-  const courses = rows(await db.Course.filter({ is_active: true }, { sort: "sort_order", limit: 50, fields: ["title", "price", "currency"] })).filter((c) => c.title);
+  const plans = await find(db.Plan, { is_active: true }, { sort: "price", limit: 100, fields: ["name", "product_type", "price", "currency", "description", "seats"] });
+  const courses = await find(db.Course, { is_active: true }, { sort: "sort_order", limit: 50, fields: ["title", "price", "currency"] }).filter((c) => c.title);
   return {
     services: plans.filter((p) => p.product_type === "service"),
     memberships: plans.filter((p) => p.product_type === "membership"),
@@ -302,20 +313,20 @@ export function parseManual(text) {
 export async function resolveRecipients(db, audience = {}, { journalId = "" } = {}) {
   const groups = { subscribers: new Set(), authors: new Set(), manual: new Set() };
   if (audience.subscribers) {
-    const subs = rows(await db.NewsletterSubscriber.filter({ is_active: { $ne: false } }, { limit: 5000, fields: ["email", "is_active"] }));
+    const subs = await find(db.NewsletterSubscriber, { is_active: { $ne: false } }, { limit: 5000, fields: ["email", "is_active"] });
     subs.forEach((s) => validEmail(s.email) && groups.subscribers.add(normEmail(s.email)));
   }
   if (audience.authors) {
     const q = { status: { $nin: ["draft"] } };
     if (journalId) q.journal_id = journalId;
-    const ms = rows(await db.Manuscript.filter(q, { limit: 5000, fields: ["authors", "created_by"] }));
+    const ms = await find(db.Manuscript, q, { limit: 5000, fields: ["authors", "created_by"] });
     ms.forEach((m) => {
       (Array.isArray(m.authors) ? m.authors : []).forEach((a) => validEmail(a?.email) && groups.authors.add(normEmail(a.email)));
       if (validEmail(m.created_by) && !/no-reply\.base44\.com$/i.test(m.created_by)) groups.authors.add(normEmail(m.created_by));
     });
   }
   parseManual(audience.manual).forEach((e) => groups.manual.add(e));
-  const suppressed = new Set(rows(await db.NewsletterSuppression.filter({}, { limit: 5000, fields: ["email"] })).map((s) => normEmail(s.email)));
+  const suppressed = new Set(await find(db.NewsletterSuppression, {}, { limit: 5000, fields: ["email"] }).map((s) => normEmail(s.email)));
   const all = new Set([...groups.subscribers, ...groups.authors, ...groups.manual]);
   const list = [...all].filter((e) => !suppressed.has(e)).sort();
   return {
