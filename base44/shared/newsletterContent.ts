@@ -293,7 +293,7 @@ export async function loadContent(db, { site, journalId = "", now = new Date() }
 
 export async function loadOffers(db) {
   const plans = await find(db.Plan, { is_active: true }, { sort: "price", limit: 100, fields: ["name", "product_type", "price", "currency", "description", "seats"] });
-  const courses = await find(db.Course, { is_active: true }, { sort: "sort_order", limit: 50, fields: ["title", "price", "currency"] }).filter((c) => c.title);
+  const courses = (await find(db.Course, { is_active: true }, { sort: "sort_order", limit: 50, fields: ["title", "price", "currency"] })).filter((c) => c.title);
   return {
     services: plans.filter((p) => p.product_type === "service"),
     memberships: plans.filter((p) => p.product_type === "membership"),
@@ -326,7 +326,7 @@ export async function resolveRecipients(db, audience = {}, { journalId = "" } = 
     });
   }
   parseManual(audience.manual).forEach((e) => groups.manual.add(e));
-  const suppressed = new Set(await find(db.NewsletterSuppression, {}, { limit: 5000, fields: ["email"] }).map((s) => normEmail(s.email)));
+  const suppressed = new Set((await find(db.NewsletterSuppression, {}, { limit: 5000, fields: ["email"] })).map((s) => normEmail(s.email)));
   const all = new Set([...groups.subscribers, ...groups.authors, ...groups.manual]);
   const list = [...all].filter((e) => !suppressed.has(e)).sort();
   return {
