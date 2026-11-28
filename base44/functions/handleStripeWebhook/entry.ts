@@ -49,9 +49,15 @@ export default async function(req) {
       } else if (md.product_type === 'course_enrolment' && md.record_id) {
         await fulfillCourseEnrolment(base44, md.record_id, md.transaction_id);
       } else if (md.product_type === 'course_cohort' && md.record_id) {
-        await fulfillCourseCohort(base44, md.record_id, md.transaction_id);      } else if (md.product_type === 'apc_invoice' && md.record_id) {
+        await fulfillCourseCohort(base44, md.record_id, md.transaction_id);
+      } else if (md.product_type === 'apc_invoice' && md.record_id) {
         await fulfillApcInvoice(base44, md.record_id, session);
       }
+    } else if (event.type === 'checkout.session.async_payment_succeeded') {
+      // Delayed payment methods settle later; fulfilApcInvoice re-checks payment_status and amount.
+      const session = event.data?.object;
+      const md = session?.metadata || {};
+      if (md.product_type === 'apc_invoice' && md.record_id) await fulfillApcInvoice(base44, md.record_id, session);
     }
 
     return Response.json({ received: true });
