@@ -181,7 +181,7 @@ export function buildIdeas({ site, now = new Date(), fresh = [], archive = [], u
 
   if (fresh.length) {
     const kw = topKeywords(fresh, 2);
-    add("theme", kw.length ? `This week's theme: ${title(kw.join(" and "))}` : "This week's new research",
+    add("theme", kw.length ? `This week's theme: ${kw.map(title).join(" and ")}` : "This week's new research",
       `This week we published ${fresh.length} new ${fresh.length === 1 ? "article" : "articles"}${kw.length ? `, with a clear focus on ${kw.join(" and ")}` : ""}. Explore the findings below and share them with colleagues who work in these areas.`,
       "Browse all new articles", `${site}/Publications`, "Based on keywords in this week's new articles");
   }
