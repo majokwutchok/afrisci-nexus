@@ -136,7 +136,10 @@ export default function NewsletterStudio() {
   const [aiFocus, setAiFocus] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiIdeas, setAiIdeas] = useState([]);
-  const [confirmSend, setConfirmSend] = useState(false);
+  const [confirmSend, setConfirmSend] = useState(false); // false | "preview" | "send"
+  const [pvDevice, setPvDevice] = useState("desktop");
+  const [testedOk, setTestedOk] = useState(false);
+  const [reviewed, setReviewed] = useState(false);
   const [progress, setProgress] = useState(null);
   const [me, setMe] = useState(null);
   const cancelRef = useRef(false);
@@ -156,8 +159,8 @@ export default function NewsletterStudio() {
     base44.entities.Journal.list("title", 100).then((r) => setJournals(Object.fromEntries(rows(r).map((j) => [j.id, j.title])))).catch(() => {});
   }, [loadIssues]);
 
-  const patch = (fields) => { setEditing((e) => ({ ...e, ...fields })); setDirty(true); };
-  const patchSections = (fields) => { setEditing((e) => ({ ...e, sections: { ...(e.sections || {}), ...fields } })); setDirty(true); };
+  const patch = (fields) => { setEditing((e) => ({ ...e, ...fields })); setDirty(true); setReviewed(false); };
+  const patchSections = (fields) => { setEditing((e) => ({ ...e, sections: { ...(e.sections || {}), ...fields } })); setDirty(true); setReviewed(false); };
   const addArticles = (list) => setEditing((e) => {
     const articles = { ...(e.articles || {}) };
     list.forEach((a) => { if (a) articles[a.id] = snap(a); });
@@ -290,7 +293,7 @@ export default function NewsletterStudio() {
   };
   const sendTest = async () => {
     setTesting(true);
-    try { const r = await call("test_send", { issue: editing, to: testTo }); flash("ok", `Test sent to ${r.to}`); }
+    try { const r = await call("test_send", { issue: editing, to: testTo }); flash("ok", `Test sent to ${r.to}`); setTestedOk(true); }
     catch (e) { flash("error", errMsg(e, "Test send failed")); }
     setTesting(false);
   };
@@ -423,10 +426,12 @@ export default function NewsletterStudio() {
           </div>
           <span className={`text-xs font-semibold px-2 py-1 rounded-full ${STATUS_STYLE[editing.status] || STATUS_STYLE.draft}`}>{editing.status || "draft"}</span>
         </div>
+        {locked && <Button variant="outline" onClick={() => setConfirmSend("preview")}><Eye className="w-4 h-4 mr-2" />Full preview</Button>}
         {!locked && (
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => save()} disabled={saving || !dirty}>{saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}Save draft</Button>
-            <Button className="bg-blue-800 hover:bg-blue-900" disabled={sendingNow} onClick={async () => { setConfirmSend(true); if (!counts) countNow(); }}><Send className="w-4 h-4 mr-2" />{editing.status === "sending" ? "Resume sending" : "Send issue"}</Button>
+            <Button variant="outline" onClick={() => { setConfirmSend("preview"); if (!counts) countNow(); }}><Eye className="w-4 h-4 mr-2" />Preview</Button>
+            <Button className="bg-blue-800 hover:bg-blue-900" disabled={sendingNow} onClick={() => { setReviewed(false); setConfirmSend("send"); if (!counts) countNow(); }}><Send className="w-4 h-4 mr-2" />{editing.status === "sending" ? "Resume sending" : "Preview and send"}</Button>
           </div>
         )}
       </div>
@@ -581,25 +586,127 @@ export default function NewsletterStudio() {
         </div>
       </div>
 
-      {confirmSend && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
-            <div className="bg-blue-800 px-5 py-4 text-white font-semibold">Send Issue {editing.issue_number}?</div>
-            <div className="h-1 bg-amber-500" />
-            <div className="p-5 text-sm text-slate-700 space-y-3">
-              <p className="font-medium text-slate-900">{editing.subject}</p>
-              {counting || !counts ? <p className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Counting recipients…</p> : (
-                <p>This will email <strong>{counts.total}</strong> unique recipients ({counts.subscribers} subscribers, {counts.authors} authors, {counts.manual} manual{counts.suppressed ? `; ${counts.suppressed} unsubscribed skipped` : ""}). Sending cannot be undone.</p>
-              )}
-              <p className="text-xs text-slate-500">Tip: send yourself a test first and check it on your phone.</p>
-            </div>
-            <div className="px-5 pb-5 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setConfirmSend(false)}>Cancel</Button>
-              <Button className="bg-blue-800 hover:bg-blue-900" disabled={!counts || !counts.total} onClick={() => runSend()}><Send className="w-4 h-4 mr-2" />Send now</Button>
+      {confirmSend && (() => {
+        const S2 = editing.sections || {};
+        const A2 = editing.articles || {};
+        const nArticles = ["new_articles", "highlight_articles", "upcoming_articles"].reduce((n, k) => n + (S2[k] || []).filter((id) => A2[id]).length, 0);
+        const missingLinks = [...(S2.new_articles || []), ...(S2.highlight_articles || [])].filter((id) => A2[id] && !A2[id].url).length;
+        const sendMode = confirmSend === "send" && !locked;
+        const checks = [
+          { ok: !!(editing.subject || "").trim(), label: "Subject line is set", fix: "Add a subject line" },
+          { ok: !!(editing.headline || "").trim(), label: "Headline is set", fix: "Add a headline" },
+          { ok: nArticles > 0, label: `${nArticles} article${nArticles === 1 ? "" : "s"} featured`, fix: "Add at least one article" },
+          { ok: missingLinks === 0, warn: true, label: "Every published article links to its page", fix: `${missingLinks} article${missingLinks === 1 ? " has" : "s have"} no link` },
+          { ok: !!(S2.solution && S2.solution.title), warn: true, label: "Publishing Solutions spotlight included", fix: "No solutions spotlight this week" },
+          { ok: !!counts && counts.total > 0, label: counts ? `${counts.total} recipients ready` : "Counting recipients…", fix: counts ? "No recipients selected" : "Counting recipients…", pending: !counts },
+          { ok: testedOk, warn: true, label: "Test email sent and checked", fix: "No test sent yet this session" },
+        ];
+        const blocking = checks.some((c) => !c.ok && !c.warn && !c.pending);
+        const openTab = () => {
+          const url = URL.createObjectURL(new Blob([preview?.html || ""], { type: "text/html" }));
+          window.open(url, "_blank", "noopener");
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+        };
+        return (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-stretch justify-center p-2 sm:p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl flex flex-col overflow-hidden">
+              <div className="bg-blue-800 px-5 py-3 flex items-center justify-between gap-3">
+                <div className="text-white">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-blue-200">{sendMode ? "Final preview before sending" : "Preview"}</div>
+                  <div className="font-semibold">{NEWSLETTER_NAME} · Issue {editing.issue_number}{editing.journal_title ? ` · ${editing.journal_title} edition` : ""}</div>
+                </div>
+                <button onClick={() => setConfirmSend(false)} className="text-blue-100 hover:text-white p-1" title="Close"><X className="w-5 h-5" /></button>
+              </div>
+              <div className="h-1 bg-amber-500" />
+              <div className="flex-1 min-h-0 grid lg:grid-cols-[360px_minmax(0,1fr)]">
+                {/* left: inbox view, checks, actions */}
+                <div className="border-r border-slate-200 overflow-y-auto p-4 space-y-4 bg-slate-50">
+                  <div>
+                    <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">How it appears in the inbox</div>
+                    <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-sm">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-full bg-blue-800 text-amber-400 flex items-center justify-center font-bold text-sm shrink-0">✦</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex justify-between gap-2"><span className="font-semibold text-sm text-slate-900 truncate">{NEWSLETTER_NAME}</span><span className="text-[11px] text-slate-400 shrink-0">{formatDate(editing.issue_date) || "Today"}</span></div>
+                          <div className="text-[11px] text-slate-500 truncate">{ctx?.from || "editorial@afriscinexus.com"}</div>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm font-semibold text-slate-900 leading-snug">{preview?.subject || <span className="text-red-600">No subject</span>}</div>
+                      <div className="text-xs text-slate-500 line-clamp-2 mt-0.5">{preview?.preheader}</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Pre send checks</div>
+                    <ul className="bg-white border border-slate-200 rounded-lg divide-y divide-slate-100 text-sm">
+                      {checks.map((c, i) => (
+                        <li key={i} className="flex items-start gap-2 px-3 py-2">
+                          {c.pending ? <Loader2 className="w-4 h-4 mt-0.5 animate-spin text-slate-400 shrink-0" /> : c.ok ? <CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-600 shrink-0" /> : <AlertTriangle className={`w-4 h-4 mt-0.5 shrink-0 ${c.warn ? "text-amber-500" : "text-red-600"}`} />}
+                          <span className={c.ok || c.pending ? "text-slate-700" : c.warn ? "text-amber-800" : "text-red-700 font-medium"}>{c.ok || c.pending ? c.label : c.fix}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Audience</div>
+                    <div className="bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-700">
+                      {counting || !counts ? <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Counting…</span> : (
+                        <>
+                          <div className="text-2xl font-bold text-slate-900">{counts.total}<span className="text-sm font-normal text-slate-500"> unique recipients</span></div>
+                          <div className="text-xs text-slate-500 mt-1">{counts.subscribers} subscribers · {counts.authors} authors · {counts.manual} manual{counts.suppressed ? ` · ${counts.suppressed} unsubscribed skipped` : ""}</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {!locked && (
+                    <div>
+                      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Send a test</div>
+                      <div className="flex gap-2">
+                        <Input value={testTo} onChange={(e) => setTestTo(e.target.value)} className="bg-white" />
+                        <Button variant="outline" onClick={sendTest} disabled={testing}>{testing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send"}</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {sendMode && (
+                    <div className="bg-white border border-blue-200 rounded-lg p-3 space-y-3">
+                      <label className="flex items-start gap-2 text-sm text-slate-700 cursor-pointer">
+                        <input type="checkbox" className="mt-1 accent-blue-800" checked={reviewed} onChange={(e) => setReviewed(e.target.checked)} />
+                        <span>I have reviewed this issue on desktop and mobile and it is ready to go to {counts ? counts.total : "all"} recipients.</span>
+                      </label>
+                      <Button className="w-full bg-blue-800 hover:bg-blue-900" disabled={!reviewed || blocking || !counts || !counts.total} onClick={() => runSend()}>
+                        <Send className="w-4 h-4 mr-2" />Send now to {counts ? counts.total : "…"} recipients
+                      </Button>
+                      <p className="text-[11px] text-slate-500">{dirty ? "Your latest edits will be saved before sending. " : ""}Sending cannot be undone.</p>
+                    </div>
+                  )}
+                  {!sendMode && !locked && (
+                    <Button className="w-full bg-blue-800 hover:bg-blue-900" onClick={() => { setReviewed(false); setConfirmSend("send"); }}><Send className="w-4 h-4 mr-2" />Continue to send</Button>
+                  )}
+                </div>
+
+                {/* right: rendered email */}
+                <div className="flex flex-col min-h-0 bg-slate-200/70">
+                  <div className="flex items-center justify-between gap-2 px-4 py-2 border-b border-slate-200 bg-white">
+                    <div className="flex gap-1">
+                      <Button size="sm" variant={pvDevice === "desktop" ? "default" : "ghost"} onClick={() => setPvDevice("desktop")}><Monitor className="w-3.5 h-3.5 mr-1.5" />Desktop</Button>
+                      <Button size="sm" variant={pvDevice === "mobile" ? "default" : "ghost"} onClick={() => setPvDevice("mobile")}><Smartphone className="w-3.5 h-3.5 mr-1.5" />Mobile</Button>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={openTab}><Eye className="w-3.5 h-3.5 mr-1.5" />Open in new tab</Button>
+                  </div>
+                  <div className="flex-1 min-h-0 overflow-auto p-4 flex justify-center">
+                    <div className={pvDevice === "mobile" ? "w-[390px] rounded-[2rem] border-[10px] border-slate-800 bg-white shadow-xl overflow-hidden" : "w-full max-w-[760px]"} style={{ height: pvDevice === "mobile" ? 780 : "100%", minHeight: 560 }}>
+                      <iframe title="Final newsletter preview" srcDoc={preview?.html || ""} sandbox="allow-popups allow-popups-to-escape-sandbox" className="w-full h-full bg-white rounded-lg" style={{ minHeight: pvDevice === "mobile" ? 760 : 560 }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
       {Toast}
     </div>
   );

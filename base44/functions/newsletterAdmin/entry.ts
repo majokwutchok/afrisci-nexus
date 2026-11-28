@@ -52,6 +52,7 @@ export default async function (req) {
           },
           ideas,
           site,
+          from: settings.from_email,
         });
       }
 
