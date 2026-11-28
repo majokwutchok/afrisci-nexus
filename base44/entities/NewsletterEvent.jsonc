@@ -1,0 +1,67 @@
+{
+  "name": "NewsletterEvent",
+  "type": "object",
+  "properties": {
+    "newsletter_id": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "open",
+        "click"
+      ]
+    },
+    "url": {
+      "type": "string"
+    },
+    "device": {
+      "type": "string",
+      "enum": [
+        "desktop",
+        "mobile",
+        "tablet",
+        "unknown"
+      ]
+    }
+  },
+  "required": [
+    "newsletter_id",
+    "email",
+    "type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "editor"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

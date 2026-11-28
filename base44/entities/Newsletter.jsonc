@@ -123,6 +123,15 @@
         },
         "manual": {
           "type": "string"
+        },
+        "users": {
+          "type": "boolean"
+        },
+        "list_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
