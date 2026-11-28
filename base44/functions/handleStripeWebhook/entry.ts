@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 import { activateSubscription } from '../../shared/subscriptionLifecycle.ts';
 import { fulfillJobPost, fulfillAdPlacement, fulfillCourseEnrolment, fulfillCourseCohort } from '../../shared/orderFulfillment.ts';
+import { fulfillApcInvoice } from '../../shared/apcBilling.ts';
 
 function timingSafeEqual(a, b) {
   let res = 0;
@@ -48,7 +49,8 @@ export default async function(req) {
       } else if (md.product_type === 'course_enrolment' && md.record_id) {
         await fulfillCourseEnrolment(base44, md.record_id, md.transaction_id);
       } else if (md.product_type === 'course_cohort' && md.record_id) {
-        await fulfillCourseCohort(base44, md.record_id, md.transaction_id);
+        await fulfillCourseCohort(base44, md.record_id, md.transaction_id);      } else if (md.product_type === 'apc_invoice' && md.record_id) {
+        await fulfillApcInvoice(base44, md.record_id, session);
       }
     }
 
