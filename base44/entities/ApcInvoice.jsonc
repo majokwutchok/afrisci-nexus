@@ -1,0 +1,116 @@
+{
+  "name": "ApcInvoice",
+  "type": "object",
+  "properties": {
+    "invoice_number": {
+      "type": "string",
+      "description": "Human readable invoice number, e.g. INV20260001"
+    },
+    "manuscript_id": {
+      "type": "string"
+    },
+    "manuscript_ref": {
+      "type": "string",
+      "description": "Short manuscript reference used in emails"
+    },
+    "manuscript_title": {
+      "type": "string"
+    },
+    "journal_id": {
+      "type": "string"
+    },
+    "journal_title": {
+      "type": "string"
+    },
+    "recipient_name": {
+      "type": "string"
+    },
+    "recipient_email": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount due in major units (e.g. 250 = USD 250)"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "unpaid",
+        "paid",
+        "void",
+        "waived"
+      ],
+      "default": "unpaid"
+    },
+    "pay_token": {
+      "type": "string",
+      "description": "Long random token in the public payment link"
+    },
+    "stripe_session_id": {
+      "type": "string"
+    },
+    "stripe_payment_intent": {
+      "type": "string"
+    },
+    "amount_paid": {
+      "type": "number"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payment_id": {
+      "type": "string",
+      "description": "Payment record created on settlement"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "invoice_number",
+    "manuscript_id",
+    "amount",
+    "currency",
+    "pay_token"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "editor"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
