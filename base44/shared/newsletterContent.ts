@@ -311,7 +311,7 @@ export function parseManual(text) {
 
 /** Deduplicated recipients for an audience, minus suppressed addresses. */
 export async function resolveRecipients(db, audience = {}, { journalId = "" } = {}) {
-  const groups = { subscribers: new Set(), authors: new Set(), manual: new Set() };
+  const groups = { subscribers: new Set(), authors: new Set(), users: new Set(), lists: new Set(), manual: new Set() };
   if (audience.subscribers) {
     const subs = await find(db.NewsletterSubscriber, { is_active: { $ne: false } }, { limit: 5000, fields: ["email", "is_active"] });
     subs.forEach((s) => validEmail(s.email) && groups.subscribers.add(normEmail(s.email)));
@@ -325,15 +325,31 @@ export async function resolveRecipients(db, audience = {}, { journalId = "" } = 
       if (validEmail(m.created_by) && !/no-reply\.base44\.com$/i.test(m.created_by)) groups.authors.add(normEmail(m.created_by));
     });
   }
+  if (audience.users) {
+    // Everyone who has registered an account on the platform (service and no-reply accounts excluded).
+    let users = [];
+    try { users = rows(await db.User.list("-created_date", 5000)); } catch (e) { console.error("users", e?.message || e); }
+    users.forEach((u) => {
+      const e = normEmail(u.email);
+      if (validEmail(e) && !/no-reply\.base44\.com$|^service\+/i.test(e)) groups.users.add(e);
+    });
+  }
+  const listIds = (Array.isArray(audience.list_ids) ? audience.list_ids : []).filter((x) => /^[A-Za-z0-9]{6,40}$/.test(String(x))).slice(0, 50);
+  if (listIds.length) {
+    const members = await find(db.MailingListMember, { list_id: { $in: listIds } }, { limit: 5000, fields: ["email"] });
+    members.forEach((m) => validEmail(m.email) && groups.lists.add(normEmail(m.email)));
+  }
   parseManual(audience.manual).forEach((e) => groups.manual.add(e));
   const suppressed = new Set((await find(db.NewsletterSuppression, {}, { limit: 5000, fields: ["email"] })).map((s) => normEmail(s.email)));
-  const all = new Set([...groups.subscribers, ...groups.authors, ...groups.manual]);
+  const all = new Set([...groups.subscribers, ...groups.authors, ...groups.users, ...groups.lists, ...groups.manual]);
   const list = [...all].filter((e) => !suppressed.has(e)).sort();
   return {
     list,
     counts: {
       subscribers: groups.subscribers.size,
       authors: groups.authors.size,
+      users: groups.users.size,
+      lists: groups.lists.size,
       manual: groups.manual.size,
       suppressed: [...all].filter((e) => suppressed.has(e)).length,
       total: list.length,
