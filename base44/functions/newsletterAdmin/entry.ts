@@ -171,7 +171,7 @@ ${p.focus ? `Editor's focus for this week: ${String(p.focus).slice(0, 300)}\n` :
           for (const to of chunk) {
             const unsub = await unsubscribeUrl(site, to, nl.id);
             const r = renderNewsletter(nl, { site, unsubscribeUrl: unsub });
-            const html = await instrument(r.html, { site, newsletterId: nl.id, email: to });
+            const html = await instrument(r.html, { site, newsletterId: nl.id, email: to }).catch((e) => { console.error("track", e?.message || e); return r.html; });
             msgs.push({ to, subject: r.subject, html, text: r.text, headers: { "List-Unsubscribe": `<${unsub}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } });
           }
           try {
