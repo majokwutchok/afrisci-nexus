@@ -50,6 +50,7 @@
       "enum": [
         "draft",
         "scheduled",
+        "sending",
         "sent",
         "failed"
       ],
@@ -79,6 +80,77 @@
       "type": "string",
       "maxLength": 1000,
       "description": "Optional additional notes about this newsletter issue"
+    },
+    "issue_number": {
+      "type": "number",
+      "description": "Sequential issue number of AfriSci Newsletter"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Cover date of the issue"
+    },
+    "journal_id": {
+      "type": "string",
+      "description": "Optional: limit this edition to one journal"
+    },
+    "journal_title": {
+      "type": "string"
+    },
+    "headline": {
+      "type": "string",
+      "description": "Issue headline shown under the masthead"
+    },
+    "sections": {
+      "type": "object",
+      "description": "Structured issue content: article lists, spotlight, ideas, call to action",
+      "additionalProperties": true
+    },
+    "articles": {
+      "type": "object",
+      "description": "Snapshot of article display data keyed by manuscript id",
+      "additionalProperties": true
+    },
+    "audience": {
+      "type": "object",
+      "description": "Who receives this issue: subscribers, authors, manual emails",
+      "properties": {
+        "subscribers": {
+          "type": "boolean"
+        },
+        "authors": {
+          "type": "boolean"
+        },
+        "manual": {
+          "type": "string"
+        }
+      }
+    },
+    "recipient_list": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Deduplicated recipients captured when sending started"
+    },
+    "sent_index": {
+      "type": "number",
+      "default": 0
+    },
+    "sent_count": {
+      "type": "number",
+      "default": 0
+    },
+    "failed_count": {
+      "type": "number",
+      "default": 0
+    },
+    "last_error": {
+      "type": "string"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
