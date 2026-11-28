@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import NewsletterAnalytics from "./NewsletterAnalytics";
+import MailingLists from "./MailingLists";
 import {
   Newspaper, Plus, Sparkles, Send, Save, Eye, ArrowUp, ArrowDown, X, Loader2, Users, Lightbulb,
-  ChevronLeft, Monitor, Smartphone, FlaskConical, CheckCircle2, AlertTriangle, Copy, RefreshCw, BookOpen, Wand2,
+  ChevronLeft, BarChart3, ListChecks, Monitor, Smartphone, FlaskConical, CheckCircle2, AlertTriangle, Copy, RefreshCw, BookOpen, Wand2,
 } from "lucide-react";
 
 const ENTITY = "Newsletter";
@@ -116,7 +118,33 @@ function ArticlePicker({ candidates, selected, onChange, empty, showViews, forth
 
 /* ------------------------------------------------------------------ main */
 
+const HUB_TABS = [
+  ["issues", Newspaper, "Issues"],
+  ["analytics", BarChart3, "Analytics"],
+  ["lists", ListChecks, "Mailing lists"],
+];
+
 export default function NewsletterStudio() {
+  const [tab, setTab] = useState("issues");
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-1 bg-white border border-slate-200 rounded-xl p-1 w-fit shadow-sm">
+        {HUB_TABS.map(([k, Icon, label]) => (
+          <button key={k} type="button" onClick={() => setTab(k)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${tab === k ? "bg-blue-800 text-white" : "text-slate-600 hover:bg-slate-100"}`}>
+            <Icon className="w-4 h-4" />{label}
+          </button>
+        ))}
+      </div>
+      {tab === "issues" && <IssuesStudio />}
+      {tab === "analytics" && <NewsletterAnalytics />}
+      {tab === "lists" && <MailingLists />}
+    </div>
+  );
+}
+
+function IssuesStudio() {
+  const [mlists, setMlists] = useState([]);
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
@@ -156,6 +184,7 @@ export default function NewsletterStudio() {
   useEffect(() => {
     loadIssues();
     base44.auth.me().then((u) => { setMe(u); setTestTo(u?.email || ""); }).catch(() => {});
+    call("lists").then((r) => setMlists(r.lists || [])).catch(() => {});
     base44.entities.Journal.list("title", 100).then((r) => setJournals(Object.fromEntries(rows(r).map((j) => [j.id, j.title])))).catch(() => {});
   }, [loadIssues]);
 
@@ -362,7 +391,7 @@ export default function NewsletterStudio() {
         <div className="grid md:grid-cols-3 gap-3 text-sm">
           {[
             [Sparkles, "Auto drafted every week", "One click pulls in newly published, archive and forthcoming articles, plus a solutions spotlight and fresh ideas."],
-            [Users, "Subscribers, authors and manual lists", "Send to newsletter subscribers, every author who has submitted, and any addresses you paste in. Duplicates and unsubscribes are removed."],
+            [Users, "Every audience you have", "Send to subscribers, registered platform users, authors, your saved mailing lists and any addresses you paste in. Duplicates and unsubscribes are removed."],
             [CheckCircle2, "Safe to send", "Every email carries a one click unsubscribe link, and unsubscribes are honoured automatically on every future issue."],
           ].map(([Icon, t, d]) => (
             <div key={t} className="bg-white border border-slate-200 rounded-xl p-4">
@@ -551,7 +580,25 @@ export default function NewsletterStudio() {
             right={<Button type="button" size="sm" variant="outline" onClick={countNow} disabled={counting}>{counting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Count recipients"}</Button>}>
             <div className="space-y-2 text-sm">
               <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-800" checked={!!audience.subscribers} onChange={(e) => setAudience({ subscribers: e.target.checked })} />Newsletter subscribers{counts && <Badge variant="secondary">{counts.subscribers}</Badge>}</label>
+              <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-800" checked={!!audience.users} onChange={(e) => setAudience({ users: e.target.checked })} />Registered platform users{counts && <Badge variant="secondary">{counts.users || 0}</Badge>}</label>
               <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-800" checked={!!audience.authors} onChange={(e) => setAudience({ authors: e.target.checked })} />Authors who have submitted{editing.journal_title ? ` to ${editing.journal_title}` : ""}{counts && <Badge variant="secondary">{counts.authors}</Badge>}</label>
+              <div className="pt-1">
+                <div className="text-xs font-semibold text-slate-600 mb-1">Mailing lists</div>
+                {mlists.length === 0 ? <p className="text-xs text-slate-400">No mailing lists yet. Build one in the Mailing lists tab.</p> : (
+                  <div className="grid sm:grid-cols-2 gap-1">
+                    {mlists.map((l) => {
+                      const ids = audience.list_ids || [];
+                      const on = ids.includes(l.id);
+                      return (
+                        <label key={l.id} className="flex items-center gap-2"><input type="checkbox" className="accent-blue-800" checked={on}
+                          onChange={(e) => setAudience({ list_ids: e.target.checked ? [...ids, l.id] : ids.filter((x) => x !== l.id) })} />
+                          <span className="truncate">{l.name}</span><Badge variant="outline">{l.member_count || 0}</Badge></label>
+                      );
+                    })}
+                  </div>
+                )}
+                {counts && counts.lists ? <p className="text-xs text-slate-500 mt-1">{counts.lists} unique addresses from selected lists</p> : null}
+              </div>
               <Field label="Add email addresses manually" hint="Paste addresses separated by commas, spaces or new lines.">
                 <Textarea rows={3} value={audience.manual || ""} onChange={(e) => setAudience({ manual: e.target.value })} placeholder="dean@university.ac.ke, research.office@uni.edu.ng" />
               </Field>
@@ -654,7 +701,7 @@ export default function NewsletterStudio() {
                       {counting || !counts ? <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Counting…</span> : (
                         <>
                           <div className="text-2xl font-bold text-slate-900">{counts.total}<span className="text-sm font-normal text-slate-500"> unique recipients</span></div>
-                          <div className="text-xs text-slate-500 mt-1">{counts.subscribers} subscribers · {counts.authors} authors · {counts.manual} manual{counts.suppressed ? ` · ${counts.suppressed} unsubscribed skipped` : ""}</div>
+                          <div className="text-xs text-slate-500 mt-1">{counts.subscribers} subscribers · {counts.users || 0} registered users · {counts.authors} authors · {counts.lists || 0} from lists · {counts.manual} manual{counts.suppressed ? ` · ${counts.suppressed} unsubscribed skipped` : ""}</div>
                         </>
                       )}
                     </div>
