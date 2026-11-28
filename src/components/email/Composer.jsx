@@ -3,6 +3,7 @@ import { Send, Eye, EyeOff, Paperclip, X, FileText, Save, BookmarkPlus, ChevronD
 import { composeEmail, extractVariables, renderString, withAutoVariables, VARIABLE_CATALOG, DEFAULT_SETTINGS, isValidEmail, parseAddress } from "@/lib/email/emailCore";
 import { TEMPLATE_CATEGORIES } from "@/lib/email/templates";
 import RichTextEditor from "./RichTextEditor";
+import ApcPaymentPanel, { APC_TEMPLATES } from "./ApcPaymentPanel";
 import { Button, EmailFrame, RecipientInput, inputClass } from "./ui";
 import { invoke, create, update, list, ENTITY, MANUSCRIPT, correspondingAuthor, manuscriptVars, fileToAttachment } from "./api";
 
@@ -227,6 +228,15 @@ export default function Composer({
             {showPreview ? "Hide preview" : "Preview"}
           </Button>
         </div>
+
+        {APC_TEMPLATES.includes(templateKey) && (
+          <ApcPaymentPanel
+            templateKey={templateKey}
+            manuscriptId={relatedManuscriptId}
+            recipient={(() => { const first = to[0] ? parseAddress(to[0]) : null; return first ? { email: first.email, name: first.name || variables.recipient_name || "" } : { email: "", name: variables.recipient_name || "" }; })()}
+            onFill={(vars) => setVariables((cur) => ({ ...cur, ...vars }))}
+          />
+        )}
 
         <RichTextEditor value={body} onChange={(v) => { setBody(v); setDirty(true); }} minHeight={compact ? 180 : 280} />
 
