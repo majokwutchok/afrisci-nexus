@@ -40,6 +40,7 @@ import ExecutiveBusinessCard from "../components/admin/ExecutiveBusinessCard";
 import BulkManuscriptActions from "../components/editor/BulkManuscriptActions";
 import PlatformAnalyticsDashboard from "../components/admin/PlatformAnalyticsDashboard";
 import EmailCenter from "../components/email/EmailCenter";
+import NewsletterStudio from "../components/newsletter/NewsletterStudio";
 import ArticleFilesLibrary from "../components/admin/ArticleFilesLibrary";
 
 const StatsCard = ({ title, value, icon: Icon, color }) => (
@@ -154,6 +155,7 @@ export default function AdminDashboard() {
           <TabsList className="flex flex-wrap gap-1 h-auto p-1">
             <TabsTrigger value="admin_profile" className="text-emerald-700 font-semibold">👤 My Admin Profiles</TabsTrigger>
             <TabsTrigger value="email_center" className="text-blue-800 font-semibold">✉️ Email Center</TabsTrigger>
+            <TabsTrigger value="newsletter" className="text-amber-700 font-semibold">📰 AfriSci Newsletter</TabsTrigger>
             <TabsTrigger value="article_files" className="text-blue-800 font-semibold">📄 Article Files</TabsTrigger>
             <TabsTrigger value="bulk_actions" className="text-blue-700 font-semibold">☑️ Bulk Actions</TabsTrigger>
             <TabsTrigger value="accelerator" className="text-amber-700 font-semibold">⚡ Manuscript Accelerator</TabsTrigger>
@@ -184,6 +186,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="email_center" className="mt-6">
             <EmailCenter />
+          </TabsContent>
+
+          <TabsContent value="newsletter" className="mt-6">
+            <NewsletterStudio />
           </TabsContent>
 
           <TabsContent value="article_files" className="mt-6">
