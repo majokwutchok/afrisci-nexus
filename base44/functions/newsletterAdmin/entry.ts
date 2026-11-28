@@ -275,7 +275,8 @@ ${p.focus ? `Editor's focus for this week: ${String(p.focus).slice(0, 300)}\n` :
         return json({ ok: true });
       }
       case "list_delete": {
-        await db.MailingListMember.deleteMany({ list_id: p.list_id });
+        const ms = await find(db.MailingListMember, { list_id: p.list_id }, { limit: 5000, fields: ["id"] });
+        for (const m of ms) await db.MailingListMember.delete(m.id).catch(() => {});
         await db.MailingList.delete(p.list_id);
         return json({ ok: true });
       }
