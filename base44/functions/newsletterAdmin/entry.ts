@@ -10,7 +10,6 @@ import {
 } from "../../shared/newsletterContent.ts";
 import { unsubscribeUrl, sendBatch } from "../../shared/newsletterSend.ts";
 import { instrument } from "../../shared/newsletterTrack.ts";
-import { parseManual as parseEmails } from "../../shared/newsletterContent.ts";
 
 const EMAIL_IN_TEXT = /([^\s<>"',;]+@[^\s<>"',;]+\.[^\s<>"',;]{2,})/;
 /** "Name <email>", "email, Name", "Name, email" or plain email per line (CSV with a header row works too). */
